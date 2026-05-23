@@ -1544,11 +1544,11 @@ function fecharModal() {
 /* ===== IMPRESSÃO A4: TOTAL POR ENCOMENDA E NOME ROSA ===== */
 function abrirA4(data, pedidosDia) {
     const consolidadoDocesDia = {};
-    const totaisMassas = { "Massa Branca": 0, "Massa Preta": 0, "Coco": 0, "Café": 0, "Amendoim": 0, "Os Copinhos": 0, "Abacaxi": 0 };
-    const fatores = { "Massa Branca": 0.05, "Massa Preta": 0.05, "Coco": 0.04, "Café": 0.04, "Amendoim": 0.04, "Os Copinhos": 0.03, "Abacaxi": 0.03 };
+    const totaisMassas = { "Massa Branca": 0, "Massa Preta": 0, "Coco": 0, "Café": 0, "Amendoim": 0, "Os Copinhos": 0, "Abacaxi": 0,  "Ninho": 0 };
+    const fatores = { "Massa Branca": 0.05, "Massa Preta": 0.05, "Coco": 0.04, "Café": 0.04, "Ninho": 0.04, "Amendoim": 0.04, "Os Copinhos": 0.03, "Abacaxi": 0.03 };
     
     const mapeamento = {
-        "brigadeiro": "Massa Preta", "cajuzinho": "Amendoim", "casadinho": "Meio a Meio", "brigadeiro de churros": "Massa Branca",
+        "brigadeiro": "Massa Preta", "cajuzinho": "Amendoim","Ninho com Nutella": "Ninho", "casadinho": "Meio a Meio", "brigadeiro de churros": "Massa Branca",
         "beijinho": "Coco", "chocobol": "Massa Preta", "camafeu": "Massa Preta", "camafeu de nozes": "Massa Preta",
         "olho de sogra": "Coco", "brigadeiro de cafe": "Café", "brigadeiro de café": "Café", "ferrero": "Massa Preta",
         "uva": "Massa Branca", "bombom de uva": "Massa Branca", "coco": "Coco", "bombom de coco": "Coco",
