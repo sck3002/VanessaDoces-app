@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vanessa Doces Finos</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:#f4f4f4;overflow:hidden;}
+.container{width:100vw;height:100vh;display:flex;flex-direction:column;}
+.topo{height:60px;background:linear-gradient(90deg,#6b3f20,#8a5a34);color:white;display:flex;align-items:center;justify-content:space-between;padding:0 30px;}
+.menu{height:40px;background:white;display:flex;border-bottom:1px solid #ddd;}
+.menu button{flex:1;border:none;background:white;cursor:pointer;font-size:14px;transition:0.3s;}
+.menu button:hover{background:#ffe3ec;}
+.menu button.active{background:#d94d7d;color:white;}
+.conteudo{flex:1;overflow:auto;padding:20px;}
+.aba{display:none;}
+.aba.active{display:block;}
+.grid{display:grid;grid-template-columns:320px 1fr 350px;gap:20px;}
+.card{background:white;border-radius:15px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.08);margin-bottom:20px;}
+.card h2{color:#8a5a34;margin-bottom:20px;}
+label{display:block;margin-top:12px;margin-bottom:5px;font-weight:500;font-size:13px;}
+input,select,textarea{width:100%;padding:12px;border:1px solid #ccc;border-radius:10px;font-size:13px;}
+textarea{height:80px;resize:none;}
+.btn{border:none;padding:12px 20px;border-radius:10px;cursor:pointer;color:white;font-size:14px;font-weight:500;}
+.btn-rosa{background:#d94d7d;}
+.btn-verde{background:#28a745;}
+.btn-laranja{background:#ff9800;}
+.btn-vermelho{background:#dc3545;}
+.btn-marrom{background:#8a5a34;}
+.btn-azul{background:#007bff;}
+.btn-cinza{background:#6c757d;}
+table{width:100%;border-collapse:collapse;margin-top:20px;}
+table th{background:#d94d7d;color:white;padding:12px;font-size:13px;}
+table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
+.botoes{display:flex;gap:15px;margin-top:20px;flex-wrap:wrap;}
+.botoes button{flex:1;min-width:120px;}
+.info{margin-bottom:20px;}
+.info h3{color:#666;font-size:14px;}
+.info p{font-size:28px;color:#d94d7d;font-weight:bold;}
+
+/* AGENDA CASCATA */
+.agenda-secao{margin-bottom:25px;}
+.agenda-ano-titulo{background:#8a5a34;color:white;padding:10px 20px;border-radius:10px;margin-bottom:15px;font-size:18px;}
+.agenda-meses-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:15px;margin-bottom:15px;}
+.mes-card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:15px;cursor:pointer;transition:0.3s;box-shadow:0 2px 6px rgba(0,0,0,0.04);}
+.mes-card:hover{border-color:#d94d7d;background:#fff9fb;}
+.mes-card h4{color:#d94d7d;font-size:16px;margin-bottom:8px;}
+.agenda-dias-container{background:#fdfdfd;border:2px dashed #ddd;border-radius:12px;padding:20px;margin-top:10px;margin-bottom:20px;}
+.agenda-dias-titulo{color:#6b3f20;margin-bottom:15px;font-size:15px;display:flex;justify-content:space-between;align-items:center;}
+.agenda-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:15px;}
+.dia-card{background:white;padding:15px;border-radius:10px;cursor:pointer;transition:0.3s;box-shadow:0 2px 8px rgba(0,0,0,0.06);border:1px solid #eee;}
+.dia-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1);border-color:#8a5a34;}
+.dia-card h3{color:#8a5a34;font-size:15px;}
+
+/* LAYOUT IMPRESSÃO A4 - RETRATO (3 COLUNAS) */
+.a4{width:794px;min-height:1123px;background:white;margin:20px auto;padding:30px;box-shadow:0 0 15px rgba(0,0,0,0.2);font-size:10px;}
+.a4 h1{text-align:center;margin-bottom:5px;color:#8a5a34;font-size:22px;}
+.print-colunas-wrapper{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:15px;}
+.print-coluna{display:flex;flex-direction:column;gap:12px;}
+.print-pedido-box{border:1px solid #888;border-radius:6px;overflow:hidden;background:white;font-size:10px;box-shadow:0 1px 3px rgba(0,0,0,0.05);break-inside:avoid;}
+.print-pedido-header{background:#6b3f20;color:white;padding:6px 10px;font-weight:bold;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.print-pedido-body{padding:8px;}
+.print-pedido-table{width:100%;border-collapse:collapse;margin-top:5px;font-size:10px;}
+.print-pedido-table th{background:#f2f2f2;color:#333;padding:4px 6px;font-weight:600;border-bottom:1px solid #888;}
+.print-pedido-table td{padding:3px 6px;border-bottom:1px solid #eee;color:#111;line-height:1.2;}
+
+.fechar{position:fixed;top:20px;right:20px;z-index:999;}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);overflow:auto;display:none;z-index:100;}
+.modal.active{display:block;}
+.modal-box{background:white;border-radius:15px;padding:25px;width:850px;max-width:95vw;margin:30px auto;position:relative;box-shadow:0 5px 25px rgba(0,0,0,0.3);}
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
+.badge-pendente{background:#fff3cd;color:#856404;}
+.badge-pago{background:#d4edda;color:#155724;}
+.badge-cancelado{background:#f8d7da;color:#721c24;}
+.pedido-item, .produto-item, .insumo-item{background:white;border-radius:12px;padding:14px 18px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.pedido-info, .produto-info, .insumo-info{flex:1;}
+.pedido-info strong, .produto-info strong, .insumo-info strong{color:#8a5a34;}
+.pedido-info span, .produto-info span, .insumo-info span{display:block;color:#666;font-size:13px;}
+.filtros{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+.filtros input,.filtros select{width:auto;flex:1;min-width:140px;padding:10px 14px;}
+.rodape{height:45px;background:#6b3f20;color:white;display:flex;align-items:center;justify-content:center;}
+
+/* === DASHBOARD PREMIUM TRÍPLICE === */
+.dashboard-premium { background: #111622; padding: 25px; border-radius: 20px; color: #fff; min-height: 100%; }
+.dash-header-filtros { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222d42; padding-bottom: 15px; margin-bottom: 25px; }
+.dash-header-filtros h2 { color: #f3af65; font-size: 22px; font-weight: 600; }
+.dash-filtro-anos { display: flex; gap: 8px; }
+.btn-filtro-ano { background: #1c2437; border: 1px solid #2d3b59; color: #a0aec0; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: 0.2s; }
+.btn-filtro-ano:hover { background: #25314a; color: #fff; }
+.btn-filtro-ano.active { background: #f3af65; color: #111622; font-weight: bold; border-color: #f3af65; }
+
+.dash-cards-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+.card-premium { background: #182030; border: 1px solid #222d42; border-radius: 12px; padding: 15px; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.card-premium span { font-size: 11px; color: #a0aec0; text-transform: uppercase; font-weight: 500; display: block; margin-bottom: 5px; }
+.card-premium .valor-destaque { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+.card-premium .sub-legenda { font-size: 11px; color: #4e5d7c; }
+
+.txt-ouro { color: #f3af65; }
+.txt-verde { color: #4ade80; }
+.txt-vermelho { color: #f87171; }
+.txt-azul { color: #60a5fa; }
+
+.dash-layout-corpo-trio { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 15px; }
+.section-titulo-interna { font-size: 13px; color: #a0aec0; margin-bottom: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px;}
+
+.container-grafico { height: 260px; display: flex; align-items: flex-end; justify-content: space-between; padding: 20px 10px 10px 10px; background: #151c2a; border-radius: 12px; border: 1px solid #1e293b; position: relative; }
+.barra-grafico-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; gap: 8px; position: relative; }
+.barra-grafico-pilar { background: linear-gradient(180deg, #d94d7d, #6b3f20); width: 45%; border-radius: 4px 4px 0 0; transition: height 0.5s ease-in-out; min-height: 2px; position: relative; }
+.barra-grafico-pilar:hover { filter: brightness(1.2); }
+.barra-grafico-pilar::after { content: attr(data-valor); position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #fff; font-weight: bold; background: #1c2437; padding: 2px 4px; border-radius: 3px; border: 1px solid #334155; opacity: 0; transition: 0.2s; pointer-events: none; white-space: nowrap; z-index: 5;}
+.barra-grafico-wrapper:hover .barra-grafico-pilar::after { opacity: 1; }
+.barra-grafico-label { font-size: 10px; color: #64748b; text-align: center; max-width: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.tabela-premium-wrapper { background: #182030; border: 1px solid #222d42; border-radius: 12px; overflow: hidden; height: 260px; overflow-y: auto; }
+.tabela-premium { width: 100%; border-collapse: collapse; margin-top: 0; font-size: 12px; text-align: left; }
+.tabela-premium th { background: #1f293d; color: #a0aec0; padding: 10px 12px; font-weight: 500; border-bottom: 1px solid #2d3b59; position: sticky; top: 0; z-index: 2; }
+.tabela-premium td { padding: 10px 12px; border-bottom: 1px solid #222d42; color: #e2e8f0; }
+.tabela-premium tr:hover { background: #1c2639; }
+
+.ranking-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid #222d42; font-size: 12px; }
+.ranking-item:last-child { border-bottom: none; }
+.ranking-pos { width: 22px; height: 22px; background: #2d3b59; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #f3af65; }
+.ranking-nome { flex: 1; margin-left: 10px; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ranking-qtd { font-weight: bold; color: #60a5fa; }
+
+@media print{
+  @page { size: portrait; margin: 0.6cm; }
+  body *{visibility:hidden;}
+  .a4,.a4 *{visibility:visible;}
+  .a4{position:absolute;left:0;top:0;box-shadow:none;margin:0;width:100%;padding:0;}
+  .fechar, .no-print{display:none !important;}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<div class="topo">
+  <h1>Vanessa Doces Finos</h1>
+  <h2 id="dataAtual"></h2>
+</div>
+
+<div class="menu">
+  <button class="active" onclick="trocarAba(0)">Pedidos</button>
+  <button onclick="trocarAba(1)">Meus Pedidos</button>
+  <button onclick="trocarAba(2)">Agenda</button>
+  <button onclick="trocarAba(3)">Clientes</button> 
+  <button onclick="trocarAba(4)">Produtos</button>
+  <button onclick="trocarAba(5)">Insumos</button>
+  <button onclick="trocarAba(6)">Dashboard</button>
+</div>
+
+<div class="conteudo">
+
+<div class="aba active">
+
+  <div class="grid">
+
+    <!-- CLIENTE -->
+    <div class="card">
+
+      <h2>Cliente</h2>
+
+      <label>Nome</label>
+      <input type="text" id="cliente">
+
+      <label>Endereço</label>
+      <input type="text" id="endereco">
+
+      <label>Telefone</label>
+      <input type="text" id="telefone" oninput="buscarClientePorTelefone()" placeholder="Digite o telefone para buscar o cliente">
+      <div id="statusBuscaCliente" style="font-size:12px;margin:5px 2px 0;min-height:16px;"></div>
+
+      <label>Data Entrega</label>
+      <input type="date" id="entrega">
+
+      <label>Valor de Entrada (R$)</label>
+      <input
+        type="number"
+        id="valorEntrada"
+        step="0.01"
+        value="0.00"
+      >
+
+      <label>Observações</label>
+      <textarea id="obs"></textarea>
+
+    </div>
+
+    <!-- ITENS -->
+    <div class="card">
+
+      <h2>Itens do Pedido</h2>
+
+      <div style="
+        display:grid;
+        grid-template-columns:2fr 1fr 1fr 1fr auto;
+        gap:15px;
+        align-items:end;
+      ">
+
+        <div>
+          <label>Produto / Sabor</label>
+          <select id="produto"></select>
+        </div>
+
+        <div>
+          <label>Qtd (Unidades)</label>
+
+          <input
+            type="number"
+            id="quantidade"
+            min="1"
+          >
+        </div>
+
+        <div>
+          <label>Valor Unit.</label>
+
+          <input
+            type="number"
+            id="valor"
+            readonly
+          >
+        </div>
+
+        <div>
+          <label>Total</label>
+
+          <input
+            type="text"
+            id="totalItem"
+            readonly
+          >
+        </div>
+
+        <div>
+          <button
+            class="btn btn-rosa"
+            onclick="adicionarItem()"
+          >
+            + Adicionar
+          </button>
+        </div>
+
+      </div>
+
+      <table id="tabelaItens">
+
+        <thead>
+
+          <tr>
+
+            <th>Produto</th>
+
+            <th>Qtd (un)</th>
+
+            <th>Valor Unit.</th>
+
+            <th>Total</th>
+
+            <th>Ação</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody></tbody>
+
+        <tfoot>
+
+          <tr>
+
+            <td colspan="3"
+              style="
+                text-align:right;
+                font-weight:bold;
+              "
+            >
+              TOTAL PEDIDO
+            </td>
+
+            <td colspan="2"
+              id="rodapeTotalPedido"
+              style="
+                font-size:22px;
+                color:#d94d7d;
+                font-weight:bold;
+              "
+            >
+              R$ 0,00
+            </td>
+
+          </tr>
+
+        </tfoot>
+
+      </table>
+
+      <div class="botoes">
+
+        <button
+          class="btn btn-laranja"
+          onclick="limparPedido()"
+        >
+          Limpar
+        </button>
+
+        <button
+          class="btn btn-verde"
+          onclick="finalizarPedido()"
+        >
+          ✔ Finalizar Pedido
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- RESUMO -->
+    <div class="card">
+
+      <h2>Resumo</h2>
+
+      <div class="info">
+
+        <h3>Total Itens (tipos)</h3>
+
+        <p id="totalItens">0</p>
+
+      </div>
+
+      <div class="info">
+
+        <h3>Total Doces (Unidades)</h3>
+
+        <p id="quantidadeTotal">0</p>
+
+      </div>
+
+      <div class="info">
+
+        <h3>Valor Total</h3>
+
+        <p id="valorTotal">R$ 0,00</p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="aba">
+  <div class="card">
+    <h2>Pedidos Finalizados</h2>
+    <div class="filtros">
+      <input type="text" id="filtroBusca" placeholder="Buscar cliente..." oninput="renderPedidos()">
+      <select id="filtroStatus" onchange="renderPedidos()">
+        <option value="">Todos os status</option>
+        <option value="pendente">Pendente</option>
+        <option value="pago">Pago</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+      <input type="date" id="filtroData" onchange="renderPedidos()">
+      <button class="btn btn-cinza" onclick="limparFiltros()">Limpar Filtros</button>
+    </div>
+    <div id="listaPedidos"></div>
+  </div>
+</div>
+
+<div class="aba">
+  <div class="card">
+    <h2>Agenda de Encomendas</h2>
+    <p style="font-size: 13px; color:#666; margin-bottom: 20px;">Selecione o mês desejado para abrir o calendário de entregas e os relatórios diários de produção.</p>
+    <div id="agendaAnosContainer"></div>
+    <div id="agendaDiasSecao" class="agenda-dias-container" style="display:none;">
+      <div class="agenda-dias-titulo">
+        <h3 id="agendaDiasTituloTexto">Dias com entregas</h3>
+        <button class="btn btn-cinza" style="padding:5px 12px; font-size:12px;" onclick="fecharSecaoDias()">✕ Fechar Mês</button>
+      </div>
+      <div class="agenda-grid" id="agendaGridDias"></div>
+    </div>
+  </div>
+</div>
+
+<div class="aba">
+  <div class="card">
+    <h2>Cadastro de Clientes</h2>
+
+    <!-- BUSCA -->
+    <div style="display:flex;gap:10px;margin-bottom:18px;align-items:center;">
+      <input type="text" id="filtroBuscaCliente" placeholder="🔍 Buscar por nome ou telefone..." oninput="renderizarClientes()" style="flex:1;margin:0;">
+      <button class="btn btn-cinza" onclick="document.getElementById('filtroBuscaCliente').value='';renderizarClientes();" style="white-space:nowrap;">Limpar</button>
+    </div>
+
+    <!-- FORMULÁRIO -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <input type="text" id="nomeCliente" placeholder="Nome Completo">
+      <input type="text" id="telCliente" placeholder="Telefone: 22-99999-0000">
+      <input type="text" id="rua" placeholder="Rua">
+      <input type="text" id="numero" placeholder="Número">
+      <input type="text" id="bairro" placeholder="Bairro">
+      <input type="text" id="referencia" placeholder="Ponto de Referência">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:15px;">
+      <button class="btn btn-rosa" onclick="adicionarCliente()">💾 Salvar Cliente</button>
+      <button class="btn btn-cinza" onclick="limparCamposCliente()">✕ Limpar Campos</button>
+    </div>
+  </div>
+
+  <table id="tabelaClientes">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Telefone</th>
+        <th>Endereço</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div class="aba">
+  <div style="display:grid;grid-template-columns:340px 1fr;gap:20px;">
+    <div class="card">
+      <h2 id="tituloProdutoForm">Novo Produto</h2>
+      <label>Nome do Produto</label><input type="text" id="nomeProduto">
+      <label>Preço Unitário Real (R$)</label><input type="number" id="precoProduto" step="0.01">
+      <div class="botoes"><button class="btn btn-rosa" onclick="salvarProduto()">Salvar</button></div>
+    </div>
+    <div class="card"><h2>Produtos no Cardápio (Preços Unitários)</h2><div id="listaProdutos"></div></div>
+  </div>
+</div>
+
+<div class="aba">
+  <div style="display:grid;grid-template-columns:340px 1fr;gap:20px;">
+    <div class="card">
+      <h2>Novo Insumo / Gasto</h2>
+      <label>Nome do Material</label><input type="text" id="nomeInsumo" placeholder="Ex: Leite Condensado">
+      <label>Unidade de Medida</label>
+      <select id="unidadeInsumo">
+        <option value="un">Unidade (un)</option>
+        <option value="kg">Quilo (kg)</option>
+        <option value="g">Grama (g)</option>
+        <option value="cx">Caixa (cx)</option>
+      </select>
+      <label>Quantidade</label><input type="number" id="estoqueInsumo" value="0">
+      <label>Preço Unitário</label><input type="number" id="precoInsumo" step="0.01" value="0.00">
+      <label>Data da Compra</label><input type="date" id="dataCompraInsumo">
+      <div class="botoes"><button class="btn btn-marrom" onclick="salvarInsumo()">Cadastrar Material</button></div>
+      
+      <hr style="margin:20px 0; border:none; border-top:2px dashed #8a5a34;">
+      
+      <h2>Segurança e Backups</h2>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="btn btn-verde" onclick="exportarBackup()">💾 Baixar Cópia de Segurança</button>
+        <button class="btn btn-laranja" onclick="document.getElementById('inputBackup').click()">📂 Restaurar Cópia</button>
+        <input type="file" id="inputBackup" accept=".json" style="display:none;" onchange="importarBackup(this)">
+        <button class="btn btn-azul" onclick="importarBancoCompleto()">🔄 Resetar de Fábrica</button>
+      </div>
+    </div>
+    <div class="card"><h2>Lista de Insumos e Gastos Cadastrados (Mais Recentes Primeiro)</h2><div id="listaInsumos"></div></div>
+  </div>
+</div>
+
+<div class="aba">
+  <div class="dashboard-premium">
+    <div class="dash-header-filtros">
+      <div>
+        <h2>Fluxo de Caixa e Produção</h2>
+        <p style="font-size:12px; color:#4e5d7c;">Gestão de Pedidos e Balanço Geral Operacional</p>
+      </div>
+      <div class="dash-filtro-anos" id="dashFiltroAnosContainer"></div>
+    </div>
+
+    <div class="dash-cards-row">
+      <div class="card-premium">
+        <span>Saldo Atual Real</span>
+        <div class="valor-destaque txt-ouro" id="kpiSaldoAtual">R$ 0,00</div>
+        <div class="sub-legenda" id="kpiSaldoMesRef">Histórico Total</div>
+      </div>
+      <div class="card-premium">
+        <span>Total Entradas</span>
+        <div class="valor-destaque txt-verde" id="kpiTotalEntradas">R$ 0,00</div>
+        <div class="sub-legenda" id="kpiContEntradas">0 Encomendas Ativas</div>
+      </div>
+      <div class="card-premium">
+        <span>Total Saídas</span>
+        <div class="valor-destaque txt-vermelho" id="kpiTotalSaidas">R$ 0,00</div>
+        <div class="sub-legenda">Com base na data dos insumos</div>
+      </div>
+      <div class="card-premium">
+        <span>Resultado Líquido</span>
+        <div class="valor-destaque txt-verde" id="kpiResultadoLiquido">R$ 0,00</div>
+        <div class="sub-legenda" id="kpiResultadoStatus">superávit</div>
+      </div>
+      <div class="card-premium">
+        <span>Volume de Doces</span>
+        <div class="valor-destaque txt-azul" id="kpiVolumeDoces">0 un</div>
+        <div class="sub-legenda">Produção do Período</div>
+      </div>
+    </div>
+
+    <div class="dash-layout-corpo-trio">
+      <div>
+        <div class="section-titulo-interna">📈 Quantidade de Doces por Mês</div>
+        <div class="container-grafico" id="graficoEvolucaoDoces"></div>
+      </div>
+      <div>
+        <div class="section-titulo-interna">🏆 Doces Mais Pedidos (Ranking)</div>
+        <div class="tabela-premium-wrapper" id="containerRankingDoces"></div>
+      </div>
+      <div>
+        <div class="section-titulo-interna">📋 Detalhamento Mensal</div>
+        <div class="tabela-premium-wrapper">
+          <table class="tabela-premium">
+            <thead>
+              <tr>
+                <th>Mês/Ano</th>
+                <th>Entradas</th>
+                <th>Saídas</th>
+                <th>Resultado</th>
+                <th>Saldo</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyDetalhamentoMensal"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<div class="rodape">Vanessa Doces Finos © 2026</div>
+</div>
+
+<div class="modal" id="modal">
+  <button onclick="fecharModal()">Fechar</button>
+  <div class="a4" id="a4"></div>
+</div>
+
+<div class="modal" id="modalEditarPedido">
+  <div class="modal-box" style="width: 900px;">
+    <h2 style="color:#8a5a34; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 8px;">Visualização & Edição Detalhada do Pedido</h2>
+    <input type="hidden" id="editPedidoId">
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+      <div>
+        <label>Cliente</label>
+        <input type="text" id="editCliente">
+        <label>Telefone</label>
+        <input type="text" id="editTelefone">
+        <label>Data de Entrega</label>
+        <input type="date" id="editEntrega">
+      </div>
+      <div>
+        <label>Endereço de Entrega</label>
+        <input type="text" id="editEndereco">
+        <label>Status do Pedido</label>
+        <select id="editStatus" onchange="verificarMudancaStatusModal()">
+          <option value="pendente">Pendente</option>
+          <option value="pago">Pago</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+        <label>Observações</label>
+        <textarea id="editObs"></textarea>
+      </div>
+      <div style="background: #fbf6f0; border: 1px dashed #8a5a34; border-radius: 12px; padding: 15px;">
+        <h3 style="color:#6b3f20; font-size:14px; margin-bottom:10px;">Balanço Financeiro</h3>
+        <label style="margin-top:0;">Valor Total (R$)</label>
+        <input type="number" id="editValorTotal" readonly style="background:#eee; font-weight:bold; color:#d94d7d;">
+        
+        <label>Valor de Entrada / Novo Pagamento Acumulado (R$)</label>
+        <input type="number" id="editValorEntrada" step="0.01" oninput="calcularBalançoModalEditar()">
+        
+        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; text-align: right;">
+          <span style="font-size: 12px; color: #555; font-weight: 500;">SALDO A PAGAR:</span>
+          <div id="editSaldoAPagar" style="font-size: 22px; font-weight: bold; color: #28a745;">R$ 0,00</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+      <h3 style="color:#8a5a34; font-size:14px; margin-bottom:10px;">Doces inclusos nesta Encomenda</h3>
+      
+      <div style="display:grid; grid-template-columns: 3fr 1fr auto; gap:10px; align-items:end; background:#f9f9f9; padding:10px; border-radius:8px;">
+        <div>
+          <label style="margin-top:0;">Adicionar outro Doce/Sabor</label>
+          <select id="editAdicionarDoceSelect"></select>
+        </div>
+        <div>
+          <label style="margin-top:0;">Quantidade</label>
+          <input type="number" id="editAdicionarDoceQtd" min="1">
+        </div>
+        <div>
+          <button class="btn btn-rosa" onclick="adicionarDoceNoPedidoEditado()">+ Inserir</button>
+        </div>
+      </div>
+
+      <div style="max-height: 180px; overflow-y: auto; margin-top: 10px; border: 1px solid #ddd; border-radius: 8px;">
+        <table style="width: 100%; margin-top: 0;" id="tableItensEditando">
+          <thead style="position: sticky; top: 0; z-index: 1;">
+            <tr>
+              <th style="padding: 8px;">Doce / Sabor</th>
+              <th style="padding: 8px; text-align: center;">Quantidade</th>
+              <th style="padding: 8px; text-align: right;">Unitário</th>
+              <th style="padding: 8px; text-align: right;">Subtotal</th>
+              <th style="padding: 8px; text-align: center;">Remover</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="botoes" style="margin-top: 20px;">
+      <button class="btn btn-verde" onclick="salvarEdicaoPedido()">💾 Salvar Modificações</button>
+      <button class="btn btn-cinza" onclick="fecharModalEditar()">Voltar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   VANESSA DOCES FINOS — IndexedDB Integration
+   Banco: vanessa_doces_db  |  Stores: pedidos, produtos, insumos
+   Service Worker + PWA registrado automaticamente
+================================================================ */
+
+/* ===== SERVICE WORKER ===== */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+}
+
+/* ===== IndexedDB ===== */
+const DB_NAME = 'vanessa_doces_db';
+const DB_VERSION = 5;
+let db;
+
+function iniciarBanco() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = function(e) {
+      const d = e.target.result;
+      // Recria a store clientes corretamente (remove versão quebrada com autoIncrement)
+      if (d.objectStoreNames.contains('clientes')) d.deleteObjectStore('clientes');
+      if (!d.objectStoreNames.contains('pedidos'))  d.createObjectStore('pedidos',  { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('produtos')) d.createObjectStore('produtos', { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('insumos'))  d.createObjectStore('insumos',  { keyPath: 'id' });
+      d.createObjectStore('clientes', { keyPath: 'id' });
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(); };
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function dbSalvarTodos(store, lista) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction([store], 'readwrite');
+    const s  = tx.objectStore(store);
+    s.clear();
+    lista.forEach(item => s.put(item));
+    tx.oncomplete = resolve;
+    tx.onerror    = e => reject(e.target.error);
+  });
+}
+
+function dbListar(store) {
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction([store], 'readonly');
+    const req = tx.objectStore(store).getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+/* salvarLS agora persiste no IndexedDB (assíncrono, sem await para manter compatibilidade) */
+function salvarLS() {
+  dbSalvarTodos('pedidos',  pedidos);
+  dbSalvarTodos('produtos', produtos);
+  dbSalvarTodos('insumos',  insumos);
+  dbSalvarTodos('clientes', clientes);
+}
+
+/* ===== ESTADO GLOBAL ===== */
+let pedidos = [];
+let produtos = [];
+let insumos = [];
+let clientes = [];
+let itensPedidoAtual = [];
+let itensEditandoPedido = [];
+let totalItensAtual = 0, quantidadeTotalAtual = 0, valorTotalAtual = 0;
+let anoFiltroSelecionado = "Todos";
+
+const NOMES_MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+
+document.getElementById('dataAtual').innerText = new Date().toLocaleDateString('pt-BR');
+
+const defaultDateInput = "2026-03-15";
+document.getElementById('dataCompraInsumo').value = defaultDateInput;
+
+const BANCO_INICIAL = {
+  produtos: [
+    { id: 1,  nome: "Brigadeiro",                  preco: 1.10 },
+    { id: 2,  nome: "Cajuzinho",                   preco: 1.10 },
+    { id: 3,  nome: "Casadinho",                   preco: 1.10 },
+    { id: 4,  nome: "Brigadeiro de Churros",       preco: 1.10 },
+    { id: 5,  nome: "Beijinho",                    preco: 1.10 },
+    { id: 6,  nome: "Chocobol",                    preco: 1.10 },
+    { id: 7,  nome: "Camafeu de Nozes",            preco: 1.25 },
+    { id: 8,  nome: "Olho de Sogra",               preco: 1.25 },
+    { id: 9,  nome: "Brigadeiro de Café",          preco: 1.25 },
+    { id: 10, nome: "Ninho com Nutella",            preco: 1.25 },
+    { id: 11, nome: "Ferrero",                     preco: 1.25 },
+    { id: 12, nome: "Bombom de Uva",               preco: 1.30 },
+    { id: 13, nome: "Bombom de Coco",              preco: 1.30 },
+    { id: 14, nome: "Bombom de Nozes",             preco: 1.30 },
+    { id: 15, nome: "Bombom de Flocos",            preco: 1.30 },
+    { id: 16, nome: "Bombom de Cereja",            preco: 1.30 },
+    { id: 17, nome: "Bombom Ouriço",               preco: 1.30 },
+    { id: 18, nome: "Bombom de Brigadeiro",        preco: 1.30 },
+    { id: 19, nome: "Bombom de Amendoim",          preco: 1.30 },
+    { id: 20, nome: "Bombom de Coco com Damasco",  preco: 1.30 },
+    { id: 21, nome: "Bombom de Abacaxi com Coco",  preco: 1.30 },
+    { id: 22, nome: "Copinho de Limão",            preco: 1.50 },
+    { id: 23, nome: "Copinho de Maracujá",         preco: 1.50 },
+    { id: 24, nome: "Gotas de Paçoca",             preco: 1.50 },
+    { id: 25, nome: "Damasco Recheado",            preco: 1.50 },
+    { id: 26, nome: "Copinho de Cereja",           preco: 2.00 },
+    { id: 27, nome: "Copinho de Morango",          preco: 1.70 },
+    { id: 28, nome: "Mini Bolinho",                preco: 2.50 },
+    { id: 29, nome: "Bem Casado",                  preco: 3.50 }
+  ],
+  insumos: [
+    { id: 101, nome: "Coco 5k",       unidade: "un", estoque: 1,  preco: 144.90, data: "2026-03-01" },
+    { id: 105, nome: "Creme de leite",unidade: "un", estoque: 27, preco: 2.49,   data: "2026-03-05" },
+    { id: 122, nome: "Nutella 3k",    unidade: "un", estoque: 1,  preco: 189.00, data: "2026-04-02" },
+    { id: 139, nome: "Gas",           unidade: "un", estoque: 1,  preco: 55.00,  data: "2026-03-10" }
+  ],
+  pedidos: [
+    { id:1001,cliente:"Aline",data:"2026-03-01",status:"pago",entrada:180.00,total:180.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Camafeu de Nozes",qtd:66,valor:1.20,total:80.00}]},
+    { id:1002,cliente:"Emily",data:"2026-03-01",status:"pago",entrada:170.00,total:170.00,itens:[{produto:"Casadinho",qtd:170,valor:1.00,total:170.00}]},
+    { id:1003,cliente:"Hyolanda",data:"2026-05-10",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Beijinho",qtd:120,valor:1.00,total:120.00}]},
+    { id:1004,cliente:"Mariana",data:"2026-05-15",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro de Churros",qtd:120,valor:1.00,total:120.00}]},
+    { id:1005,cliente:"Rayane",data:"2026-06-20",status:"pago",entrada:110.00,total:110.00,itens:[{produto:"Chocobol",qtd:110,valor:1.00,total:110.00}]},
+    { id:1006,cliente:"Geiza Reis",data:"2026-03-04",status:"pago",entrada:132.00,total:132.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00},{produto:"Ferrero",qtd:26,valor:1.20,total:32.00}]},
+    { id:1007,cliente:"Mayara Marcolino",data:"2026-03-06",status:"pago",entrada:60.00,total:60.00,itens:[{produto:"Brigadeiro",qtd:30,valor:1.00,total:30.00},{produto:"Beijinho",qtd:30,valor:1.00,total:30.00}]},
+    { id:1008,cliente:"Bruna Luiza",data:"2026-03-07",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00}]},
+    { id:1009,cliente:"Bete",data:"2026-03-07",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00}]},
+    { id:1010,cliente:"Gisele",data:"2026-03-07",status:"pago",entrada:140.00,total:140.00,itens:[{produto:"Brigadeiro",qtd:140,valor:1.00,total:140.00}]},
+    { id:1011,cliente:"Duda",data:"2026-03-07",status:"pago",entrada:300.00,total:300.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Beijinho",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
+    { id:1012,cliente:"Carla Virginia",data:"2026-03-07",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00}]},
+    { id:1013,cliente:"Rafaela",data:"2026-03-07",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:30,valor:1.00,total:30.00},{produto:"Casadinho",qtd:30,valor:1.00,total:30.00},{produto:"Beijinho",qtd:30,valor:1.00,total:30.00},{produto:"Brigadeiro de Churros",qtd:30,valor:1.00,total:30.00}]},
+    { id:1014,cliente:"Sônia",data:"2026-03-08",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:30,valor:1.00,total:30.00},{produto:"Casadinho",qtd:30,valor:1.00,total:30.00},{produto:"Beijinho",qtd:30,valor:1.00,total:30.00},{produto:"Cajuzinho",qtd:30,valor:1.00,total:30.00}]},
+    { id:1015,cliente:"Marta",data:"2026-03-12",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00}]},
+    { id:1016,cliente:"Patrícia",data:"2026-03-14",status:"pago",entrada:220.00,total:220.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00},{produto:"Ninho com Nutella",qtd:16,valor:1.20,total:20.00}]},
+    { id:1017,cliente:"Marcos",data:"2026-03-14",status:"pago",entrada:200.00,total:200.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Beijinho",qtd:100,valor:1.00,total:100.00}]},
+    { id:1018,cliente:"Vivian",data:"2026-03-14",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
+    { id:1019,cliente:"Larissa",data:"2026-03-14",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro de Churros",qtd:100,valor:1.00,total:100.00},{produto:"Ferrero",qtd:16,valor:1.20,total:20.00}]},
+    { id:1020,cliente:"Kênia",data:"2026-03-14",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Beijinho",qtd:100,valor:1.00,total:100.00}]},
+    { id:1021,cliente:"Nivia",data:"2026-03-15",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00}]},
+    { id:1022,cliente:"Lúcia",data:"2026-03-17",status:"pago",entrada:50.00,total:50.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00}]},
+    { id:1023,cliente:"Renata Miranda",data:"2026-03-19",status:"pago",entrada:240.00,total:240.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00},{produto:"Bombom de Uva",qtd:33,valor:1.20,total:40.00}]},
+    { id:1024,cliente:"Thaís",data:"2026-03-21",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:60,valor:1.00,total:60.00},{produto:"Beijinho",qtd:60,valor:1.00,total:60.00}]},
+    { id:1025,cliente:"Carla",data:"2026-03-21",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00}]},
+    { id:1026,cliente:"Juliana Santos",data:"2026-03-21",status:"pago",entrada:180.00,total:180.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Ninho com Nutella",qtd:66,valor:1.20,total:80.00}]},
+    { id:1027,cliente:"Mônica",data:"2026-03-22",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00}]},
+    { id:1028,cliente:"Sílvia Reis",data:"2026-03-24",status:"pago",entrada:80.00,total:80.00,itens:[{produto:"Brigadeiro",qtd:40,valor:1.00,total:40.00},{produto:"Casadinho",qtd:40,valor:1.00,total:40.00}]},
+    { id:1029,cliente:"Andressa",data:"2026-03-26",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00}]},
+    { id:1030,cliente:"Letícia",data:"2026-03-28",status:"pago",entrada:200.00,total:200.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Beijinho",qtd:100,valor:1.00,total:100.00}]},
+    { id:1031,cliente:"Fernanda",data:"2026-03-28",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00},{produto:"Brigadeiro de Churros",qtd:50,valor:1.00,total:50.00}]},
+    { id:1032,cliente:"Mariane",data:"2026-03-28",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:60,valor:1.00,total:60.00},{produto:"Cajuzinho",qtd:60,valor:1.00,total:60.00}]},
+    { id:1033,cliente:"Isabela",data:"2026-03-28",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
+    { id:1034,cliente:"Gabriela",data:"2026-03-29",status:"pago",entrada:130.00,total:130.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Ferrero",qtd:66,valor:1.20,total:80.00}]},
+    { id:1035,cliente:"Priscila",data:"2026-03-31",status:"pago",entrada:90.00,total:90.00,itens:[{produto:"Brigadeiro",qtd:45,valor:1.00,total:45.00},{produto:"Beijinho",qtd:45,valor:1.00,total:45.00}]},
+    { id:1036,cliente:"Camila Mara",data:"2026-04-02",status:"pago",entrada:160.00,total:160.00,itens:[{produto:"Brigadeiro",qtd:80,valor:1.00,total:80.00},{produto:"Casadinho",qtd:80,valor:1.00,total:80.00}]},
+    { id:1037,cliente:"Tatiana",data:"2026-04-04",status:"pago",entrada:110.00,total:110.00,itens:[{produto:"Brigadeiro",qtd:55,valor:1.00,total:55.00},{produto:"Beijinho",qtd:55,valor:1.00,total:55.00}]},
+    { id:1038,cliente:"Sandra",data:"2026-04-04",status:"pago",entrada:200.00,total:200.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
+    { id:1039,cliente:"Soraia",data:"2026-04-04",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00},{produto:"Cajuzinho",qtd:50,valor:1.00,total:50.00}]},
+    { id:1040,cliente:"Amanda Reis",data:"2026-04-05",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro de Churros",qtd:120,valor:1.00,total:120.00}]},
+    { id:1041,cliente:"Cristiane",data:"2026-04-08",status:"pago",entrada:80.00,total:80.00,itens:[{produto:"Brigadeiro",qtd:40,valor:1.00,total:40.00},{produto:"Casadinho",qtd:40,valor:1.00,total:40.00}]},
+    { id:1042,cliente:"Regiane",data:"2026-04-11",status:"pago",entrada:210.00,total:210.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Ninho com Nutella",qtd:91,valor:1.20,total:110.00}]},
+    { id:1043,cliente:"Vanessa Torres",data:"2026-04-11",status:"pago",entrada:140.00,total:140.00,itens:[{produto:"Brigadeiro",qtd:70,valor:1.00,total:70.00},{produto:"Beijinho",qtd:70,valor:1.00,total:70.00}]},
+    { id:1044,cliente:"Aline Santos",data:"2026-04-11",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
+    { id:1045,cliente:"Milena",data:"2026-04-12",status:"pago",entrada:130.00,total:130.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Bombom de Uva",qtd:66,valor:1.20,total:80.00}]},
+    { id:1046,cliente:"Juliana Ferraz",data:"2026-04-15",status:"pago",entrada:90.00,total:90.00,itens:[{produto:"Brigadeiro",qtd:45,valor:1.00,total:45.00},{produto:"Cajuzinho",qtd:45,valor:1.00,total:45.00}]},
+    { id:1047,cliente:"Daniela",data:"2026-04-18",status:"pago",entrada:250.00,total:250.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00},{produto:"Ferrero",qtd:41,valor:1.20,total:50.00}]},
+    { id:1048,cliente:"Elaine",data:"2026-04-18",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00},{produto:"Brigadeiro de Churros",qtd:50,valor:1.00,total:50.00}]},
+    { id:1049,cliente:"Lilian",data:"2026-04-18",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
+    { id:1050,cliente:"Tânia",data:"2026-04-19",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:60,valor:1.00,total:60.00},{produto:"Beijinho",qtd:60,valor:1.00,total:60.00}]},
+    { id:1051,cliente:"Karina",data:"2026-04-22",status:"pago",entrada:70.00,total:70.00,itens:[{produto:"Brigadeiro",qtd:35,valor:1.00,total:35.00},{produto:"Casadinho",qtd:35,valor:1.00,total:35.00}]},
+    { id:1052,cliente:"Michele",data:"2026-04-25",status:"pago",entrada:180.00,total:180.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Ninho com Nutella",qtd:66,valor:1.20,total:80.00}]},
+    { id:1053,cliente:"Priscila Ramos",data:"2026-04-25",status:"pago",entrada:130.00,total:130.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Bombom de Coco",qtd:66,valor:1.20,total:80.00}]},
+    { id:1054,cliente:"Fabiana",data:"2026-04-25",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Beijinho",qtd:100,valor:1.00,total:100.00}]},
+    { id:1055,cliente:"Gisele Silva",data:"2026-04-26",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00}]},
+    { id:1056,cliente:"Kelly",data:"2026-04-29",status:"pago",entrada:80.00,total:80.00,itens:[{produto:"Brigadeiro",qtd:40,valor:1.00,total:40.00},{produto:"Cajuzinho",qtd:40,valor:1.00,total:40.00}]},
+    { id:1057,cliente:"Úrsula",data:"2026-05-02",status:"pago",entrada:220.00,total:220.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00},{produto:"Ferrero",qtd:16,valor:1.20,total:20.00}]},
+    { id:1058,cliente:"Simone",data:"2026-05-02",status:"pago",entrada:140.00,total:140.00,itens:[{produto:"Brigadeiro",qtd:70,valor:1.00,total:70.00},{produto:"Beijinho",qtd:70,valor:1.00,total:70.00}]},
+    { id:1059,cliente:"Renata Reis",data:"2026-05-02",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro de Churros",qtd:100,valor:1.00,total:100.00}]},
+    { id:1060,cliente:"Talita",data:"2026-05-03",status:"pago",entrada:130.00,total:130.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Bombom de Nozes",qtd:66,valor:1.20,total:80.00}]},
+    { id:1061,cliente:"Sílvia",data:"2026-05-06",status:"pago",entrada:90.00,total:90.00,itens:[{produto:"Brigadeiro",qtd:45,valor:1.00,total:45.00},{produto:"Casadinho",qtd:45,valor:1.00,total:45.00}]},
+    { id:1062,cliente:"Lívia",data:"2026-05-09",status:"pago",entrada:200.00,total:200.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
+    { id:1063,cliente:"Cláudia",data:"2026-05-09",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00},{produto:"Cajuzinho",qtd:50,valor:1.00,total:50.00}]},
+    { id:1064,cliente:"Andreia",data:"2026-05-10",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro de Churros",qtd:120,valor:1.00,total:120.00}]},
+    { id:1065,cliente:"Antônia",data:"2026-05-13",status:"pago",entrada:80.00,total:80.00,itens:[{produto:"Brigadeiro",qtd:40,valor:1.00,total:40.00},{produto:"Casadinho",qtd:40,valor:1.00,total:40.00}]},
+    { id:1066,cliente:"Paula",data:"2026-05-16",status:"pago",entrada:180.00,total:180.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Ninho com Nutella",qtd:66,valor:1.20,total:80.00}]},
+    { id:1067,cliente:"Marisa",data:"2026-05-16",status:"pago",entrada:140.00,total:140.00,itens:[{produto:"Brigadeiro",qtd:70,valor:1.00,total:70.00},{produto:"Beijinho",qtd:70,valor:1.00,total:70.00}]},
+    { id:1068,cliente:"Beatriz",data:"2026-05-16",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
+    { id:1069,cliente:"Sueli",data:"2026-05-17",status:"pago",entrada:130.00,total:130.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Bombom de Flocos",qtd:66,valor:1.20,total:80.00}]},
+    { id:1070,cliente:"Regina",data:"2026-05-20",status:"pago",entrada:90.00,total:90.00,itens:[{produto:"Brigadeiro",qtd:45,valor:1.00,total:45.00},{produto:"Cajuzinho",qtd:45,valor:1.00,total:45.00}]},
+    { id:1071,cliente:"Solange",data:"2026-05-23",status:"pago",entrada:240.00,total:240.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00},{produto:"Ferrero",qtd:33,valor:1.20,total:40.00}]},
+    { id:1072,cliente:"Jéssica",data:"2026-05-23",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00},{produto:"Brigadeiro de Churros",qtd:50,valor:1.00,total:50.00}]},
+    { id:1073,cliente:"Luciana",data:"2026-05-23",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
+    { id:1074,cliente:"Diana",data:"2026-05-24",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:60,valor:1.00,total:60.00},{produto:"Beijinho",qtd:60,valor:1.00,total:60.00}]},
+    { id:1075,cliente:"Bruna",data:"2026-05-27",status:"pago",entrada:70.00,total:70.00,itens:[{produto:"Brigadeiro",qtd:35,valor:1.00,total:35.00},{produto:"Casadinho",qtd:35,valor:1.00,total:35.00}]}
+  ]
+};
+
+/* ===== BACKUP ===== */
+function exportarBackup() {
+  const dados = { pedidos, produtos, insumos };
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dados));
+  const a = document.createElement('a');
+  a.setAttribute("href", dataStr);
+  a.setAttribute("download", `backup_vanessa_doces_${new Date().toISOString().slice(0,10)}.json`);
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function importarBackup(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const dados = JSON.parse(e.target.result);
+      if (dados.pedidos && dados.produtos && dados.insumos) {
+        pedidos = dados.pedidos; produtos = dados.produtos; insumos = dados.insumos;
+        salvarLS(); atualizarTodasAsTelas(); alert("Backup restaurado!");
+      } else { alert("Arquivo inválido."); }
+    } catch { alert("Erro ao ler o arquivo."); }
+  };
+  reader.readAsText(file);
+}
+
+/* ===== CARREGAR SISTEMA (IndexedDB primeiro, fallback para BANCO_INICIAL) ===== */
+async function carregarSistema() {
+  await iniciarBanco();
+  const [p, pr, ins, cli] = await Promise.all([
+    dbListar('pedidos'),
+    dbListar('produtos'),
+    dbListar('insumos'),
+    dbListar('clientes')
+  ]);
+  if (pr.length === 0 && p.length === 0 && ins.length === 0) {
+    pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
+    produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
+    insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
+    clientes = [];
+    await Promise.all([
+      dbSalvarTodos('pedidos',  pedidos),
+      dbSalvarTodos('produtos', produtos),
+      dbSalvarTodos('insumos',  insumos),
+      dbSalvarTodos('clientes', clientes)
+    ]);
+  } else {
+    pedidos  = p   || [];
+    produtos = pr  || [];
+    insumos  = ins || [];
+    clientes = cli || [];
+  }
+}
+
+function importarBancoCompleto() {
+  if (confirm("Deseja redefinir para as configurações iniciais do Banco de Dados?")) {
+    pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
+    produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
+    insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
+    salvarLS(); atualizarTodasAsTelas(); alert("Sistema reiniciado com a base de dados original!");
+  }
+}
+
+/* ===== ABAS ===== */
+function trocarAba(index){
+  document.querySelectorAll('.aba').forEach(a=>a.classList.remove('active'));
+  document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.aba')[index].classList.add('active');
+  document.querySelectorAll('.menu button')[index].classList.add('active');
+  if(index === 1) renderPedidos();
+  if(index === 2) atualizarAgenda();
+  if(index === 3) renderizarClientes();
+  if(index === 5) renderInsumos();
+  if(index === 6) { gerenciarFiltrosAnoDashboard(); atualizarDashboard(); }
+}
+
+/* ===== NOVO PEDIDO ===== */
+function popularSelectProduto(){
+  const sel = document.getElementById('produto');
+  const selEdit = document.getElementById('editAdicionarDoceSelect');
+  sel.innerHTML = ''; selEdit.innerHTML = '';
+  produtos.forEach(p=>{
+    const opt = document.createElement('option'); opt.value = p.id; opt.textContent = `${p.nome} (R$ ${p.preco.toFixed(2)}/un)`;
+    sel.appendChild(opt);
+    selEdit.appendChild(opt.cloneNode(true));
+  });
+  atualizarValor();
+}
+function atualizarValor(){
+  const selectElem = document.getElementById('produto'); if(!selectElem.value) return;
+  const prod = produtos.find(p=>p.id===parseInt(selectElem.value)); if(!prod) return;
+  document.getElementById('valor').value = prod.preco.toFixed(2);
+  calcularTotalItem();
+}
+function calcularTotalItem(){
+  const qtd = parseInt(document.getElementById('quantidade').value)||0;
+  const valor = parseFloat(document.getElementById('valor').value)||0;
+  document.getElementById('totalItem').value = 'R$ '+(qtd*valor).toFixed(2);
+}
+function adicionarItem(){
+  const sel = document.getElementById('produto'); if(!sel.value) return;
+  const produto = produtos.find(p=>p.id===parseInt(sel.value)).nome;
+  const qtd = parseInt(document.getElementById('quantidade').value);
+  const valor = parseFloat(document.getElementById('valor').value);
+  if(!qtd || qtd <= 0){ alert('Informe a quantidade.'); return; }
+  const total = qtd * valor;
+  itensPedidoAtual.push({produto, qtd, valor, total});
+  quantidadeTotalAtual += qtd; valorTotalAtual += total; totalItensAtual = itensPedidoAtual.length;
+  atualizarResumoAtual(); renderItensTabela();
+  document.getElementById('quantidade').value = '';
+}
+function renderItensTabela(){
+  document.querySelector('#tabelaItens tbody').innerHTML = itensPedidoAtual.map((item, idx)=>`
+    <tr><td>${item.produto}</td><td>${item.qtd} un</td><td>R$ ${item.valor.toFixed(2)}</td><td>R$ ${item.total.toFixed(2)}</td>
+    <td><button class="btn btn-vermelho" style="padding:6px 12px;" onclick="removerItemAtual(${idx})">Excluir</button></td></tr>
+  `).join('');
+}
+function removerItemAtual(idx){
+  quantidadeTotalAtual -= itensPedidoAtual[idx].qtd; valorTotalAtual -= itensPedidoAtual[idx].total;
+  itensPedidoAtual.splice(idx, 1); totalItensAtual = itensPedidoAtual.length;
+  atualizarResumoAtual(); renderItensTabela();
+}
+function atualizarResumoAtual(){
+  document.getElementById('totalItens').innerText = totalItensAtual;
+  document.getElementById('quantidadeTotal').innerText = Math.round(quantidadeTotalAtual);
+  document.getElementById('valorTotal').innerText = 'R$ '+valorTotalAtual.toFixed(2);
+  document.getElementById('rodapeTotalPedido').innerText = 'R$ '+valorTotalAtual.toFixed(2);
+}
+function finalizarPedido(){
+
+  // =========================
+  // CAMPOS DO FORMULÁRIO
+  // =========================
+
+  const campoTelefone =
+    document.getElementById('telefone');
+
+  const campoCliente =
+    document.getElementById('cliente');
+
+  const campoEntrega =
+    document.getElementById('entrega');
+
+  const campoEntrada =
+    document.getElementById('valorEntrada');
+
+  const campoEndereco =
+    document.getElementById('endereco');
+
+  const campoObs =
+    document.getElementById('obs');
+
+  // =========================
+  // VALIDA SE OS CAMPOS EXISTEM
+  // =========================
+
+  if(
+    !campoTelefone ||
+    !campoCliente ||
+    !campoEntrega ||
+    !campoEntrada
+  ){
+    alert('Erro: campos do formulário não encontrados.');
+    return;
+  }
+
+  // =========================
+  // CAPTURA DOS VALORES
+  // =========================
+
+  const telefone =
+    campoTelefone.value.trim();
+
+  const cliente =
+    campoCliente.value.trim();
+
+  const dataEntrega =
+    campoEntrega.value;
+
+  const entrada =
+    parseFloat(campoEntrada.value) || 0;
+
+  const endereco =
+    campoEndereco
+      ? campoEndereco.value.trim()
+      : '';
+
+  const observacoes =
+    campoObs
+      ? campoObs.value.trim()
+      : '';
+
+  // =========================
+  // VALIDAÇÕES
+  // =========================
+
+  if(cliente === ''){
+    alert('Informe o nome do cliente.');
+    return;
+  }
+
+  if(telefone === ''){
+    alert('Informe o telefone.');
+    return;
+  }
+
+  if(dataEntrega === ''){
+    alert('Informe a data de entrega.');
+    return;
+  }
+
+  if(itensPedidoAtual.length === 0){
+    alert('Adicione pelo menos um item.');
+    return;
+  }
+
+  // =========================
+  // STATUS AUTOMÁTICO
+  // =========================
+
+  const statusPedido =
+    (valorTotalAtual - entrada > 0)
+      ? 'pendente'
+      : 'pago';
+
+  // =========================
+  // MONTA OBJETO DO PEDIDO
+  // =========================
+
+  const novoPedido = {
+
+    id: Date.now(),
+
+    cliente: cliente,
+
+    telefone: telefone,
+
+    data: dataEntrega,
+
+    endereco: endereco,
+
+    obs: observacoes,
+
+    itens: [...itensPedidoAtual],
+
+    status: statusPedido,
+
+    entrada: entrada,
+
+    total: valorTotalAtual
+
+  };
+
+  // =========================
+  // SALVA PEDIDO
+  // =========================
+
+  pedidos.push(novoPedido);
+
+  // =========================
+  // SALVA CLIENTE
+  // =========================
+
+  if(typeof clientes !== 'undefined'){
+    const telefoneLimpo = telefone.replace(/\D/g, '');
+    const clienteExiste = clientes.find(c => {
+      return (c.id||'').toString().replace(/\D/g,'') === telefoneLimpo ||
+             (c.tel||'').toString().replace(/\D/g,'') === telefoneLimpo;
+    });
+    if(!clienteExiste && telefoneLimpo){
+      clientes.push({ id: telefoneLimpo, nome: cliente, tel: telefoneLimpo, end: endereco });
+    }
+  }
+
+  // =========================
+  // SALVA DADOS
+  // =========================
+
+  try{
+
+    if(typeof salvarLS === 'function'){
+      salvarLS();
+    }
+
+  }catch(erro){
+
+    console.error(
+      'Erro ao salvar:',
+      erro
+    );
+
+  }
+
+  // =========================
+  // ATUALIZA TELAS
+  // =========================
+
+  try{
+
+    if(typeof atualizarTodasAsTelas === 'function'){
+      atualizarTodasAsTelas();
+    }
+
+  }catch(erro){
+
+    console.error(
+      'Erro ao atualizar telas:',
+      erro
+    );
+
+  }
+
+  // =========================
+  // MENSAGEM
+  // =========================
+
+  alert('Pedido salvo com sucesso!');
+
+  // =========================
+  // LIMPA FORMULÁRIO
+  // =========================
+
+  limparPedido();
+
+}
+
+function limparPedido(){
+
+  // =========================
+  // CAMPOS PARA LIMPAR
+  // =========================
+
+  const campos = [
+
+    'cliente',
+
+    'telefone',
+
+    'endereco',
+
+    'entrega',
+
+    'obs',
+
+    'valorEntrada'
+
+  ];
+
+  // =========================
+  // LIMPA CAMPOS
+  // =========================
+
+  campos.forEach(id => {
+
+    const elemento =
+      document.getElementById(id);
+
+    if(elemento){
+
+      elemento.value =
+        (id === 'valorEntrada')
+          ? '0.00'
+          : '';
+
+    }
+
+  });
+
+  // =========================
+  // LIMPA SELECT PRODUTO
+  // =========================
+
+  const produto =
+    document.getElementById('produto');
+
+  if(produto){
+    produto.selectedIndex = 0;
+  }
+
+  // =========================
+  // LIMPA QUANTIDADE
+  // =========================
+
+  const quantidade =
+    document.getElementById('quantidade');
+
+  if(quantidade){
+    quantidade.value = '';
+  }
+
+  // =========================
+  // LIMPA VALOR UNITÁRIO
+  // =========================
+
+  const valor =
+    document.getElementById('valor');
+
+  if(valor){
+    valor.value = '';
+  }
+
+  // =========================
+  // LIMPA TOTAL ITEM
+  // =========================
+
+  const totalItem =
+    document.getElementById('totalItem');
+
+  if(totalItem){
+    totalItem.value = '';
+  }
+
+  // =========================
+  // ZERA VARIÁVEIS
+  // =========================
+
+  itensPedidoAtual = [];
+
+  totalItensAtual = 0;
+
+  quantidadeTotalAtual = 0;
+
+  valorTotalAtual = 0;
+
+  // =========================
+  // ATUALIZA RESUMO
+  // =========================
+
+  if(typeof atualizarResumoAtual === 'function'){
+    atualizarResumoAtual();
+  }
+
+  // =========================
+  // ATUALIZA TABELA
+  // =========================
+
+  if(typeof renderItensTabela === 'function'){
+    renderItensTabela();
+  }
+
+  // =========================
+  // ZERA TOTAL VISUAL
+  // =========================
+
+  const rodapeTotal =
+    document.getElementById(
+      'rodapeTotalPedido'
+    );
+
+  if(rodapeTotal){
+    rodapeTotal.innerHTML = 'R$ 0,00';
+  }
+
+}
+
+/* ===== Cadastro de Cliente (Versão Unificada) ===== */
+
+function adicionarCliente() {
+  const id    = document.getElementById('telCliente').value.trim();
+  const nome  = document.getElementById('nomeCliente').value.trim();
+  const rua   = document.getElementById('rua').value.trim();
+  const num   = document.getElementById('numero').value.trim();
+  const bairro = document.getElementById('bairro').value.trim();
+  const ref   = document.getElementById('referencia').value.trim();
+
+  if (!nome || !id) { alert('Preencha o nome e o telefone!'); return; }
+
+  const endCompleto = `${rua}${num ? ', ' + num : ''}${bairro ? ' - ' + bairro : ''}${ref ? ' (Ref: ' + ref + ')' : ''}`;
+  const novoCliente = { id: id, nome: nome, tel: id, end: endCompleto };
+
+  const idx = clientes.findIndex(c => String(c.id) === String(id));
+  if (idx !== -1) {
+    clientes[idx] = novoCliente;
+  } else {
+    clientes.push(novoCliente);
+  }
+
+  salvarLS();
+  renderizarClientes();
+  limparCamposCliente();
+  alert('Cliente salvo com sucesso!');
+}
+
+function renderizarClientes() {
+  const filtro = (document.getElementById('filtroBuscaCliente')?.value || '').toLowerCase().replace(/\D/g,'') || 
+                 (document.getElementById('filtroBuscaCliente')?.value || '').toLowerCase();
+  const busca  = (document.getElementById('filtroBuscaCliente')?.value || '').toLowerCase();
+  
+  let lista = clientes;
+  if (busca.trim()) {
+    lista = clientes.filter(c => {
+      const nome = (c.nome || '').toLowerCase();
+      const tel  = ((c.tel || c.telefone || c.id || '')).toString().toLowerCase();
+      return nome.includes(busca) || tel.includes(busca) || tel.replace(/\D/g,'').includes(busca.replace(/\D/g,''));
+    });
+  }
+
+  const tbody = document.querySelector('#tabelaClientes tbody');
+  tbody.innerHTML = '';
+  if (lista.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#999;padding:20px;">Nenhum cliente encontrado.</td></tr>`;
+    return;
+  }
+  lista.forEach(c => {
+    const tel  = c.tel || c.telefone || c.id || '—';
+    const end  = c.end || c.endereco || '—';
+    const idEsc = String(c.id).replace(/'/g, "\\'");
+    const row = tbody.insertRow();
+    row.innerHTML = `<td><strong>${c.nome || '—'}</strong></td>
+      <td>${tel}</td>
+      <td>${end}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-azul" style="padding:6px 12px;margin-right:5px;" onclick="carregarParaEditar('${idEsc}')">✏️ Editar</button>
+        <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirCliente('${idEsc}')">🗑 Excluir</button>
+      </td>`;
+  });
+}
+
+function carregarParaEditar(id) {
+  const c = clientes.find(c => String(c.id) === String(id));
+  if (!c) return;
+
+  const endStr = c.end || c.endereco || '';
+  // Tenta parsear o formato "Rua, Nº - Bairro (Ref: Ponto)"
+  const matchRua    = endStr.match(/^([^,]+)/);
+  const matchNum    = endStr.match(/,\s*([^-\(]+)/);
+  const matchBairro = endStr.match(/-\s*([^\(]+)/);
+  const matchRef    = endStr.match(/\(Ref:\s*([^\)]+)\)/);
+
+  document.getElementById('nomeCliente').value = c.nome || '';
+  document.getElementById('telCliente').value  = c.tel || c.telefone || c.id || '';
+  document.getElementById('rua').value         = matchRua    ? matchRua[1].trim()    : '';
+  document.getElementById('numero').value      = matchNum    ? matchNum[1].trim()    : '';
+  document.getElementById('bairro').value      = matchBairro ? matchBairro[1].trim() : '';
+  document.getElementById('referencia').value  = matchRef    ? matchRef[1].trim()    : '';
+
+  // Rola para o formulário
+  document.querySelector('#tabelaClientes').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function excluirCliente(id) {
+  if (confirm('Tem certeza que deseja excluir este cliente?')) {
+    clientes = clientes.filter(c => String(c.id) !== String(id));
+    salvarLS();
+    renderizarClientes();
+  }
+}
+
+function limparCamposCliente() {
+    ['nomeCliente', 'telCliente', 'rua', 'numero', 'bairro', 'referencia'].forEach(id => {
+        document.getElementById(id).value = "";
+    });
+}
+/* ===== BUSCAR CLIENTE PELO TELEFONE ===== */
+function buscarClientePorTelefone() {
+  const tel = (document.getElementById('telefone').value || '').replace(/\D/g, '');
+  const statusEl = document.getElementById('statusBuscaCliente');
+
+  if (tel.length < 8) {
+    if (statusEl) statusEl.innerHTML = '';
+    return;
+  }
+
+  // Busca em todos os campos possíveis: id, tel, telefone
+  const encontrado = clientes.find(c => {
+    const t1 = (c.id       || '').toString().replace(/\D/g, '');
+    const t2 = (c.tel      || '').toString().replace(/\D/g, '');
+    const t3 = (c.telefone || '').toString().replace(/\D/g, '');
+    return t1 === tel || t2 === tel || t3 === tel;
+  });
+
+  if (encontrado) {
+    document.getElementById('cliente').value  = encontrado.nome || '';
+    // endereco pode estar em .end ou .endereco
+    document.getElementById('endereco').value = encontrado.end || encontrado.endereco || '';
+    if (statusEl) statusEl.innerHTML = `<span style="color:#28a745;font-weight:600;">✔ Cliente encontrado: ${encontrado.nome}</span>`;
+  } else {
+    document.getElementById('cliente').value  = '';
+    document.getElementById('endereco').value = '';
+    if (statusEl) statusEl.innerHTML = `<span style="color:#e65100;font-weight:600;">⚠ Cliente não encontrado — será cadastrado ao salvar o pedido.</span>`;
+  }
+}
+
+/* ===== EVENTO TELEFONE — garante binding mesmo se DOMContentLoaded já passou ===== */
+(function() {
+  function bindTelefone() {
+    const el = document.getElementById('telefone');
+    if (el && !el.dataset.bound) {
+      el.addEventListener('input', buscarClientePorTelefone);
+      el.dataset.bound = '1';
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindTelefone);
+  } else {
+    bindTelefone();
+  }
+})();
+
+/* ===== MEUS PEDIDOS ===== */
+function renderPedidos(){
+  const busca = document.getElementById('filtroBusca').value.toLowerCase();
+  const status = document.getElementById('filtroStatus').value;
+  const data = document.getElementById('filtroData').value;
+  const lista = document.getElementById('listaPedidos');
+  let filtrados = pedidos.filter(p=> (!busca || p.cliente.toLowerCase().includes(busca)) && (!status || p.status === status) && (!data || p.data === data));
+  lista.innerHTML = filtrados.map(p=>{
+    const entrada = p.entrada || 0;
+    const saldo = p.total - entrada;
+    return `
+    <div class="pedido-item">
+      <div class="pedido-info">
+        <strong>${p.cliente.toUpperCase()}</strong>
+        <span>📅 ${formatarData(p.data)} &nbsp;|&nbsp; 🍬 ${Math.round(p.itens.reduce((s,i)=>s+i.qtd,0))} un &nbsp;|&nbsp; 💰 Total: R$ ${p.total.toFixed(2)}</span>
+        <span style="font-size:12px; color:#555; margin-top:4px;">💰 Entrada Paga: <b>R$ ${entrada.toFixed(2)}</b> &nbsp;|&nbsp; <b style="color:${saldo > 0 ? '#ff9800' : '#28a745'};">Saldo Restante: R$ ${saldo.toFixed(2)}</b></span>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <span class="badge badge-${p.status}">${p.status.toUpperCase()}</span>
+        <button class="btn btn-azul" style="padding:6px 12px;" onclick="abrirEditar(${p.id})">✏️ Ver / Alterar</button>
+        <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirPedido(${p.id})">🗑</button>
+      </div>
+    </div>`
+  }).join('');
+}
+
+/* ===== EDIÇÃO AVANÇADA ===== */
+function abrirEditar(id){
+  const p = pedidos.find(x=>x.id===id); if(!p) return;
+  document.getElementById('editPedidoId').value = id;
+  document.getElementById('editCliente').value = p.cliente;
+  document.getElementById('editEndereco').value = p.endereco||'';
+  document.getElementById('editTelefone').value = p.telefone||'';
+  document.getElementById('editEntrega').value = p.data||'';
+  document.getElementById('editObs').value = p.obs||'';
+  document.getElementById('editStatus').value = p.status;
+  document.getElementById('editValorEntrada').value = (p.entrada || 0).toFixed(2);
+  itensEditandoPedido = JSON.parse(JSON.stringify(p.itens));
+  atualizarItensTabelaModalEditar();
+  document.getElementById('modalEditarPedido').classList.add('active');
+}
+function verificarMudancaStatusModal() {
+  const status = document.getElementById('editStatus').value;
+  const total = parseFloat(document.getElementById('editValorTotal').value) || 0;
+  if (status === 'pago') document.getElementById('editValorEntrada').value = total.toFixed(2);
+  calcularBalançoModalEditar();
+}
+function atualizarItensTabelaModalEditar() {
+  const tbody = document.querySelector('#tableItensEditando tbody');
+  let totalAcumulado = 0;
+  tbody.innerHTML = itensEditandoPedido.map((item, idx) => {
+    const unitario = item.valor || 1.00;
+    const subtotal = item.qtd * unitario;
+    totalAcumulado += subtotal;
+    return `<tr>
+      <td><b>${item.produto}</b></td>
+      <td style="text-align:center;"><input type="number" value="${item.qtd}" min="1" style="width:70px;padding:4px;text-align:center;" onchange="alterarQtdItemModalEditar(${idx},this.value)"> un</td>
+      <td style="text-align:right;">R$ ${unitario.toFixed(2)}</td>
+      <td style="text-align:right;font-weight:600;">R$ ${subtotal.toFixed(2)}</td>
+      <td style="text-align:center;"><button class="btn btn-vermelho" style="padding:2px 8px;font-size:11px;" onclick="removerItemModalEditar(${idx})">✕</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('editValorTotal').value = totalAcumulado.toFixed(2);
+  calcularBalançoModalEditar();
+}
+function alterarQtdItemModalEditar(idx, novaQtd) {
+  const quantidade = parseInt(novaQtd) || 1;
+  itensEditandoPedido[idx].qtd = quantidade;
+  itensEditandoPedido[idx].total = quantidade * (itensEditandoPedido[idx].valor || 1.00);
+  atualizarItensTabelaModalEditar();
+}
+function removerItemModalEditar(idx) { itensEditandoPedido.splice(idx, 1); atualizarItensTabelaModalEditar(); }
+function adicionarDoceNoPedidoEditado() {
+  const select = document.getElementById('editAdicionarDoceSelect');
+  const qtdInput = document.getElementById('editAdicionarDoceQtd');
+  const quantidade = parseInt(qtdInput.value) || 0;
+  if(quantidade <= 0) { alert("Digite uma quantidade válida!"); return; }
+  const prodObj = produtos.find(p => p.id === parseInt(select.value)); if(!prodObj) return;
+  const indexExistente = itensEditandoPedido.findIndex(i => i.produto.toLowerCase() === prodObj.nome.toLowerCase());
+  if(indexExistente !== -1) {
+    itensEditandoPedido[indexExistente].qtd += quantidade;
+    itensEditandoPedido[indexExistente].total = itensEditandoPedido[indexExistente].qtd * prodObj.preco;
+  } else {
+    itensEditandoPedido.push({ produto: prodObj.nome, qtd: quantidade, valor: prodObj.preco, total: quantidade * prodObj.preco });
+  }
+  qtdInput.value = ''; atualizarItensTabelaModalEditar();
+}
+function calcularBalançoModalEditar() {
+  const total = parseFloat(document.getElementById('editValorTotal').value) || 0;
+  const entrada = parseFloat(document.getElementById('editValorEntrada').value) || 0;
+  const saldo = total - entrada;
+  const divSaldo = document.getElementById('editSaldoAPagar');
+  divSaldo.innerText = 'R$ ' + (saldo < 0 ? 0.00 : saldo).toFixed(2);
+  divSaldo.style.color = saldo > 0 ? '#ff9800' : '#28a745';
+}
+function salvarEdicaoPedido(){
+  const id = parseInt(document.getElementById('editPedidoId').value);
+  const idx = pedidos.findIndex(x=>x.id===id); if(idx===-1) return;
+  if(itensEditandoPedido.length === 0) { alert("O pedido não pode ficar vazio!"); return; }
+  const totalCalculado = itensEditandoPedido.reduce((acc, i) => acc + i.total, 0);
+  const entradaInformada = parseFloat(document.getElementById('editValorEntrada').value) || 0;
+  let statusInformado = document.getElementById('editStatus').value;
+  if (totalCalculado - entradaInformada > 0) statusInformado = 'pendente';
+  else if (statusInformado === 'pendente' && entradaInformada >= totalCalculado) statusInformado = 'pago';
+  pedidos[idx].cliente   = document.getElementById('editCliente').value.trim();
+  pedidos[idx].endereco  = document.getElementById('editEndereco').value;
+  pedidos[idx].telefone  = document.getElementById('editTelefone').value;
+  pedidos[idx].data      = document.getElementById('editEntrega').value;
+  pedidos[idx].obs       = document.getElementById('editObs').value;
+  pedidos[idx].status    = statusInformado;
+  pedidos[idx].entrada   = entradaInformada;
+  pedidos[idx].itens     = [...itensEditandoPedido];
+  pedidos[idx].total     = totalCalculado;
+  salvarLS(); atualizarTodasAsTelas(); fecharModalEditar();
+}
+function fecharModalEditar(){ document.getElementById('modalEditarPedido').classList.remove('active'); }
+function excluirPedido(id){ if(confirm('Excluir este pedido permanentemente?')){ pedidos=pedidos.filter(x=>x.id!==id); salvarLS(); atualizarTodasAsTelas(); } }
+
+/* ===== AGENDA ===== */
+function atualizarAgenda(){
+  const containerAnos = document.getElementById('agendaAnosContainer');
+  containerAnos.innerHTML = ''; fecharSecaoDias();
+  const mapaCronologico = {};
+  pedidos.forEach(p => {
+    if(p.status === 'cancelado' || !p.data) return;
+    const [ano, mes] = p.data.split('-');
+    if(!mapaCronologico[ano]) mapaCronologico[ano] = {};
+    if(!mapaCronologico[ano][mes]) mapaCronologico[ano][mes] = { dias: {}, totalDoces: 0, totalPedidos: 0 };
+    if(!mapaCronologico[ano][mes].dias[p.data]) mapaCronologico[ano][mes].dias[p.data] = [];
+    mapaCronologico[ano][mes].dias[p.data].push(p);
+    mapaCronologico[ano][mes].totalPedidos++;
+    mapaCronologico[ano][mes].totalDoces += p.itens.reduce((s, i) => s + i.qtd, 0);
+  });
+  Object.keys(mapaCronologico).sort((a,b)=>b-a).forEach(ano => {
+    const secaoAno = document.createElement('div'); secaoAno.className = 'agenda-secao';
+    secaoAno.innerHTML = `<div class="agenda-ano-titulo"><b>Ano Letivo Operacional: ${ano}</b></div>`;
+    const gridMeses = document.createElement('div'); gridMeses.className = 'agenda-meses-grid';
+    Object.keys(mapaCronologico[ano]).sort((a,b)=>a-b).forEach(mes => {
+      const dadosMes = mapaCronologico[ano][mes];
+      const cardMes = document.createElement('div'); cardMes.className = 'mes-card';
+      cardMes.innerHTML = `<h4><b>${NOMES_MESES[parseInt(mes)-1]}</b></h4>
+        <p style="font-size:13px;">📋 Encomendas: <b>${dadosMes.totalPedidos}</b></p>
+        <p style="font-size:13px;">🍬 Total de Doces: <b>${Math.round(dadosMes.totalDoces)} un</b></p>`;
+      cardMes.onclick = () => mostrarDiasDoMes(`${NOMES_MESES[parseInt(mes)-1]} de ${ano}`, dadosMes.dias);
+      gridMeses.appendChild(cardMes);
+    });
+    secaoAno.appendChild(gridMeses); containerAnos.appendChild(secaoAno);
+  });
+}
+function mostrarDiasDoMes(titulo, diasObjeto) {
+  const secaoDias = document.getElementById('agendaDiasSecao');
+  document.getElementById('agendaDiasTituloTexto').innerHTML = `Entregas programadas para: <b style="color:#d94d7d;">${titulo}</b>`;
+  const gridDias = document.getElementById('agendaGridDias'); gridDias.innerHTML = '';
+  Object.keys(diasObjeto).sort().forEach(data => {
+    const listaPedidosDia = diasObjeto[data];
+    const totalDocesDia = listaPedidosDia.reduce((acc, p) => acc + p.itens.reduce((s,i)=>s+i.qtd, 0), 0);
+    const cardDia = document.createElement('div'); cardDia.className = 'dia-card';
+    cardDia.innerHTML = `<h3>📅 ${formatarData(data)}</h3>
+      <p style="font-size:12px;margin-top:5px;">Pedidos: <b>${listaPedidosDia.length}</b></p>
+      <p style="font-size:12px;">Volume: <b style="color:#8a5a34;">${Math.round(totalDocesDia)} un</b></p>`;
+    cardDia.onclick = () => abrirA4(data, listaPedidosDia);
+    gridDias.appendChild(cardDia);
+  });
+  secaoDias.style.display = 'block'; secaoDias.scrollIntoView({ behavior: 'smooth' });
+}
+function fecharSecaoDias() { document.getElementById('agendaDiasSecao').style.display = 'none'; }
+function fecharModal() {
+    const modal = document.getElementById('modal');
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+}
+/* ===== IMPRESSÃO A4: TOTAL POR ENCOMENDA E NOME ROSA ===== */
+function abrirA4(data, pedidosDia) {
+    const consolidadoDocesDia = {};
+    const totaisMassas = { "Massa Branca": 0, "Massa Preta": 0, "Coco": 0, "Café": 0, "Amendoim": 0, "Os Copinhos": 0, "Abacaxi": 0 };
+    const fatores = { "Massa Branca": 0.05, "Massa Preta": 0.05, "Coco": 0.04, "Café": 0.04, "Amendoim": 0.04, "Os Copinhos": 0.03, "Abacaxi": 0.03 };
+    
+    const mapeamento = {
+        "brigadeiro": "Massa Preta", "cajuzinho": "Amendoim", "casadinho": "Meio a Meio", "brigadeiro de churros": "Massa Branca",
+        "beijinho": "Coco", "chocobol": "Massa Preta", "camafeu": "Massa Preta", "camafeu de nozes": "Massa Preta",
+        "olho de sogra": "Coco", "brigadeiro de cafe": "Café", "brigadeiro de café": "Café", "ferrero": "Massa Preta",
+        "uva": "Massa Branca", "bombom de uva": "Massa Branca", "coco": "Coco", "bombom de coco": "Coco",
+        "nozes": "Massa Preta", "bombom de nozes": "Massa Preta", "flocos": "Massa Branca", "bombom de flocos": "Massa Branca",
+        "cereja": "Massa Branca", "bombom de cereja": "Massa Branca", "ouriço": "Massa Branca", "bombom ouriço": "Massa Branca",
+        "bombom de brigadeiro": "Massa Preta", "bombom de amendoim": "Amendoim", "coco com damasco": "Coco", "abacaxi com coco": "Abacaxi",
+        "copinho de limao": "Os Copinhos", "copinho de limão": "Os Copinhos", "copinho de maracuja": "Os Copinhos", "copinho de maracujá": "Os Copinhos",
+        "gotas de paçoca": "Amendoim", "damasco recheado": "Coco", "copinho de cereja": "Os Copinhos", "copinho de morango": "Os Copinhos", "bolinho": "Massa Branca", "bem casado": "Massa Branca"
+    };
+
+    let totalGeral = 0;
+    pedidosDia.forEach(p => {
+        totalGeral += p.itens.reduce((s, i) => s + i.qtd, 0);
+        p.itens.forEach(i => {
+            const nomeChave = i.produto.trim().toLowerCase();
+            consolidadoDocesDia[nomeChave] = (consolidadoDocesDia[nomeChave] || 0) + i.qtd;
+            const tipo = mapeamento[nomeChave] || "Massa Branca";
+            if (tipo === "Meio a Meio") {
+                totaisMassas["Massa Branca"] += (i.qtd / 2) * 0.05;
+                totaisMassas["Massa Preta"] += (i.qtd / 2) * 0.05;
+            } else {
+                totaisMassas[tipo] += i.qtd * (fatores[tipo] || 0.05);
+            }
+        });
+    });
+
+    let html = `
+    <style>
+        @media print { 
+            @page { size: A4 portrait; margin: 10mm; } 
+            .no-print { display: none !important; }
+        }
+        .print-wrapper { width: 100%; font-family: sans-serif; }
+        .print-colunas-wrapper { display: flex; gap: 10px; width: 100%; }
+        .print-coluna { flex: 1; }
+        .print-pedido-box { border: 2px solid #ddd; padding: 8px; margin-bottom: 8px; font-size: 10px; }
+        .footer-total-box { width: 100%; margin-top: 15px; border: 2px solid #6b3f20; padding: 10px; background: #fffaf0; font-size: 11px; box-sizing: border-box; }
+        .lista-doces { column-count: 2; column-gap: 20px; }
+    </style>
+    <div class="print-wrapper">
+        <h1 style="text-align:center; color:#6b3f20; margin: 0 0 10px 0; font-size: 18px;">Mapa de Entregas (${formatarData(data)})</h1>
+        <div class="print-colunas-wrapper">`;
+
+    let colunas = ['', '', ''];
+    pedidosDia.forEach((p, index) => {
+        const totalPedido = p.itens.reduce((s, i) => s + i.qtd, 0);
+        colunas[index % 3] += `
+            <div class="print-pedido-box">
+                <div style="font-weight:bold; font-size: 11px; border-bottom: 1px solid #eee; margin-bottom: 4px; background: #ffe4e1; padding: 2px;">${p.cliente.toUpperCase()}</div>
+                <div style="margin: 2px 0;">${p.itens.map(i => `${Math.round(i.qtd)} ${i.produto}`).join('<br>')}</div>
+                <div style="margin-top: 5px; border-top: 1px dashed #ccc; padding-top: 2px; font-weight: bold;">Total: ${totalPedido} un.</div>
+                ${p.obs ? `<div style="margin-top:4px; font-style:italic; color:#666; font-size: 9px;"><b>Obs:</b> ${p.obs}</div>` : ''}
+            </div>`;
+    });
+
+    html += colunas.map(c => `<div class="print-coluna">${c}</div>`).join('') + `</div>
+        <div class="footer-total-box">
+            <div style="display:flex; justify-content:space-between;">
+                <div><h3>Massas</h3>${Object.entries(totaisMassas).map(([k,v]) => v > 0 ? `<div>${k}: <b>${v.toFixed(2)}</b></div>` : '').join('')}</div>
+                <div><h3>Totais</h3><div class="lista-doces">${Object.entries(consolidadoDocesDia).map(([k,v]) => `<div>${k}: <b>${v}</b></div>`).join('')}</div></div>
+            </div>
+            <div style="text-align:center; font-weight:bold; border-top:1px solid #6b3f20; margin-top: 5px; padding-top:5px;">Total Geral: ${Math.round(totalGeral)} unidades</div>
+        </div>
+        <div class="no-print" style="text-align:center; margin-top:20px;">
+            <button onclick="window.print()" style="padding:10px 20px; background:#28a745; color:white; border:none; cursor:pointer;">🖨️ Imprimir</button>
+            <button onclick="fecharModal()" style="padding:10px 20px; background:#dc3545; color:white; border:none; cursor:pointer;">Fechar</button>
+        </div>
+    </div>`;
+
+    document.getElementById('a4').innerHTML = html;
+    const modal = document.getElementById('modal');
+    modal.style.display = 'block';
+    modal.classList.add('active');
+}
+
+/* ===== INSUMOS ===== */
+function salvarInsumo(){
+  const nome = document.getElementById('nomeInsumo').value.trim(); const unidade = document.getElementById('unidadeInsumo').value;
+  const estoque = parseFloat(document.getElementById('estoqueInsumo').value)||0; const preco = parseFloat(document.getElementById('precoInsumo').value)||0;
+  const dataCompra = document.getElementById('dataCompraInsumo').value || defaultDateInput;
+  if(!nome) return;
+  insumos.push({id: Date.now(), nome, unidade, estoque, preco, data: dataCompra});
+  salvarLS(); renderInsumos();
+  document.getElementById('nomeInsumo').value = ''; document.getElementById('estoqueInsumo').value = '0'; document.getElementById('precoInsumo').value = '0.00';
+  document.getElementById('dataCompraInsumo').value = defaultDateInput;
+}
+function renderInsumos(){
+  let ordenados = [...insumos].sort((a,b) => new Date(b.data||"2026-01-01") - new Date(a.data||"2026-01-01"));
+  document.getElementById('listaInsumos').innerHTML = ordenados.map(i=>`
+    <div class="insumo-item">
+      <div class="insumo-info">
+        <strong>${i.nome}</strong>
+        <span>📅 Compra: ${formatarData(i.data||defaultDateInput)} &nbsp;|&nbsp; Qtde: ${i.estoque} (${i.unidade}) &nbsp;|&nbsp; Unit: R$ ${i.preco.toFixed(2)} &nbsp;|&nbsp; <b>Custo Total: R$ ${(i.estoque*i.preco).toFixed(2)}</b></span>
+      </div>
+      <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirInsumo(${i.id})">🗑</button>
+    </div>
+  `).join('');
+}
+function excluirInsumo(id){ insumos=insumos.filter(x=>x.id!==id); salvarLS(); renderInsumos(); }
+
+/* ===== PRODUTOS ===== */
+function salvarProduto(){
+  const nome = document.getElementById('nomeProduto').value.trim(); const preco = parseFloat(document.getElementById('precoProduto').value);
+  if(!nome || isNaN(preco)) return;
+  produtos.push({id: Date.now(), nome, preco});
+  salvarLS(); renderProdutos(); popularSelectProduto();
+  document.getElementById('nomeProduto').value = ''; document.getElementById('precoProduto').value = '';
+}
+function renderProdutos(){
+  document.getElementById('listaProdutos').innerHTML = produtos.map(p=>`
+    <div class="produto-item"><div class="produto-info"><strong>${p.nome}</strong><span>R$ ${p.preco.toFixed(2)} un</span></div>
+    <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirProduto(${p.id})">🗑</button></div>
+  `).join('');
+}
+function excluirProduto(id){ produtos=produtos.filter(x=>x.id!==id); salvarLS(); renderProdutos(); popularSelectProduto(); }
+
+/* ===== PRODUÇÃO ===== */
+function atualizarProducao(){
+  const prod = {}; pedidos.forEach(p=>{ if(p.status!=='cancelado') p.itens.forEach(i=>{ prod[i.produto]=(prod[i.produto]||0)+i.qtd; }); });
+  document.querySelector('#tabelaProducao tbody').innerHTML = Object.keys(prod).map(name=>`
+    <tr><td>${name}</td><td>${Math.round(prod[name])} un</td><td>${Math.ceil(prod[name]/50)} receitas</td></tr>
+  `).join('');
+}
+
+/* ===== DASHBOARD ===== */
+function gerenciarFiltrosAnoDashboard() {
+  const container = document.getElementById('dashFiltroAnosContainer'); const anosExistentes = new Set();
+  pedidos.forEach(p => { if(p.data) anosExistentes.add(p.data.split('-')[0]); });
+  insumos.forEach(i => { if(i.data) anosExistentes.add(i.data.split('-')[0]); });
+  let anosOrdenados = Array.from(anosExistentes).sort((a,b)=>b-a);
+  let html = `<button class="btn-filtro-ano ${anoFiltroSelecionado==='Todos'?'active':''}" onclick="mudarAnoFiltroDashboard('Todos')">Todos</button>`;
+  anosOrdenados.forEach(ano => { html += `<button class="btn-filtro-ano ${anoFiltroSelecionado===ano?'active':''}" onclick="mudarAnoFiltroDashboard('${ano}')">${ano}</button>`; });
+  container.innerHTML = html;
+}
+function mudarAnoFiltroDashboard(ano) { anoFiltroSelecionado = ano; gerenciarFiltrosAnoDashboard(); atualizarDashboard(); }
+
+function atualizarDashboard(){
+  const pedidosFiltrados = pedidos.filter(p => {
+    if(p.status === 'cancelado') return false;
+    if(anoFiltroSelecionado === "Todos") return true;
+    return p.data && p.data.startsWith(anoFiltroSelecionado);
+  });
+  const insumosFiltrados = insumos.filter(i => {
+    if(anoFiltroSelecionado === "Todos") return true;
+    return i.data && i.data.startsWith(anoFiltroSelecionado);
+  });
+  let totalEntradas = 0; let volumeDoces = 0;
+  const contagemSaboresRanking = {};
+  pedidosFiltrados.forEach(p => {
+    totalEntradas += p.total;
+    p.itens.forEach(i => { volumeDoces += i.qtd; contagemSaboresRanking[i.produto] = (contagemSaboresRanking[i.produto] || 0) + i.qtd; });
+  });
+  let totalSaidas = insumosFiltrados.reduce((s, i) => s + (i.estoque * i.preco), 0);
+  let resultadoLiquido = totalEntradas - totalSaidas;
+  document.getElementById('kpiTotalEntradas').innerText = 'R$ ' + totalEntradas.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+  document.getElementById('kpiContEntradas').innerText = `${pedidosFiltrados.length} Encomendas`;
+  document.getElementById('kpiTotalSaidas').innerText = 'R$ ' + totalSaidas.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+  const divLiquido = document.getElementById('kpiResultadoLiquido');
+  const divStatus = document.getElementById('kpiResultadoStatus');
+  divLiquido.innerText = 'R$ ' + resultadoLiquido.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+  divLiquido.className = resultadoLiquido >= 0 ? "valor-destaque txt-verde" : "valor-destaque txt-vermelho";
+  divStatus.innerText = resultadoLiquido >= 0 ? "superávit" : "déficit";
+  document.getElementById('kpiVolumeDoces').innerText = Math.round(volumeDoces).toLocaleString('pt-BR') + " un";
+  document.getElementById('kpiSaldoAtual').innerText = 'R$ ' + resultadoLiquido.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+  const rankingOrdenado = Object.keys(contagemSaboresRanking).map(nome => ({ nome, qtd: contagemSaboresRanking[nome] })).sort((a,b) => b.qtd - a.qtd);
+  const containerRanking = document.getElementById('containerRankingDoces');
+  if(rankingOrdenado.length === 0) {
+    containerRanking.innerHTML = `<div style="padding:20px;color:#64748b;text-align:center;font-size:12px;">Sem dados de vendas.</div>`;
+  } else {
+    containerRanking.innerHTML = rankingOrdenado.map((item, index) => `
+      <div class="ranking-item">
+        <div class="ranking-pos">${index + 1}</div>
+        <div class="ranking-nome" title="${item.nome}"><b>${item.nome}</b></div>
+        <div class="ranking-qtd">${Math.round(item.qtd)} un</div>
+      </div>`).join('');
+  }
+  const mesesChave = ["01","02","03","04","05","06","07","08","09","10","11","12"];
+  const dicionarioDadosMensais = {};
+  mesesChave.forEach(m => { dicionarioDadosMensais[m] = { entradas: 0, saidas: 0, doces: 0 }; });
+  pedidos.forEach(p => {
+    if(p.status === 'cancelado' || !p.data) return;
+    const [ano, mes] = p.data.split('-');
+    if(anoFiltroSelecionado !== "Todos" && ano !== anoFiltroSelecionado) return;
+    if(dicionarioDadosMensais[mes]) {
+      dicionarioDadosMensais[mes].entradas += p.total;
+      dicionarioDadosMensais[mes].doces += p.itens.reduce((s,i)=>s+i.qtd,0);
+    }
+  });
+  insumos.forEach(i => {
+    if(!i.data) return;
+    const [ano, mes] = i.data.split('-');
+    if(anoFiltroSelecionado !== "Todos" && ano !== anoFiltroSelecionado) return;
+    if(dicionarioDadosMensais[mes]) dicionarioDadosMensais[mes].saidas += (i.estoque * i.preco);
+  });
+  const maxDocesMes = Math.max(...Object.values(dicionarioDadosMensais).map(o => o.doces)) || 1;
+  const containerGrafico = document.getElementById('graficoEvolucaoDoces'); containerGrafico.innerHTML = '';
+  mesesChave.forEach((m, idx) => {
+    const volumeMes = dicionarioDadosMensais[m].doces;
+    const alturaPercentual = (volumeMes / maxDocesMes) * 70;
+    const barraWrapper = document.createElement('div'); barraWrapper.className = 'barra-grafico-wrapper';
+    barraWrapper.innerHTML = `<div class="barra-grafico-pilar" style="height:${alturaPercentual}%;" data-valor="${Math.round(volumeMes)} un"></div>
+      <div class="barra-grafico-label">${NOMES_MESES[idx].substring(0,3)}</div>`;
+    containerGrafico.appendChild(barraWrapper);
+  });
+  const tbodyTabela = document.getElementById('tbodyDetalhamentoMensal'); tbodyTabela.innerHTML = '';
+  let saldoCumulativoPasso = 0;
+  mesesChave.forEach((m, idx) => {
+    const dadosM = dicionarioDadosMensais[m]; if(dadosM.entradas === 0 && dadosM.saidas === 0) return;
+    const resultadoMes = dadosM.entradas - dadosM.saidas; saldoCumulativoPasso += resultadoMes;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><b>${NOMES_MESES[idx].substring(0,3)}</b></td>
+      <td class="txt-verde">R$ ${dadosM.entradas.toFixed(0)}</td>
+      <td class="txt-vermelho">R$ ${dadosM.saidas.toFixed(0)}</td>
+      <td class="${resultadoMes >= 0 ? 'txt-verde' : 'txt-vermelho'}">R$ ${resultadoMes.toFixed(0)}</td>
+      <td class="txt-ouro">R$ ${saldoCumulativoPasso.toFixed(0)}</td>`;
+    tbodyTabela.appendChild(tr);
+  });
+  if(tbodyTabela.innerHTML === '') tbodyTabela.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#64748b;padding:20px;">Sem registros.</td></tr>`;
+}
+
+/* ===== UTILS ===== */
+function formatarData(d){ if(!d) return ''; const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function limparFiltros(){ document.getElementById('filtroBusca').value=''; document.getElementById('filtroStatus').value=''; document.getElementById('filtroData').value=''; renderPedidos(); }
+
+document.getElementById('produto').addEventListener('change', atualizarValor);
+document.getElementById('quantidade').addEventListener('input', calcularTotalItem);
+
+function atualizarTodasAsTelas(){
+  popularSelectProduto(); renderProdutos(); renderPedidos(); atualizarAgenda(); atualizarProducao(); renderInsumos(); renderizarClientes();
+  gerenciarFiltrosAnoDashboard(); atualizarDashboard();
+}
+
+
+
+/* ===== INICIALIZAÇÃO COM IndexedDB ===== */
+carregarSistema().then(() => {
+  atualizarTodasAsTelas();
+}).catch(err => {
+  console.error('Erro ao iniciar banco:', err);
+  alert('Erro ao carregar o banco de dados. Verifique o console.');
+});
+</script>
+</body>
+</html>
