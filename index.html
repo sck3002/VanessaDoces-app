@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vanessa Doces Finos</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 body{background:#f4f4f4;overflow:hidden;}
@@ -170,8 +171,7 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
       <input type="text" id="endereco">
 
       <label>Telefone</label>
-      <input type="text" id="telefone" oninput="buscarClientePorTelefone()" placeholder="Digite o telefone para buscar o cliente">
-      <div id="statusBuscaCliente" style="font-size:12px;margin:4px 2px 0;min-height:16px;"></div>
+      <input type="text" id="telefone">
 
       <label>Data Entrega</label>
       <input type="date" id="entrega">
@@ -617,62 +617,39 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 
 <script>
 /* ================================================================
-   VANESSA DOCES FINOS — IndexedDB Integration
-   Banco: vanessa_doces_db  |  Stores: pedidos, produtos, insumos
-   Service Worker + PWA registrado automaticamente
+   VANESSA DOCES FINOS — Supabase Integration
+   Banco: Supabase  |  Tabelas: pedidos, produtos, insumos, clientes
 ================================================================ */
 
-/* ===== SERVICE WORKER ===== */
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+/* ===== SUPABASE ===== */
+const SUPABASE_URL = 'https://stwqlmxymyixgbwxynxh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_jBjgD5yEzdHdGT1pEZ6Jkw_kj3lowPV';
+const sbClient     = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ===== HELPERS SUPABASE ===== */
+async function sbListar(tabela) {
+  const { data, error } = await sbClient.from(tabela).select('*');
+  if (error) { console.error(`Erro ao listar ${tabela}:`, error.message); return []; }
+  return data || [];
 }
 
-/* ===== IndexedDB ===== */
-const DB_NAME = 'vanessa_doces_db';
-const DB_VERSION = 3;
-let db;
-
-function iniciarBanco() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = function(e) {
-      const d = e.target.result;
-      if (!d.objectStoreNames.contains('pedidos'))  d.createObjectStore('pedidos',  { keyPath: 'id' });
-      if (!d.objectStoreNames.contains('produtos')) d.createObjectStore('produtos', { keyPath: 'id' });
-      if (!d.objectStoreNames.contains('insumos'))  d.createObjectStore('insumos',  { keyPath: 'id' });
-      if (!d.objectStoreNames.contains('clientes')) d.createObjectStore('clientes', { keyPath: 'id', autoIncrement: true });
-    };
-    req.onsuccess = e => { db = e.target.result; resolve(); };
-    req.onerror   = e => reject(e.target.error);
-  });
+async function sbUpsert(tabela, lista) {
+  if (!lista || lista.length === 0) return;
+  const { error } = await sbClient.from(tabela).upsert(lista, { onConflict: 'id' });
+  if (error) console.error(`Erro ao salvar em ${tabela}:`, error.message);
 }
 
-function dbSalvarTodos(store, lista) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction([store], 'readwrite');
-    const s  = tx.objectStore(store);
-    s.clear();
-    lista.forEach(item => s.put(item));
-    tx.oncomplete = resolve;
-    tx.onerror    = e => reject(e.target.error);
-  });
+async function sbDeletar(tabela, id) {
+  const { error } = await sbClient.from(tabela).delete().eq('id', id);
+  if (error) console.error(`Erro ao deletar de ${tabela}:`, error.message);
 }
 
-function dbListar(store) {
-  return new Promise((resolve, reject) => {
-    const tx  = db.transaction([store], 'readonly');
-    const req = tx.objectStore(store).getAll();
-    req.onsuccess = () => resolve(req.result);
-    req.onerror   = e => reject(e.target.error);
-  });
-}
-
-/* salvarLS agora persiste no IndexedDB (assíncrono, sem await para manter compatibilidade) */
+/* salvarLS — persiste no Supabase (todas as tabelas) */
 function salvarLS() {
-  dbSalvarTodos('pedidos',  pedidos);
-  dbSalvarTodos('produtos', produtos);
-  dbSalvarTodos('insumos',  insumos);
-  dbSalvarTodos('clientes', clientes);
+  sbUpsert('pedidos',  pedidos);
+  sbUpsert('produtos', produtos);
+  sbUpsert('insumos',  insumos);
+  sbUpsert('clientes', clientes);
 }
 
 /* ===== ESTADO GLOBAL ===== */
@@ -833,63 +810,31 @@ function importarBackup(input) {
   reader.readAsText(file);
 }
 
-/* ===== CARREGAR SISTEMA (IndexedDB primeiro, fallback para BANCO_INICIAL) ===== */
+/* ===== CARREGAR SISTEMA (Supabase primeiro, fallback para BANCO_INICIAL) ===== */
 async function carregarSistema() {
+  const [p, pr, ins, cli] = await Promise.all([
+    sbListar('pedidos'),
+    sbListar('produtos'),
+    sbListar('insumos'),
+    sbListar('clientes')
+  ]);
 
-  await iniciarBanco();
-
-  try {
-
-    const [p, pr, ins, cli] = await Promise.all([
-      dbListar('pedidos'),
-      dbListar('produtos'),
-      dbListar('insumos'),
-      dbListar('clientes')
+  if (p.length === 0 && pr.length === 0 && ins.length === 0) {
+    pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
+    produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
+    insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
+    clientes = [];
+    await Promise.all([
+      sbUpsert('pedidos',  pedidos),
+      sbUpsert('produtos', produtos),
+      sbUpsert('insumos',  insumos)
     ]);
-
-    // Se não existir dados, carrega banco inicial
-    if (
-      pr.length === 0 &&
-      p.length === 0 &&
-      ins.length === 0
-    ) {
-
-      pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
-      produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
-      insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
-      clientes = [];
-
-      await Promise.all([
-
-  dbSalvarTodos('pedidos', pedidos),
-
-  dbSalvarTodos('produtos', produtos),
-
-  dbSalvarTodos('insumos', insumos),
-
-  dbSalvarTodos('clientes', clientes)
-
-]);
-
-    } else {
-
-      pedidos  = p || [];
-      produtos = pr || [];
-      insumos  = ins || [];
-      clientes = cli || [];
-
-    }
-
-    console.log('Sistema carregado com sucesso');
-
-  } catch (erro) {
-
-    console.error('Erro ao carregar sistema:', erro);
-
-    alert('Erro ao carregar banco de dados.');
-
+  } else {
+    pedidos  = p   || [];
+    produtos = pr  || [];
+    insumos  = ins || [];
+    clientes = cli || [];
   }
-
 }
 
 function importarBancoCompleto() {
@@ -1098,56 +1043,24 @@ function finalizarPedido(){
   pedidos.push(novoPedido);
 
   // =========================
-  // SALVA CLIENTE
-  // =========================
-
-  if(typeof clientes !== 'undefined'){
-
-    // Remove tudo que não for número
-const telefoneLimpo =
-  telefone.replace(/\D/g, '');
-
-// Procura cliente existente
-const clienteExiste =
-  clientes.find(c => {
-
-    const telefoneCliente =
-      (c.telefone || '')
-      .replace(/\D/g, '');
-
-    return telefoneCliente === telefoneLimpo;
-
-  });
-
-    if(!clienteExiste){
-
-      clientes.push({
-        nome: cliente,
-        telefone: telefoneLimpo,
-        endereco: endereco
-      });
-
-    }
-
-  }
-
-  // =========================
-  // SALVA DADOS
+  // SALVA NO SUPABASE
   // =========================
 
   try{
+    sbUpsert('pedidos', [novoPedido]);
 
-    if(typeof salvarLS === 'function'){
-      salvarLS();
-    }
-
-  }catch(erro){
-
-    console.error(
-      'Erro ao salvar:',
-      erro
+    const telefoneLimpo = telefone.replace(/\D/g, '');
+    const clienteExiste = clientes.find(c =>
+      (c.id||'').toString().replace(/\D/g,'') === telefoneLimpo ||
+      (c.tel||'').toString().replace(/\D/g,'') === telefoneLimpo
     );
-
+    if(!clienteExiste && telefoneLimpo){
+      const novoCliente = { id: telefoneLimpo, nome: cliente, tel: telefoneLimpo, end: endereco };
+      clientes.push(novoCliente);
+      sbUpsert('clientes', [novoCliente]);
+    }
+  }catch(erro){
+    console.error('Erro ao salvar:', erro);
   }
 
   // =========================
@@ -1314,29 +1227,28 @@ function limparPedido(){
 
 /* ===== Cadastro de Cliente (Versão Unificada) ===== */
 
-function adicionarCliente() {
-    let id = document.getElementById('telCliente').value;
-    let nome = document.getElementById('nomeCliente').value;
-    let rua = document.getElementById('rua').value;
-    let num = document.getElementById('numero').value;
-    let bairro = document.getElementById('bairro').value;
-    let ref = document.getElementById('referencia').value;
+async function adicionarCliente() {
+    const id    = document.getElementById('telCliente').value.trim();
+    const nome  = document.getElementById('nomeCliente').value.trim();
+    const rua   = document.getElementById('rua').value.trim();
+    const num   = document.getElementById('numero').value.trim();
+    const bairro = document.getElementById('bairro').value.trim();
+    const ref   = document.getElementById('referencia').value.trim();
 
-    if(nome === "" || id === "") { alert("Preencha o nome e o telefone!"); return; }
+    if (!nome || !id) { alert('Preencha o nome e o telefone!'); return; }
 
-    let enderecoCompleto = `${rua}, ${num} - ${bairro} (Ref: ${ref})`;
-    let novoCliente = { id: id, nome: nome, tel: id, end: enderecoCompleto };
+    const endCompleto = `${rua}${num ? ', ' + num : ''}${bairro ? ' - ' + bairro : ''}${ref ? ' (Ref: ' + ref + ')' : ''}`;
+    const novoCliente = { id: id, nome: nome, tel: id, end: endCompleto };
 
-    let index = clientes.findIndex(c => c.id === id);
-    if(index !== -1) {
-        clientes[index] = novoCliente;
-    } else {
-        clientes.push(novoCliente);
-    }
+    const { error } = await sbClient.from('clientes').upsert([novoCliente], { onConflict: 'id' });
+    if (error) { alert('Erro ao salvar cliente: ' + error.message); return; }
 
-    salvarLS();
+    const idx = clientes.findIndex(c => String(c.id) === String(id));
+    if (idx !== -1) clientes[idx] = novoCliente; else clientes.push(novoCliente);
+
     renderizarClientes();
     limparCamposCliente();
+    alert('Cliente salvo com sucesso!');
 }
 
 function renderizarClientes() {
@@ -1368,8 +1280,8 @@ function carregarParaEditar(id) {
 
 function excluirCliente(id) {
     if(confirm('Tem certeza que deseja excluir este cliente?')) {
-        clientes = clientes.filter(c => c.id !== id);
-        salvarLS();
+        sbDeletar('clientes', id);
+        clientes = clientes.filter(c => String(c.id) !== String(id));
         renderizarClientes();
     }
 }
@@ -1380,38 +1292,79 @@ function limparCamposCliente() {
     });
 }
 /* ===== BUSCAR CLIENTE PELO TELEFONE ===== */
-function buscarClientePorTelefone() {
-  const campoTelefone = document.getElementById('telefone');
-  if (!campoTelefone) return;
-  const telefone = campoTelefone.value.replace(/\D/g, '');
-  const campoCliente  = document.getElementById('cliente');
-  const campoEndereco = document.getElementById('endereco');
-  let statusEl = document.getElementById('statusBuscaCliente');
 
-  if (telefone.length < 8) {
-    if (campoCliente)  campoCliente.value  = '';
-    if (campoEndereco) campoEndereco.value = '';
-    if (statusEl) statusEl.innerHTML = '';
+function buscarClientePorTelefone(){
+
+  const campoTelefone =
+    document.getElementById('telefone');
+
+  if(!campoTelefone) return;
+
+  // Remove máscara
+  const telefone =
+    campoTelefone.value.replace(/\D/g,'');
+
+  // Campos do formulário
+  const campoCliente =
+    document.getElementById('cliente');
+
+  const campoEndereco =
+    document.getElementById('endereco');
+
+  if(telefone.length < 8){
+
+    if(campoCliente) campoCliente.value = '';
+
+    if(campoEndereco) campoEndereco.value = '';
+
     return;
   }
 
-  const encontrado = clientes.find(c => {
-    const t1 = (c.id       || '').toString().replace(/\D/g, '');
-    const t2 = (c.tel      || '').toString().replace(/\D/g, '');
-    const t3 = (c.telefone || '').toString().replace(/\D/g, '');
-    return t1 === telefone || t2 === telefone || t3 === telefone;
-  });
+  // Procura cliente
+  const clienteEncontrado =
+    clientes.find(cliente => {
 
-  if (encontrado) {
-    if (campoCliente)  campoCliente.value  = encontrado.nome || '';
-    if (campoEndereco) campoEndereco.value = encontrado.end || encontrado.endereco || '';
-    if (statusEl) statusEl.innerHTML = `<span style="color:#28a745;font-weight:600;">✔ Cliente encontrado: ${encontrado.nome}</span>`;
-  } else {
-    if (campoCliente)  campoCliente.value  = '';
-    if (campoEndereco) campoEndereco.value = '';
-    if (statusEl) statusEl.innerHTML = `<span style="color:#e65100;font-weight:600;">⚠ Não encontrado — será cadastrado ao salvar.</span>`;
+      const telCliente =
+        (cliente.telefone || '')
+        .replace(/\D/g,'');
+
+      return telCliente === telefone;
+
+    });
+
+  // Se encontrou
+  if(clienteEncontrado){
+
+    if(campoCliente){
+      campoCliente.value =
+        clienteEncontrado.nome || '';
+    }
+
+    if(campoEndereco){
+      campoEndereco.value =
+        clienteEncontrado.endereco || '';
+    }
+
   }
+
 }
+/* ===== EVENTO TELEFONE ===== */
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  const campoTelefone =
+    document.getElementById('telefone');
+
+  if(campoTelefone){
+
+    campoTelefone.addEventListener(
+      'input',
+      buscarClientePorTelefone
+    );
+
+  }
+
+});
 
 /* ===== MEUS PEDIDOS ===== */
 function renderPedidos(){
@@ -1526,10 +1479,10 @@ function salvarEdicaoPedido(){
   pedidos[idx].entrada   = entradaInformada;
   pedidos[idx].itens     = [...itensEditandoPedido];
   pedidos[idx].total     = totalCalculado;
-  salvarLS(); atualizarTodasAsTelas(); fecharModalEditar();
+  sbUpsert('pedidos', [pedidos[idx]]); atualizarTodasAsTelas(); fecharModalEditar();
 }
 function fecharModalEditar(){ document.getElementById('modalEditarPedido').classList.remove('active'); }
-function excluirPedido(id){ if(confirm('Excluir este pedido permanentemente?')){ pedidos=pedidos.filter(x=>x.id!==id); salvarLS(); atualizarTodasAsTelas(); } }
+function excluirPedido(id){ if(confirm('Excluir este pedido permanentemente?')){ sbDeletar('pedidos', id); pedidos=pedidos.filter(x=>x.id!==id); atualizarTodasAsTelas(); } }
 
 /* ===== AGENDA ===== */
 function atualizarAgenda(){
@@ -1673,8 +1626,9 @@ function salvarInsumo(){
   const estoque = parseFloat(document.getElementById('estoqueInsumo').value)||0; const preco = parseFloat(document.getElementById('precoInsumo').value)||0;
   const dataCompra = document.getElementById('dataCompraInsumo').value || defaultDateInput;
   if(!nome) return;
-  insumos.push({id: Date.now(), nome, unidade, estoque, preco, data: dataCompra});
-  salvarLS(); renderInsumos();
+  const novo = {id: Date.now(), nome, unidade, estoque, preco, data: dataCompra};
+  insumos.push(novo);
+  sbUpsert('insumos', [novo]); renderInsumos();
   document.getElementById('nomeInsumo').value = ''; document.getElementById('estoqueInsumo').value = '0'; document.getElementById('precoInsumo').value = '0.00';
   document.getElementById('dataCompraInsumo').value = defaultDateInput;
 }
@@ -1690,14 +1644,15 @@ function renderInsumos(){
     </div>
   `).join('');
 }
-function excluirInsumo(id){ insumos=insumos.filter(x=>x.id!==id); salvarLS(); renderInsumos(); }
+function excluirInsumo(id){ sbDeletar('insumos', id); insumos=insumos.filter(x=>x.id!==id); renderInsumos(); }
 
 /* ===== PRODUTOS ===== */
 function salvarProduto(){
   const nome = document.getElementById('nomeProduto').value.trim(); const preco = parseFloat(document.getElementById('precoProduto').value);
   if(!nome || isNaN(preco)) return;
-  produtos.push({id: Date.now(), nome, preco});
-  salvarLS(); renderProdutos(); popularSelectProduto();
+  const novo = {id: Date.now(), nome, preco};
+  produtos.push(novo);
+  sbUpsert('produtos', [novo]); renderProdutos(); popularSelectProduto();
   document.getElementById('nomeProduto').value = ''; document.getElementById('precoProduto').value = '';
 }
 function renderProdutos(){
@@ -1706,7 +1661,7 @@ function renderProdutos(){
     <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirProduto(${p.id})">🗑</button></div>
   `).join('');
 }
-function excluirProduto(id){ produtos=produtos.filter(x=>x.id!==id); salvarLS(); renderProdutos(); popularSelectProduto(); }
+function excluirProduto(id){ sbDeletar('produtos', id); produtos=produtos.filter(x=>x.id!==id); renderProdutos(); popularSelectProduto(); }
 
 /* ===== PRODUÇÃO ===== */
 function atualizarProducao(){
