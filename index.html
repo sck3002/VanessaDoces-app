@@ -1560,11 +1560,13 @@ function abrirA4(data, pedidosDia) {
     };
 
     let totalGeral = 0;
+    let totalBemCasados = 0;
     pedidosDia.forEach(p => {
-    totalGeral += p.itens.reduce((s, i) => {
-        const nome = i.produto.trim().toLowerCase();
-        return nome === "bem casado" ? s : s + i.qtd; // ignora bem casado
-    }, 0);
+        totalGeral += p.itens.reduce((s, i) => {
+            const nome = i.produto.trim().toLowerCase();
+            if (nome === "bem casado") { totalBemCasados += i.qtd; return s; }
+            return s + i.qtd;
+        }, 0);
         p.itens.forEach(i => {
             const nomeChave = i.produto.trim().toLowerCase();
             if (nomeChave === "bem casado") return;
@@ -1598,15 +1600,19 @@ function abrirA4(data, pedidosDia) {
 
     let colunas = ['', '', ''];
     pedidosDia.forEach((p, index) => {
-        const totalPedido = p.itens.reduce((s, i) => s + i.qtd, 0);
+        const bc = p.itens.filter(i => i.produto.trim().toLowerCase() === "bem casado").reduce((s, i) => s + i.qtd, 0);
+        const totalPedido = p.itens.reduce((s, i) => s + i.qtd, 0) - bc;
+        const totalStr = `${totalPedido} doces${bc > 0 ? ` e ${Math.round(bc)} bem casados` : ''}`;
         colunas[index % 3] += `
             <div class="print-pedido-box">
                 <div style="font-weight:bold; font-size: 11px; border-bottom: 1px solid #eee; margin-bottom: 4px; background: #ffe4e1; padding: 2px;">${p.cliente.toUpperCase()}</div>
                 <div style="margin: 2px 0;">${p.itens.map(i => `${Math.round(i.qtd)} ${i.produto}`).join('<br>')}</div>
-                <div style="margin-top: 5px; border-top: 1px dashed #ccc; padding-top: 2px; font-weight: bold;">Total: ${totalPedido} un.</div>
+                <div style="margin-top: 5px; border-top: 1px dashed #ccc; padding-top: 2px; font-weight: bold;">Total: ${totalStr}</div>
                 ${p.obs ? `<div style="margin-top:4px; font-style:italic; color:#666; font-size: 9px;"><b>Obs:</b> ${p.obs}</div>` : ''}
             </div>`;
     });
+
+    const totalGeralStr = `${Math.round(totalGeral)} doces${totalBemCasados > 0 ? ` e ${Math.round(totalBemCasados)} bem casados` : ''}`;
 
     html += colunas.map(c => `<div class="print-coluna">${c}</div>`).join('') + `</div>
         <div class="footer-total-box">
@@ -1614,7 +1620,7 @@ function abrirA4(data, pedidosDia) {
                 <div><h3>Massas</h3>${Object.entries(totaisMassas).map(([k,v]) => v > 0 ? `<div>${k}: <b>${v.toFixed(2)}</b></div>` : '').join('')}</div>
                 <div><h3>Totais</h3><div class="lista-doces">${Object.entries(consolidadoDocesDia).map(([k,v]) => `<div>${k}: <b>${v}</b></div>`).join('')}</div></div>
             </div>
-            <div style="text-align:center; font-weight:bold; border-top:1px solid #6b3f20; margin-top: 5px; padding-top:5px;">Total Geral: ${Math.round(totalGeral)} unidades</div>
+            <div style="text-align:center; font-weight:bold; border-top:1px solid #6b3f20; margin-top: 5px; padding-top:5px;">Total Geral: ${totalGeralStr}</div>
         </div>
         <div class="no-print" style="text-align:center; margin-top:20px;">
             <button onclick="window.print()" style="padding:10px 20px; background:#28a745; color:white; border:none; cursor:pointer;">🖨️ Imprimir</button>
@@ -1627,7 +1633,7 @@ function abrirA4(data, pedidosDia) {
     modal.style.display = 'block';
     modal.classList.add('active');
 }
-
+  
 /* ===== INSUMOS ===== */
 function salvarInsumo(){
   const nome = document.getElementById('nomeInsumo').value.trim(); const unidade = document.getElementById('unidadeInsumo').value;
