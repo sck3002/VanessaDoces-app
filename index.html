@@ -171,7 +171,11 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
       <input type="text" id="endereco">
 
       <label>Telefone</label>
-      <input type="text" id="telefone">
+      <input
+  type="text"
+  id="telefone"
+  onkeyup="buscarClientePorTelefone()"
+>
 
       <label>Data Entrega</label>
       <input type="date" id="entrega">
