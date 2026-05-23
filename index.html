@@ -156,206 +156,55 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 <div class="conteudo">
 
 <div class="aba active">
-
   <div class="grid">
-
-    <!-- CLIENTE -->
     <div class="card">
-
       <h2>Cliente</h2>
-
       <label>Nome</label>
       <input type="text" id="cliente">
-
       <label>Endereço</label>
       <input type="text" id="endereco">
-
       <label>Telefone</label>
-      <input
-  type="text"
-  id="telefone"
-  onkeyup="buscarClientePorTelefone()"
->
-
+      <input type="text" id="telefone" onkeyup="buscarClientePorTelefone()">
       <label>Data Entrega</label>
       <input type="date" id="entrega">
-
       <label>Valor de Entrada (R$)</label>
-      <input
-        type="number"
-        id="valorEntrada"
-        step="0.01"
-        value="0.00"
-      >
-
+      <input type="number" id="valorEntrada" step="0.01" value="0.00">
       <label>Observações</label>
       <textarea id="obs"></textarea>
-
     </div>
 
-    <!-- ITENS -->
     <div class="card">
-
       <h2>Itens do Pedido</h2>
-
-      <div style="
-        display:grid;
-        grid-template-columns:2fr 1fr 1fr 1fr auto;
-        gap:15px;
-        align-items:end;
-      ">
-
-        <div>
-          <label>Produto / Sabor</label>
-          <select id="produto"></select>
-        </div>
-
-        <div>
-          <label>Qtd (Unidades)</label>
-
-          <input
-            type="number"
-            id="quantidade"
-            min="1"
-          >
-        </div>
-
-        <div>
-          <label>Valor Unit.</label>
-
-          <input
-            type="number"
-            id="valor"
-            readonly
-          >
-        </div>
-
-        <div>
-          <label>Total</label>
-
-          <input
-            type="text"
-            id="totalItem"
-            readonly
-          >
-        </div>
-
-        <div>
-          <button
-            class="btn btn-rosa"
-            onclick="adicionarItem()"
-          >
-            + Adicionar
-          </button>
-        </div>
-
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:15px;align-items:end;">
+        <div><label>Produto / Sabor</label><select id="produto"></select></div>
+        <div><label>Qtd (Unidades)</label><input type="number" id="quantidade" min="1"></div>
+        <div><label>Valor Unit.</label><input type="number" id="valor" readonly></div>
+        <div><label>Total</label><input type="text" id="totalItem" readonly></div>
+        <div><button class="btn btn-rosa" onclick="adicionarItem()">+ Adicionar</button></div>
       </div>
-
       <table id="tabelaItens">
-
-        <thead>
-
-          <tr>
-
-            <th>Produto</th>
-
-            <th>Qtd (un)</th>
-
-            <th>Valor Unit.</th>
-
-            <th>Total</th>
-
-            <th>Ação</th>
-
-          </tr>
-
-        </thead>
-
+        <thead><tr><th>Produto</th><th>Qtd (un)</th><th>Valor Unit.</th><th>Total</th><th>Ação</th></tr></thead>
         <tbody></tbody>
-
         <tfoot>
-
           <tr>
-
-            <td colspan="3"
-              style="
-                text-align:right;
-                font-weight:bold;
-              "
-            >
-              TOTAL PEDIDO
-            </td>
-
-            <td colspan="2"
-              id="rodapeTotalPedido"
-              style="
-                font-size:22px;
-                color:#d94d7d;
-                font-weight:bold;
-              "
-            >
-              R$ 0,00
-            </td>
-
+            <td colspan="3" style="text-align:right;font-weight:bold;">TOTAL PEDIDO</td>
+            <td colspan="2" id="rodapeTotalPedido" style="font-size:22px;color:#d94d7d;font-weight:bold;">R$ 0,00</td>
           </tr>
-
         </tfoot>
-
       </table>
-
       <div class="botoes">
-
-        <button
-          class="btn btn-laranja"
-          onclick="limparPedido()"
-        >
-          Limpar
-        </button>
-
-        <button
-          class="btn btn-verde"
-          onclick="finalizarPedido()"
-        >
-          ✔ Finalizar Pedido
-        </button>
-
+        <button class="btn btn-laranja" onclick="limparPedido()">Limpar</button>
+        <button class="btn btn-verde" onclick="finalizarPedido()">✔ Finalizar Pedido</button>
       </div>
-
     </div>
 
-    <!-- RESUMO -->
     <div class="card">
-
       <h2>Resumo</h2>
-
-      <div class="info">
-
-        <h3>Total Itens (tipos)</h3>
-
-        <p id="totalItens">0</p>
-
-      </div>
-
-      <div class="info">
-
-        <h3>Total Doces (Unidades)</h3>
-
-        <p id="quantidadeTotal">0</p>
-
-      </div>
-
-      <div class="info">
-
-        <h3>Valor Total</h3>
-
-        <p id="valorTotal">R$ 0,00</p>
-
-      </div>
-
+      <div class="info"><h3>Total Itens (tipos)</h3><p id="totalItens">0</p></div>
+      <div class="info"><h3>Total Doces (Unidades)</h3><p id="quantidadeTotal">0</p></div>
+      <div class="info"><h3>Valor Total</h3><p id="valorTotal">R$ 0,00</p></div>
     </div>
-
   </div>
-
 </div>
 
 <div class="aba">
@@ -404,16 +253,8 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
     </div>
     <button class="btn btn-rosa" style="margin-top: 15px;" onclick="adicionarCliente()">Salvar Cliente</button>
 </div>
-
     <table id="tabelaClientes">
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Telefone</th>
-                <th>Endereço</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
+        <thead><tr><th>Nome</th><th>Telefone</th><th>Endereço</th><th>Ações</th></tr></thead>
         <tbody></tbody>
     </table>
 </div>
@@ -513,13 +354,7 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
         <div class="tabela-premium-wrapper">
           <table class="tabela-premium">
             <thead>
-              <tr>
-                <th>Mês/Ano</th>
-                <th>Entradas</th>
-                <th>Saídas</th>
-                <th>Resultado</th>
-                <th>Saldo</th>
-              </tr>
+              <tr><th>Mês/Ano</th><th>Entradas</th><th>Saídas</th><th>Resultado</th><th>Saldo</th></tr>
             </thead>
             <tbody id="tbodyDetalhamentoMensal"></tbody>
           </table>
@@ -545,33 +380,26 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
     
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
       <div>
-        <label>Cliente</label>
-        <input type="text" id="editCliente">
-        <label>Telefone</label>
-        <input type="text" id="editTelefone">
-        <label>Data de Entrega</label>
-        <input type="date" id="editEntrega">
+        <label>Cliente</label><input type="text" id="editCliente">
+        <label>Telefone</label><input type="text" id="editTelefone">
+        <label>Data de Entrega</label><input type="date" id="editEntrega">
       </div>
       <div>
-        <label>Endereço de Entrega</label>
-        <input type="text" id="editEndereco">
+        <label>Endereço de Entrega</label><input type="text" id="editEndereco">
         <label>Status do Pedido</label>
         <select id="editStatus" onchange="verificarMudancaStatusModal()">
           <option value="pendente">Pendente</option>
           <option value="pago">Pago</option>
           <option value="cancelado">Cancelado</option>
         </select>
-        <label>Observações</label>
-        <textarea id="editObs"></textarea>
+        <label>Observações</label><textarea id="editObs"></textarea>
       </div>
       <div style="background: #fbf6f0; border: 1px dashed #8a5a34; border-radius: 12px; padding: 15px;">
         <h3 style="color:#6b3f20; font-size:14px; margin-bottom:10px;">Balanço Financeiro</h3>
         <label style="margin-top:0;">Valor Total (R$)</label>
         <input type="number" id="editValorTotal" readonly style="background:#eee; font-weight:bold; color:#d94d7d;">
-        
         <label>Valor de Entrada / Novo Pagamento Acumulado (R$)</label>
         <input type="number" id="editValorEntrada" step="0.01" oninput="calcularBalançoModalEditar()">
-        
         <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; text-align: right;">
           <span style="font-size: 12px; color: #555; font-weight: 500;">SALDO A PAGAR:</span>
           <div id="editSaldoAPagar" style="font-size: 22px; font-weight: bold; color: #28a745;">R$ 0,00</div>
@@ -581,7 +409,6 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 
     <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
       <h3 style="color:#8a5a34; font-size:14px; margin-bottom:10px;">Doces inclusos nesta Encomenda</h3>
-      
       <div style="display:grid; grid-template-columns: 3fr 1fr auto; gap:10px; align-items:end; background:#f9f9f9; padding:10px; border-radius:8px;">
         <div>
           <label style="margin-top:0;">Adicionar outro Doce/Sabor</label>
@@ -591,11 +418,8 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
           <label style="margin-top:0;">Quantidade</label>
           <input type="number" id="editAdicionarDoceQtd" min="1">
         </div>
-        <div>
-          <button class="btn btn-rosa" onclick="adicionarDoceNoPedidoEditado()">+ Inserir</button>
-        </div>
+        <div><button class="btn btn-rosa" onclick="adicionarDoceNoPedidoEditado()">+ Inserir</button></div>
       </div>
-
       <div style="max-height: 180px; overflow-y: auto; margin-top: 10px; border: 1px solid #ddd; border-radius: 8px;">
         <table style="width: 100%; margin-top: 0;" id="tableItensEditando">
           <thead style="position: sticky; top: 0; z-index: 1;">
@@ -620,35 +444,24 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 </div>
 
 <script>
-/* ================================================================
-   VANESSA DOCES FINOS — Supabase Integration
-   Banco: Supabase  |  Tabelas: pedidos, produtos, insumos, clientes
-================================================================ */
-
-/* ===== SUPABASE ===== */
 const SUPABASE_URL = 'https://stwqlmxymyixgbwxynxh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_jBjgD5yEzdHdGT1pEZ6Jkw_kj3lowPV';
 const sbClient     = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* ===== HELPERS SUPABASE ===== */
 async function sbListar(tabela) {
   const { data, error } = await sbClient.from(tabela).select('*');
   if (error) { console.error(`Erro ao listar ${tabela}:`, error.message); return []; }
   return data || [];
 }
-
 async function sbUpsert(tabela, lista) {
   if (!lista || lista.length === 0) return;
   const { error } = await sbClient.from(tabela).upsert(lista, { onConflict: 'id' });
   if (error) console.error(`Erro ao salvar em ${tabela}:`, error.message);
 }
-
 async function sbDeletar(tabela, id) {
   const { error } = await sbClient.from(tabela).delete().eq('id', id);
   if (error) console.error(`Erro ao deletar de ${tabela}:`, error.message);
 }
-
-/* salvarLS — persiste no Supabase (todas as tabelas) */
 function salvarLS() {
   sbUpsert('pedidos',  pedidos);
   sbUpsert('produtos', produtos);
@@ -656,20 +469,14 @@ function salvarLS() {
   sbUpsert('clientes', clientes);
 }
 
-/* ===== ESTADO GLOBAL ===== */
-let pedidos = [];
-let produtos = [];
-let insumos = [];
-let clientes = [];
-let itensPedidoAtual = [];
-let itensEditandoPedido = [];
+let pedidos = [], produtos = [], insumos = [], clientes = [];
+let itensPedidoAtual = [], itensEditandoPedido = [];
 let totalItensAtual = 0, quantidadeTotalAtual = 0, valorTotalAtual = 0;
 let anoFiltroSelecionado = "Todos";
 
 const NOMES_MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
 document.getElementById('dataAtual').innerText = new Date().toLocaleDateString('pt-BR');
-
 const defaultDateInput = "2026-03-15";
 document.getElementById('dataCompraInsumo').value = defaultDateInput;
 
@@ -790,12 +597,10 @@ const BANCO_INICIAL = {
   ]
 };
 
-/* ===== BACKUP ===== */
 function exportarBackup() {
   const dados = { pedidos, produtos, insumos };
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dados));
-  const a = document.createElement('a');
-  a.setAttribute("href", dataStr);
+  const a = document.createElement('a'); a.setAttribute("href", dataStr);
   a.setAttribute("download", `backup_vanessa_doces_${new Date().toISOString().slice(0,10)}.json`);
   document.body.appendChild(a); a.click(); a.remove();
 }
@@ -814,30 +619,16 @@ function importarBackup(input) {
   reader.readAsText(file);
 }
 
-/* ===== CARREGAR SISTEMA (Supabase primeiro, fallback para BANCO_INICIAL) ===== */
 async function carregarSistema() {
-  const [p, pr, ins, cli] = await Promise.all([
-    sbListar('pedidos'),
-    sbListar('produtos'),
-    sbListar('insumos'),
-    sbListar('clientes')
-  ]);
-
+  const [p, pr, ins, cli] = await Promise.all([sbListar('pedidos'),sbListar('produtos'),sbListar('insumos'),sbListar('clientes')]);
   if (p.length === 0 && pr.length === 0 && ins.length === 0) {
     pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
     produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
     insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
     clientes = [];
-    await Promise.all([
-      sbUpsert('pedidos',  pedidos),
-      sbUpsert('produtos', produtos),
-      sbUpsert('insumos',  insumos)
-    ]);
+    await Promise.all([sbUpsert('pedidos',pedidos),sbUpsert('produtos',produtos),sbUpsert('insumos',insumos)]);
   } else {
-    pedidos  = p   || [];
-    produtos = pr  || [];
-    insumos  = ins || [];
-    clientes = cli || [];
+    pedidos = p || []; produtos = pr || []; insumos = ins || []; clientes = cli || [];
   }
 }
 
@@ -850,7 +641,6 @@ function importarBancoCompleto() {
   }
 }
 
-/* ===== ABAS ===== */
 function trocarAba(index){
   document.querySelectorAll('.aba').forEach(a=>a.classList.remove('active'));
   document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
@@ -863,15 +653,13 @@ function trocarAba(index){
   if(index === 6) { gerenciarFiltrosAnoDashboard(); atualizarDashboard(); }
 }
 
-/* ===== NOVO PEDIDO ===== */
 function popularSelectProduto(){
   const sel = document.getElementById('produto');
   const selEdit = document.getElementById('editAdicionarDoceSelect');
   sel.innerHTML = ''; selEdit.innerHTML = '';
   produtos.forEach(p=>{
     const opt = document.createElement('option'); opt.value = p.id; opt.textContent = `${p.nome} (R$ ${p.preco.toFixed(2)}/un)`;
-    sel.appendChild(opt);
-    selEdit.appendChild(opt.cloneNode(true));
+    sel.appendChild(opt); selEdit.appendChild(opt.cloneNode(true));
   });
   atualizarValor();
 }
@@ -916,461 +704,110 @@ function atualizarResumoAtual(){
   document.getElementById('rodapeTotalPedido').innerText = 'R$ '+valorTotalAtual.toFixed(2);
 }
 function finalizarPedido(){
-
-  // =========================
-  // CAMPOS DO FORMULÁRIO
-  // =========================
-
-  const campoTelefone =
-    document.getElementById('telefone');
-
-  const campoCliente =
-    document.getElementById('cliente');
-
-  const campoEntrega =
-    document.getElementById('entrega');
-
-  const campoEntrada =
-    document.getElementById('valorEntrada');
-
-  const campoEndereco =
-    document.getElementById('endereco');
-
-  const campoObs =
-    document.getElementById('obs');
-
-  // =========================
-  // VALIDA SE OS CAMPOS EXISTEM
-  // =========================
-
-  if(
-    !campoTelefone ||
-    !campoCliente ||
-    !campoEntrega ||
-    !campoEntrada
-  ){
-    alert('Erro: campos do formulário não encontrados.');
-    return;
-  }
-
-  // =========================
-  // CAPTURA DOS VALORES
-  // =========================
-
-  const telefone =
-    campoTelefone.value.trim();
-
-  const cliente =
-    campoCliente.value.trim();
-
-  const dataEntrega =
-    campoEntrega.value;
-
-  const entrada =
-    parseFloat(campoEntrada.value) || 0;
-
-  const endereco =
-    campoEndereco
-      ? campoEndereco.value.trim()
-      : '';
-
-  const observacoes =
-    campoObs
-      ? campoObs.value.trim()
-      : '';
-
-  // =========================
-  // VALIDAÇÕES
-  // =========================
-
-  if(cliente === ''){
-    alert('Informe o nome do cliente.');
-    return;
-  }
-
-  if(telefone === ''){
-    alert('Informe o telefone.');
-    return;
-  }
-
-  if(dataEntrega === ''){
-    alert('Informe a data de entrega.');
-    return;
-  }
-
-  if(itensPedidoAtual.length === 0){
-    alert('Adicione pelo menos um item.');
-    return;
-  }
-
-  // =========================
-  // STATUS AUTOMÁTICO
-  // =========================
-
-  const statusPedido =
-    (valorTotalAtual - entrada > 0)
-      ? 'pendente'
-      : 'pago';
-
-  // =========================
-  // MONTA OBJETO DO PEDIDO
-  // =========================
-
-  const novoPedido = {
-
-    id: Date.now(),
-
-    cliente: cliente,
-
-    telefone: telefone,
-
-    data: dataEntrega,
-
-    endereco: endereco,
-
-    obs: observacoes,
-
-    itens: [...itensPedidoAtual],
-
-    status: statusPedido,
-
-    entrada: entrada,
-
-    total: valorTotalAtual
-
-  };
-
-  // =========================
-  // SALVA PEDIDO
-  // =========================
-
+  const campoTelefone = document.getElementById('telefone');
+  const campoCliente = document.getElementById('cliente');
+  const campoEntrega = document.getElementById('entrega');
+  const campoEntrada = document.getElementById('valorEntrada');
+  const campoEndereco = document.getElementById('endereco');
+  const campoObs = document.getElementById('obs');
+  if(!campoTelefone||!campoCliente||!campoEntrega||!campoEntrada){ alert('Erro: campos do formulário não encontrados.'); return; }
+  const telefone = campoTelefone.value.trim();
+  const cliente = campoCliente.value.trim();
+  const dataEntrega = campoEntrega.value;
+  const entrada = parseFloat(campoEntrada.value) || 0;
+  const endereco = campoEndereco ? campoEndereco.value.trim() : '';
+  const observacoes = campoObs ? campoObs.value.trim() : '';
+  if(cliente === ''){ alert('Informe o nome do cliente.'); return; }
+  if(telefone === ''){ alert('Informe o telefone.'); return; }
+  if(dataEntrega === ''){ alert('Informe a data de entrega.'); return; }
+  if(itensPedidoAtual.length === 0){ alert('Adicione pelo menos um item.'); return; }
+  const statusPedido = (valorTotalAtual - entrada > 0) ? 'pendente' : 'pago';
+  const novoPedido = { id: Date.now(), cliente, telefone, data: dataEntrega, endereco, obs: observacoes, itens: [...itensPedidoAtual], status: statusPedido, entrada, total: valorTotalAtual };
   pedidos.push(novoPedido);
-
-  // =========================
-  // SALVA NO SUPABASE
-  // =========================
-
-  try{
+  try {
     sbUpsert('pedidos', [novoPedido]);
-
     const telefoneLimpo = telefone.replace(/\D/g, '');
-    const clienteExiste = clientes.find(c =>
-      (c.id||'').toString().replace(/\D/g,'') === telefoneLimpo ||
-      (c.tel||'').toString().replace(/\D/g,'') === telefoneLimpo
-    );
-    if(!clienteExiste && telefoneLimpo){
-      const novoCliente = { id: telefoneLimpo, nome: cliente, tel: telefoneLimpo, end: endereco };
-      clientes.push(novoCliente);
-      sbUpsert('clientes', [novoCliente]);
-    }
-  }catch(erro){
-    console.error('Erro ao salvar:', erro);
-  }
-
-  // =========================
-  // ATUALIZA TELAS
-  // =========================
-
-  try{
-
-    if(typeof atualizarTodasAsTelas === 'function'){
-      atualizarTodasAsTelas();
-    }
-
-  }catch(erro){
-
-    console.error(
-      'Erro ao atualizar telas:',
-      erro
-    );
-
-  }
-
-  // =========================
-  // MENSAGEM
-  // =========================
-
+    const clienteExiste = clientes.find(c => (c.id||'').toString().replace(/\D/g,'') === telefoneLimpo || (c.tel||'').toString().replace(/\D/g,'') === telefoneLimpo);
+    if(!clienteExiste && telefoneLimpo){ const novoCliente = { id: telefoneLimpo, nome: cliente, tel: telefoneLimpo, end: endereco }; clientes.push(novoCliente); sbUpsert('clientes', [novoCliente]); }
+  } catch(erro){ console.error('Erro ao salvar:', erro); }
+  try { if(typeof atualizarTodasAsTelas === 'function') atualizarTodasAsTelas(); } catch(erro){ console.error('Erro ao atualizar telas:', erro); }
   alert('Pedido salvo com sucesso!');
-
-  // =========================
-  // LIMPA FORMULÁRIO
-  // =========================
-
   limparPedido();
-
 }
-
 function limparPedido(){
-
-  // =========================
-  // CAMPOS PARA LIMPAR
-  // =========================
-
-  const campos = [
-
-    'cliente',
-
-    'telefone',
-
-    'endereco',
-
-    'entrega',
-
-    'obs',
-
-    'valorEntrada'
-
-  ];
-
-  // =========================
-  // LIMPA CAMPOS
-  // =========================
-
-  campos.forEach(id => {
-
-    const elemento =
-      document.getElementById(id);
-
-    if(elemento){
-
-      elemento.value =
-        (id === 'valorEntrada')
-          ? '0.00'
-          : '';
-
-    }
-
+  ['cliente','telefone','endereco','entrega','obs','valorEntrada'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = (id === 'valorEntrada') ? '0.00' : '';
   });
-
-  // =========================
-  // LIMPA SELECT PRODUTO
-  // =========================
-
-  const produto =
-    document.getElementById('produto');
-
-  if(produto){
-    produto.selectedIndex = 0;
-  }
-
-  // =========================
-  // LIMPA QUANTIDADE
-  // =========================
-
-  const quantidade =
-    document.getElementById('quantidade');
-
-  if(quantidade){
-    quantidade.value = '';
-  }
-
-  // =========================
-  // LIMPA VALOR UNITÁRIO
-  // =========================
-
-  const valor =
-    document.getElementById('valor');
-
-  if(valor){
-    valor.value = '';
-  }
-
-  // =========================
-  // LIMPA TOTAL ITEM
-  // =========================
-
-  const totalItem =
-    document.getElementById('totalItem');
-
-  if(totalItem){
-    totalItem.value = '';
-  }
-
-  // =========================
-  // ZERA VARIÁVEIS
-  // =========================
-
-  itensPedidoAtual = [];
-
-  totalItensAtual = 0;
-
-  quantidadeTotalAtual = 0;
-
-  valorTotalAtual = 0;
-
-  // =========================
-  // ATUALIZA RESUMO
-  // =========================
-
-  if(typeof atualizarResumoAtual === 'function'){
-    atualizarResumoAtual();
-  }
-
-  // =========================
-  // ATUALIZA TABELA
-  // =========================
-
-  if(typeof renderItensTabela === 'function'){
-    renderItensTabela();
-  }
-
-  // =========================
-  // ZERA TOTAL VISUAL
-  // =========================
-
-  const rodapeTotal =
-    document.getElementById(
-      'rodapeTotalPedido'
-    );
-
-  if(rodapeTotal){
-    rodapeTotal.innerHTML = 'R$ 0,00';
-  }
-
+  const p = document.getElementById('produto'); if(p) p.selectedIndex = 0;
+  const q = document.getElementById('quantidade'); if(q) q.value = '';
+  const v = document.getElementById('valor'); if(v) v.value = '';
+  const t = document.getElementById('totalItem'); if(t) t.value = '';
+  itensPedidoAtual = []; totalItensAtual = 0; quantidadeTotalAtual = 0; valorTotalAtual = 0;
+  if(typeof atualizarResumoAtual === 'function') atualizarResumoAtual();
+  if(typeof renderItensTabela === 'function') renderItensTabela();
+  const r = document.getElementById('rodapeTotalPedido'); if(r) r.innerHTML = 'R$ 0,00';
 }
-
-/* ===== Cadastro de Cliente (Versão Unificada) ===== */
 
 async function adicionarCliente() {
-    const id    = document.getElementById('telCliente').value.trim();
-    const nome  = document.getElementById('nomeCliente').value.trim();
-    const rua   = document.getElementById('rua').value.trim();
-    const num   = document.getElementById('numero').value.trim();
-    const bairro = document.getElementById('bairro').value.trim();
-    const ref   = document.getElementById('referencia').value.trim();
-
-    if (!nome || !id) { alert('Preencha o nome e o telefone!'); return; }
-
-    const endCompleto = `${rua}${num ? ', ' + num : ''}${bairro ? ' - ' + bairro : ''}${ref ? ' (Ref: ' + ref + ')' : ''}`;
-    const novoCliente = { id: id, nome: nome, tel: id, end: endCompleto };
-
-    const { error } = await sbClient.from('clientes').upsert([novoCliente], { onConflict: 'id' });
-    if (error) { alert('Erro ao salvar cliente: ' + error.message); return; }
-
-    const idx = clientes.findIndex(c => String(c.id) === String(id));
-    if (idx !== -1) clientes[idx] = novoCliente; else clientes.push(novoCliente);
-
-    renderizarClientes();
-    limparCamposCliente();
-    alert('Cliente salvo com sucesso!');
+  const id = document.getElementById('telCliente').value.trim();
+  const nome = document.getElementById('nomeCliente').value.trim();
+  const rua = document.getElementById('rua').value.trim();
+  const num = document.getElementById('numero').value.trim();
+  const bairro = document.getElementById('bairro').value.trim();
+  const ref = document.getElementById('referencia').value.trim();
+  if (!nome || !id) { alert('Preencha o nome e o telefone!'); return; }
+  const endCompleto = `${rua}${num ? ', ' + num : ''}${bairro ? ' - ' + bairro : ''}${ref ? ' (Ref: ' + ref + ')' : ''}`;
+  const novoCliente = { id, nome, tel: id, end: endCompleto };
+  const { error } = await sbClient.from('clientes').upsert([novoCliente], { onConflict: 'id' });
+  if (error) { alert('Erro ao salvar cliente: ' + error.message); return; }
+  const idx = clientes.findIndex(c => String(c.id) === String(id));
+  if (idx !== -1) clientes[idx] = novoCliente; else clientes.push(novoCliente);
+  renderizarClientes(); limparCamposCliente(); alert('Cliente salvo com sucesso!');
 }
-
 function renderizarClientes() {
-    let tbody = document.getElementById('tabelaClientes').getElementsByTagName('tbody')[0];
-    tbody.innerHTML = "";
-    clientes.forEach((c) => {
-        let row = tbody.insertRow();
-        row.innerHTML = `<td>${c.nome}</td><td>${c.tel}</td><td>${c.end}</td>
-            <td>
-                <button class="btn btn-azul" onclick="carregarParaEditar('${c.id}')">Editar</button>
-                <button class="btn btn-vermelho" onclick="excluirCliente('${c.id}')">Excluir</button>
-            </td>`;
-    });
+  let tbody = document.getElementById('tabelaClientes').getElementsByTagName('tbody')[0];
+  tbody.innerHTML = "";
+  clientes.forEach((c) => {
+    let row = tbody.insertRow();
+    row.innerHTML = `<td>${c.nome}</td><td>${c.tel}</td><td>${c.end}</td>
+      <td><button class="btn btn-azul" onclick="carregarParaEditar('${c.id}')">Editar</button>
+      <button class="btn btn-vermelho" onclick="excluirCliente('${c.id}')">Excluir</button></td>`;
+  });
 }
-
 function carregarParaEditar(id) {
-    let c = clientes.find(c => c.id === id);
-    if(!c) return;
-
-    let partes = c.end.split(/, | - | \(Ref: |\)/);
-    
-    document.getElementById('nomeCliente').value = c.nome;
-    document.getElementById('telCliente').value = c.tel;
-    document.getElementById('rua').value = partes[0] || '';
-    document.getElementById('numero').value = partes[1] || '';
-    document.getElementById('bairro').value = partes[2] || '';
-    document.getElementById('referencia').value = partes[3] || '';
+  let c = clientes.find(c => c.id === id); if(!c) return;
+  let partes = c.end.split(/, | - | \(Ref: |\)/);
+  document.getElementById('nomeCliente').value = c.nome;
+  document.getElementById('telCliente').value = c.tel;
+  document.getElementById('rua').value = partes[0] || '';
+  document.getElementById('numero').value = partes[1] || '';
+  document.getElementById('bairro').value = partes[2] || '';
+  document.getElementById('referencia').value = partes[3] || '';
 }
-
 function excluirCliente(id) {
-    if(confirm('Tem certeza que deseja excluir este cliente?')) {
-        sbDeletar('clientes', id);
-        clientes = clientes.filter(c => String(c.id) !== String(id));
-        renderizarClientes();
-    }
+  if(confirm('Tem certeza que deseja excluir este cliente?')) {
+    sbDeletar('clientes', id); clientes = clientes.filter(c => String(c.id) !== String(id)); renderizarClientes();
+  }
 }
-
 function limparCamposCliente() {
-    ['nomeCliente', 'telCliente', 'rua', 'numero', 'bairro', 'referencia'].forEach(id => {
-        document.getElementById(id).value = "";
-    });
+  ['nomeCliente','telCliente','rua','numero','bairro','referencia'].forEach(id => { document.getElementById(id).value = ""; });
 }
-/* ===== BUSCAR CLIENTE PELO TELEFONE ===== */
 
 function buscarClientePorTelefone(){
-
-  const campoTelefone =
-    document.getElementById('telefone');
-
-  if(!campoTelefone) return;
-
-  // Remove máscara
-  const telefone =
-    campoTelefone.value.replace(/\D/g,'');
-
-  // Campos do formulário
-  const campoCliente =
-    document.getElementById('cliente');
-
-  const campoEndereco =
-    document.getElementById('endereco');
-
-  if(telefone.length < 8){
-
-    if(campoCliente) campoCliente.value = '';
-
-    if(campoEndereco) campoEndereco.value = '';
-
-    return;
-  }
-
-  // Procura cliente
-  const clienteEncontrado =
-    clientes.find(cliente => {
-
-      const telCliente =
-        (cliente.telefone || '')
-        .replace(/\D/g,'');
-
-      return telCliente === telefone;
-
-    });
-
-  // Se encontrou
-  if(clienteEncontrado){
-
-    if(campoCliente){
-      campoCliente.value =
-        clienteEncontrado.nome || '';
-    }
-
-    if(campoEndereco){
-      campoEndereco.value =
-        clienteEncontrado.endereco || '';
-    }
-
-  }
-
+  const campoTelefone = document.getElementById('telefone'); if(!campoTelefone) return;
+  const telefone = campoTelefone.value.replace(/\D/g,'');
+  const campoCliente = document.getElementById('cliente');
+  const campoEndereco = document.getElementById('endereco');
+  if(telefone.length < 8){ if(campoCliente) campoCliente.value = ''; if(campoEndereco) campoEndereco.value = ''; return; }
+  const clienteEncontrado = clientes.find(cliente => { const telCliente = (cliente.telefone || '').replace(/\D/g,''); return telCliente === telefone; });
+  if(clienteEncontrado){ if(campoCliente) campoCliente.value = clienteEncontrado.nome || ''; if(campoEndereco) campoEndereco.value = clienteEncontrado.endereco || ''; }
 }
-/* ===== EVENTO TELEFONE ===== */
 
 document.addEventListener('DOMContentLoaded', () => {
-
-  const campoTelefone =
-    document.getElementById('telefone');
-
-  if(campoTelefone){
-
-    campoTelefone.addEventListener(
-      'input',
-      buscarClientePorTelefone
-    );
-
-  }
-
+  const campoTelefone = document.getElementById('telefone');
+  if(campoTelefone) campoTelefone.addEventListener('input', buscarClientePorTelefone);
 });
 
-/* ===== MEUS PEDIDOS ===== */
 function renderPedidos(){
   const busca = document.getElementById('filtroBusca').value.toLowerCase();
   const status = document.getElementById('filtroStatus').value;
@@ -1378,10 +815,8 @@ function renderPedidos(){
   const lista = document.getElementById('listaPedidos');
   let filtrados = pedidos.filter(p=> (!busca || p.cliente.toLowerCase().includes(busca)) && (!status || p.status === status) && (!data || p.data === data));
   lista.innerHTML = filtrados.map(p=>{
-    const entrada = p.entrada || 0;
-    const saldo = p.total - entrada;
-    return `
-    <div class="pedido-item">
+    const entrada = p.entrada || 0; const saldo = p.total - entrada;
+    return `<div class="pedido-item">
       <div class="pedido-info">
         <strong>${p.cliente.toUpperCase()}</strong>
         <span>📅 ${formatarData(p.data)} &nbsp;|&nbsp; 🍬 ${Math.round(p.itens.reduce((s,i)=>s+i.qtd,0))} un &nbsp;|&nbsp; 💰 Total: R$ ${p.total.toFixed(2)}</span>
@@ -1392,11 +827,10 @@ function renderPedidos(){
         <button class="btn btn-azul" style="padding:6px 12px;" onclick="abrirEditar(${p.id})">✏️ Ver / Alterar</button>
         <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirPedido(${p.id})">🗑</button>
       </div>
-    </div>`
+    </div>`;
   }).join('');
 }
 
-/* ===== EDIÇÃO AVANÇADA ===== */
 function abrirEditar(id){
   const p = pedidos.find(x=>x.id===id); if(!p) return;
   document.getElementById('editPedidoId').value = id;
@@ -1421,9 +855,7 @@ function atualizarItensTabelaModalEditar() {
   const tbody = document.querySelector('#tableItensEditando tbody');
   let totalAcumulado = 0;
   tbody.innerHTML = itensEditandoPedido.map((item, idx) => {
-    const unitario = item.valor || 1.00;
-    const subtotal = item.qtd * unitario;
-    totalAcumulado += subtotal;
+    const unitario = item.valor || 1.00; const subtotal = item.qtd * unitario; totalAcumulado += subtotal;
     return `<tr>
       <td><b>${item.produto}</b></td>
       <td style="text-align:center;"><input type="number" value="${item.qtd}" min="1" style="width:70px;padding:4px;text-align:center;" onchange="alterarQtdItemModalEditar(${idx},this.value)"> un</td>
@@ -1497,11 +929,16 @@ function atualizarAgenda(){
     if(p.status === 'cancelado' || !p.data) return;
     const [ano, mes] = p.data.split('-');
     if(!mapaCronologico[ano]) mapaCronologico[ano] = {};
-    if(!mapaCronologico[ano][mes]) mapaCronologico[ano][mes] = { dias: {}, totalDoces: 0, totalPedidos: 0 };
+    if(!mapaCronologico[ano][mes]) mapaCronologico[ano][mes] = { dias: {}, totalDoces: 0, totalBemCasados: 0, totalPedidos: 0 };
     if(!mapaCronologico[ano][mes].dias[p.data]) mapaCronologico[ano][mes].dias[p.data] = [];
     mapaCronologico[ano][mes].dias[p.data].push(p);
     mapaCronologico[ano][mes].totalPedidos++;
-    mapaCronologico[ano][mes].totalDoces += p.itens.reduce((s, i) => s + i.qtd, 0);
+    // *** ALTERAÇÃO: separa doces de bem casados ***
+    mapaCronologico[ano][mes].totalDoces += p.itens.reduce((s, i) => {
+      if (i.produto.trim().toLowerCase() === "bem casado") return s;
+      return s + i.qtd;
+    }, 0);
+    mapaCronologico[ano][mes].totalBemCasados += p.itens.filter(i => i.produto.trim().toLowerCase() === "bem casado").reduce((s, i) => s + i.qtd, 0);
   });
   Object.keys(mapaCronologico).sort((a,b)=>b-a).forEach(ano => {
     const secaoAno = document.createElement('div'); secaoAno.className = 'agenda-secao';
@@ -1510,43 +947,48 @@ function atualizarAgenda(){
     Object.keys(mapaCronologico[ano]).sort((a,b)=>a-b).forEach(mes => {
       const dadosMes = mapaCronologico[ano][mes];
       const cardMes = document.createElement('div'); cardMes.className = 'mes-card';
+      // *** ALTERAÇÃO: exibe bem casados separado no card do mês ***
       cardMes.innerHTML = `<h4><b>${NOMES_MESES[parseInt(mes)-1]}</b></h4>
         <p style="font-size:13px;">📋 Encomendas: <b>${dadosMes.totalPedidos}</b></p>
-        <p style="font-size:13px;">🍬 Total de Doces: <b>${Math.round(dadosMes.totalDoces)} un</b></p>`;
+        <p style="font-size:13px;">🍬 Doces: <b>${Math.round(dadosMes.totalDoces)} un</b>${dadosMes.totalBemCasados > 0 ? `</p><p style="font-size:13px;">💍 Bem Casados: <b>${Math.round(dadosMes.totalBemCasados)} un</b>` : ''}</p>`;
       cardMes.onclick = () => mostrarDiasDoMes(`${NOMES_MESES[parseInt(mes)-1]} de ${ano}`, dadosMes.dias);
       gridMeses.appendChild(cardMes);
     });
     secaoAno.appendChild(gridMeses); containerAnos.appendChild(secaoAno);
   });
 }
+
 function mostrarDiasDoMes(titulo, diasObjeto) {
   const secaoDias = document.getElementById('agendaDiasSecao');
   document.getElementById('agendaDiasTituloTexto').innerHTML = `Entregas programadas para: <b style="color:#d94d7d;">${titulo}</b>`;
   const gridDias = document.getElementById('agendaGridDias'); gridDias.innerHTML = '';
   Object.keys(diasObjeto).sort().forEach(data => {
     const listaPedidosDia = diasObjeto[data];
-    const totalDocesDia = listaPedidosDia.reduce((acc, p) => acc + p.itens.reduce((s,i)=>s+i.qtd, 0), 0);
+    // *** ALTERAÇÃO: separa doces de bem casados no card do dia ***
+    const totalDocesDia = listaPedidosDia.reduce((acc, p) => acc + p.itens.reduce((s,i) => i.produto.trim().toLowerCase() === "bem casado" ? s : s+i.qtd, 0), 0);
+    const totalBemCasadosDia = listaPedidosDia.reduce((acc, p) => acc + p.itens.filter(i => i.produto.trim().toLowerCase() === "bem casado").reduce((s,i) => s+i.qtd, 0), 0);
     const cardDia = document.createElement('div'); cardDia.className = 'dia-card';
     cardDia.innerHTML = `<h3>📅 ${formatarData(data)}</h3>
       <p style="font-size:12px;margin-top:5px;">Pedidos: <b>${listaPedidosDia.length}</b></p>
-      <p style="font-size:12px;">Volume: <b style="color:#8a5a34;">${Math.round(totalDocesDia)} un</b></p>`;
+      <p style="font-size:12px;">Doces: <b style="color:#8a5a34;">${Math.round(totalDocesDia)} un</b></p>
+      ${totalBemCasadosDia > 0 ? `<p style="font-size:12px;">Bem Casados: <b style="color:#8a5a34;">${Math.round(totalBemCasadosDia)} un</b></p>` : ''}`;
     cardDia.onclick = () => abrirA4(data, listaPedidosDia);
     gridDias.appendChild(cardDia);
   });
   secaoDias.style.display = 'block'; secaoDias.scrollIntoView({ behavior: 'smooth' });
 }
+
 function fecharSecaoDias() { document.getElementById('agendaDiasSecao').style.display = 'none'; }
 function fecharModal() {
-    const modal = document.getElementById('modal');
-    modal.classList.remove('active');
-    modal.style.display = 'none';
+  const modal = document.getElementById('modal');
+  modal.classList.remove('active'); modal.style.display = 'none';
 }
-/* ===== IMPRESSÃO A4: TOTAL POR ENCOMENDA E NOME ROSA ===== */
+
+/* ===== IMPRESSÃO A4 ===== */
 function abrirA4(data, pedidosDia) {
     const consolidadoDocesDia = {};
-    const totaisMassas = { "Massa Branca": 0, "Massa Preta": 0, "Coco": 0, "Café": 0, "Amendoim": 0, "Os Copinhos": 0, "Abacaxi": 0,  "Ninho": 0 };
+    const totaisMassas = { "Massa Branca": 0, "Massa Preta": 0, "Coco": 0, "Café": 0, "Amendoim": 0, "Os Copinhos": 0, "Abacaxi": 0, "Ninho": 0 };
     const fatores = { "Massa Branca": 0.05, "Massa Preta": 0.05, "Coco": 0.04, "Café": 0.04, "Ninho": 0.04, "Amendoim": 0.04, "Os Copinhos": 0.03, "Abacaxi": 0.03 };
-    
     const mapeamento = {
         "brigadeiro": "Massa Preta", "cajuzinho": "Amendoim","ninho com nutella": "Ninho", "casadinho": "Meio a Meio", "brigadeiro de churros": "Massa Branca",
         "beijinho": "Coco", "chocobol": "Massa Preta", "camafeu": "Massa Preta", "camafeu de nozes": "Massa Preta",
@@ -1558,9 +1000,7 @@ function abrirA4(data, pedidosDia) {
         "copinho de limao": "Os Copinhos", "copinho de limão": "Os Copinhos", "copinho de maracuja": "Os Copinhos", "copinho de maracujá": "Os Copinhos",
         "gotas de paçoca": "Amendoim", "damasco recheado": "Massa Branca", "copinho de cereja": "Os Copinhos", "copinho de morango": "Os Copinhos", "bolinho": "Massa Branca"
     };
-
-    let totalGeral = 0;
-    let totalBemCasados = 0;
+    let totalGeral = 0, totalBemCasados = 0;
     pedidosDia.forEach(p => {
         totalGeral += p.itens.reduce((s, i) => {
             const nome = i.produto.trim().toLowerCase();
@@ -1580,13 +1020,9 @@ function abrirA4(data, pedidosDia) {
             }
         });
     });
-
     let html = `
     <style>
-        @media print { 
-            @page { size: A4 portrait; margin: 10mm; } 
-            .no-print { display: none !important; }
-        }
+        @media print { @page { size: A4 portrait; margin: 10mm; } .no-print { display: none !important; } }
         .print-wrapper { width: 100%; font-family: sans-serif; }
         .print-colunas-wrapper { display: flex; gap: 10px; width: 100%; }
         .print-coluna { flex: 1; }
@@ -1597,7 +1033,6 @@ function abrirA4(data, pedidosDia) {
     <div class="print-wrapper">
         <h1 style="text-align:center; color:#6b3f20; margin: 0 0 10px 0; font-size: 18px;">Mapa de Entregas (${formatarData(data)})</h1>
         <div class="print-colunas-wrapper">`;
-
     let colunas = ['', '', ''];
     pedidosDia.forEach((p, index) => {
         const bc = p.itens.filter(i => i.produto.trim().toLowerCase() === "bem casado").reduce((s, i) => s + i.qtd, 0);
@@ -1611,9 +1046,7 @@ function abrirA4(data, pedidosDia) {
                 ${p.obs ? `<div style="margin-top:4px; font-style:italic; color:#666; font-size: 9px;"><b>Obs:</b> ${p.obs}</div>` : ''}
             </div>`;
     });
-
     const totalGeralStr = `${Math.round(totalGeral)} doces${totalBemCasados > 0 ? ` e ${Math.round(totalBemCasados)} bem casados` : ''}`;
-
     html += colunas.map(c => `<div class="print-coluna">${c}</div>`).join('') + `</div>
         <div class="footer-total-box">
             <div style="display:flex; justify-content:space-between;">
@@ -1627,13 +1060,11 @@ function abrirA4(data, pedidosDia) {
             <button onclick="fecharModal()" style="padding:10px 20px; background:#dc3545; color:white; border:none; cursor:pointer;">Fechar</button>
         </div>
     </div>`;
-
     document.getElementById('a4').innerHTML = html;
     const modal = document.getElementById('modal');
-    modal.style.display = 'block';
-    modal.classList.add('active');
+    modal.style.display = 'block'; modal.classList.add('active');
 }
-  
+
 /* ===== INSUMOS ===== */
 function salvarInsumo(){
   const nome = document.getElementById('nomeInsumo').value.trim(); const unidade = document.getElementById('unidadeInsumo').value;
@@ -1641,8 +1072,7 @@ function salvarInsumo(){
   const dataCompra = document.getElementById('dataCompraInsumo').value || defaultDateInput;
   if(!nome) return;
   const novo = {id: Date.now(), nome, unidade, estoque, preco, data: dataCompra};
-  insumos.push(novo);
-  sbUpsert('insumos', [novo]); renderInsumos();
+  insumos.push(novo); sbUpsert('insumos', [novo]); renderInsumos();
   document.getElementById('nomeInsumo').value = ''; document.getElementById('estoqueInsumo').value = '0'; document.getElementById('precoInsumo').value = '0.00';
   document.getElementById('dataCompraInsumo').value = defaultDateInput;
 }
@@ -1665,8 +1095,7 @@ function salvarProduto(){
   const nome = document.getElementById('nomeProduto').value.trim(); const preco = parseFloat(document.getElementById('precoProduto').value);
   if(!nome || isNaN(preco)) return;
   const novo = {id: Date.now(), nome, preco};
-  produtos.push(novo);
-  sbUpsert('produtos', [novo]); renderProdutos(); popularSelectProduto();
+  produtos.push(novo); sbUpsert('produtos', [novo]); renderProdutos(); popularSelectProduto();
   document.getElementById('nomeProduto').value = ''; document.getElementById('precoProduto').value = '';
 }
 function renderProdutos(){
@@ -1677,7 +1106,6 @@ function renderProdutos(){
 }
 function excluirProduto(id){ sbDeletar('produtos', id); produtos=produtos.filter(x=>x.id!==id); renderProdutos(); popularSelectProduto(); }
 
-/* ===== PRODUÇÃO ===== */
 function atualizarProducao(){
   const prod = {}; pedidos.forEach(p=>{ if(p.status!=='cancelado') p.itens.forEach(i=>{ prod[i.produto]=(prod[i.produto]||0)+i.qtd; }); });
   document.querySelector('#tabelaProducao tbody').innerHTML = Object.keys(prod).map(name=>`
@@ -1744,10 +1172,7 @@ function atualizarDashboard(){
     if(p.status === 'cancelado' || !p.data) return;
     const [ano, mes] = p.data.split('-');
     if(anoFiltroSelecionado !== "Todos" && ano !== anoFiltroSelecionado) return;
-    if(dicionarioDadosMensais[mes]) {
-      dicionarioDadosMensais[mes].entradas += p.total;
-      dicionarioDadosMensais[mes].doces += p.itens.reduce((s,i)=>s+i.qtd,0);
-    }
+    if(dicionarioDadosMensais[mes]) { dicionarioDadosMensais[mes].entradas += p.total; dicionarioDadosMensais[mes].doces += p.itens.reduce((s,i)=>s+i.qtd,0); }
   });
   insumos.forEach(i => {
     if(!i.data) return;
@@ -1793,9 +1218,6 @@ function atualizarTodasAsTelas(){
   gerenciarFiltrosAnoDashboard(); atualizarDashboard();
 }
 
-
-
-/* ===== INICIALIZAÇÃO COM IndexedDB ===== */
 carregarSistema().then(() => {
   atualizarTodasAsTelas();
 }).catch(err => {
