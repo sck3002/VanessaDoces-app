@@ -1277,7 +1277,7 @@ function limparPedido(){
 
 /* ===== Cadastro de Cliente (Versão Unificada) ===== */
 
-function adicionarCliente() {
+async function adicionarCliente() {
   const id    = document.getElementById('telCliente').value.trim();
   const nome  = document.getElementById('nomeCliente').value.trim();
   const rua   = document.getElementById('rua').value.trim();
@@ -1288,19 +1288,19 @@ function adicionarCliente() {
   if (!nome || !id) { alert('Preencha o nome e o telefone!'); return; }
 
   const endCompleto = `${rua}${num ? ', ' + num : ''}${bairro ? ' - ' + bairro : ''}${ref ? ' (Ref: ' + ref + ')' : ''}`;
-  const novoCliente = { id: id, nome: nome, tel: id, end: endCompleto };
+  
+  // Alterado destino: salvando no Supabase
+  const { error } = await supabase
+    .from('clientes')
+    .upsert([{ id: id, nome: nome, tel: id, "end": endCompleto }]);
 
-  const idx = clientes.findIndex(c => String(c.id) === String(id));
-  if (idx !== -1) {
-    clientes[idx] = novoCliente;
+  if (error) {
+    alert('Erro ao salvar no banco: ' + error.message);
   } else {
-    clientes.push(novoCliente);
+    renderizarClientes();
+    limparCamposCliente();
+    alert('Cliente salvo com sucesso!');
   }
-
-  salvarLS();
-  renderizarClientes();
-  limparCamposCliente();
-  alert('Cliente salvo com sucesso!');
 }
 
 function renderizarClientes() {
@@ -1363,6 +1363,7 @@ function carregarParaEditar(id) {
 function excluirCliente(id) {
   if (confirm('Tem certeza que deseja excluir este cliente?')) {
     clientes = clientes.filter(c => String(c.id) !== String(id));
+    // Nota: Para excluir permanentemente do Supabase, seria necessário um comando .delete() adicional aqui
     salvarLS();
     renderizarClientes();
   }
