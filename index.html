@@ -624,23 +624,23 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 /* ===== SUPABASE ===== */
 const SUPABASE_URL = 'https://stwqlmxymyixgbwxynxh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_jBjgD5yEzdHdGT1pEZ6Jkw_kj3lowPV';
-const supabase     = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sbClient     = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ===== HELPERS SUPABASE ===== */
 async function sbListar(tabela) {
-  const { data, error } = await supabase.from(tabela).select('*');
+  const { data, error } = await sbClient.from(tabela).select('*');
   if (error) { console.error(`Erro ao listar ${tabela}:`, error.message); return []; }
   return data || [];
 }
 
 async function sbUpsert(tabela, lista) {
   if (!lista || lista.length === 0) return;
-  const { error } = await supabase.from(tabela).upsert(lista, { onConflict: 'id' });
+  const { error } = await sbClient.from(tabela).upsert(lista, { onConflict: 'id' });
   if (error) console.error(`Erro ao salvar em ${tabela}:`, error.message);
 }
 
 async function sbDeletar(tabela, id) {
-  const { error } = await supabase.from(tabela).delete().eq('id', id);
+  const { error } = await sbClient.from(tabela).delete().eq('id', id);
   if (error) console.error(`Erro ao deletar de ${tabela}:`, error.message);
 }
 
@@ -1240,7 +1240,7 @@ async function adicionarCliente() {
     const endCompleto = `${rua}${num ? ', ' + num : ''}${bairro ? ' - ' + bairro : ''}${ref ? ' (Ref: ' + ref + ')' : ''}`;
     const novoCliente = { id: id, nome: nome, tel: id, end: endCompleto };
 
-    const { error } = await supabase.from('clientes').upsert([novoCliente], { onConflict: 'id' });
+    const { error } = await sbClient.from('clientes').upsert([novoCliente], { onConflict: 'id' });
     if (error) { alert('Erro ao salvar cliente: ' + error.message); return; }
 
     const idx = clientes.findIndex(c => String(c.id) === String(id));
