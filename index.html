@@ -5,13 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vanessa Doces Finos</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 body{background:#f4f4f4;overflow:hidden;}
 .container{width:100vw;height:100vh;display:flex;flex-direction:column;}
-.topo{height:50px;background:linear-gradient(90deg,#6b3f20,#8a5a34);color:white;display:flex;align-items:center;justify-content:space-between;padding:0 30px;}
-.menu{height:30px;background:white;display:flex;border-bottom:1px solid #ddd;}
+.topo{height:90px;background:linear-gradient(90deg,#6b3f20,#8a5a34);color:white;display:flex;align-items:center;justify-content:space-between;padding:0 30px;}
+.menu{height:60px;background:white;display:flex;border-bottom:1px solid #ddd;}
 .menu button{flex:1;border:none;background:white;cursor:pointer;font-size:14px;transition:0.3s;}
 .menu button:hover{background:#ffe3ec;}
 .menu button.active{background:#d94d7d;color:white;}
@@ -171,7 +170,8 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
       <input type="text" id="endereco">
 
       <label>Telefone</label>
-      <input type="text" id="telefone">
+      <input type="text" id="telefone" oninput="buscarClientePorTelefone()" placeholder="Digite o telefone para buscar o cliente">
+      <div id="statusBuscaCliente" style="font-size:12px;margin:4px 2px 0;min-height:16px;"></div>
 
       <label>Data Entrega</label>
       <input type="date" id="entrega">
@@ -617,39 +617,62 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 
 <script>
 /* ================================================================
-   VANESSA DOCES FINOS — Supabase Integration
-   Banco: Supabase  |  Tabelas: pedidos, produtos, insumos, clientes
+   VANESSA DOCES FINOS — IndexedDB Integration
+   Banco: vanessa_doces_db  |  Stores: pedidos, produtos, insumos
+   Service Worker + PWA registrado automaticamente
 ================================================================ */
 
-/* ===== SUPABASE ===== */
-const SUPABASE_URL = 'https://stwqlmxymyixgbwxynxh.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_jBjgD5yEzdHdGT1pEZ6Jkw_kj3lowPV';
-const sbClient     = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-/* ===== HELPERS SUPABASE ===== */
-async function sbListar(tabela) {
-  const { data, error } = await sbClient.from(tabela).select('*');
-  if (error) { console.error(`Erro ao listar ${tabela}:`, error.message); return []; }
-  return data || [];
+/* ===== SERVICE WORKER ===== */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
 }
 
-async function sbUpsert(tabela, lista) {
-  if (!lista || lista.length === 0) return;
-  const { error } = await sbClient.from(tabela).upsert(lista, { onConflict: 'id' });
-  if (error) console.error(`Erro ao salvar em ${tabela}:`, error.message);
+/* ===== IndexedDB ===== */
+const DB_NAME = 'vanessa_doces_db';
+const DB_VERSION = 3;
+let db;
+
+function iniciarBanco() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = function(e) {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('pedidos'))  d.createObjectStore('pedidos',  { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('produtos')) d.createObjectStore('produtos', { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('insumos'))  d.createObjectStore('insumos',  { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('clientes')) d.createObjectStore('clientes', { keyPath: 'id', autoIncrement: true });
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(); };
+    req.onerror   = e => reject(e.target.error);
+  });
 }
 
-async function sbDeletar(tabela, id) {
-  const { error } = await sbClient.from(tabela).delete().eq('id', id);
-  if (error) console.error(`Erro ao deletar de ${tabela}:`, error.message);
+function dbSalvarTodos(store, lista) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction([store], 'readwrite');
+    const s  = tx.objectStore(store);
+    s.clear();
+    lista.forEach(item => s.put(item));
+    tx.oncomplete = resolve;
+    tx.onerror    = e => reject(e.target.error);
+  });
 }
 
-/* salvarLS — persiste no Supabase (todas as tabelas) */
+function dbListar(store) {
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction([store], 'readonly');
+    const req = tx.objectStore(store).getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+/* salvarLS agora persiste no IndexedDB (assíncrono, sem await para manter compatibilidade) */
 function salvarLS() {
-  sbUpsert('pedidos',  pedidos);
-  sbUpsert('produtos', produtos);
-  sbUpsert('insumos',  insumos);
-  sbUpsert('clientes', clientes);
+  dbSalvarTodos('pedidos',  pedidos);
+  dbSalvarTodos('produtos', produtos);
+  dbSalvarTodos('insumos',  insumos);
+  dbSalvarTodos('clientes', clientes);
 }
 
 /* ===== ESTADO GLOBAL ===== */
@@ -810,31 +833,63 @@ function importarBackup(input) {
   reader.readAsText(file);
 }
 
-/* ===== CARREGAR SISTEMA (Supabase primeiro, fallback para BANCO_INICIAL) ===== */
+/* ===== CARREGAR SISTEMA (IndexedDB primeiro, fallback para BANCO_INICIAL) ===== */
 async function carregarSistema() {
-  const [p, pr, ins, cli] = await Promise.all([
-    sbListar('pedidos'),
-    sbListar('produtos'),
-    sbListar('insumos'),
-    sbListar('clientes')
-  ]);
 
-  if (p.length === 0 && pr.length === 0 && ins.length === 0) {
-    pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
-    produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
-    insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
-    clientes = [];
-    await Promise.all([
-      sbUpsert('pedidos',  pedidos),
-      sbUpsert('produtos', produtos),
-      sbUpsert('insumos',  insumos)
+  await iniciarBanco();
+
+  try {
+
+    const [p, pr, ins, cli] = await Promise.all([
+      dbListar('pedidos'),
+      dbListar('produtos'),
+      dbListar('insumos'),
+      dbListar('clientes')
     ]);
-  } else {
-    pedidos  = p   || [];
-    produtos = pr  || [];
-    insumos  = ins || [];
-    clientes = cli || [];
+
+    // Se não existir dados, carrega banco inicial
+    if (
+      pr.length === 0 &&
+      p.length === 0 &&
+      ins.length === 0
+    ) {
+
+      pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
+      produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
+      insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
+      clientes = [];
+
+      await Promise.all([
+
+  dbSalvarTodos('pedidos', pedidos),
+
+  dbSalvarTodos('produtos', produtos),
+
+  dbSalvarTodos('insumos', insumos),
+
+  dbSalvarTodos('clientes', clientes)
+
+]);
+
+    } else {
+
+      pedidos  = p || [];
+      produtos = pr || [];
+      insumos  = ins || [];
+      clientes = cli || [];
+
+    }
+
+    console.log('Sistema carregado com sucesso');
+
+  } catch (erro) {
+
+    console.error('Erro ao carregar sistema:', erro);
+
+    alert('Erro ao carregar banco de dados.');
+
   }
+
 }
 
 function importarBancoCompleto() {
@@ -1043,24 +1098,56 @@ function finalizarPedido(){
   pedidos.push(novoPedido);
 
   // =========================
-  // SALVA NO SUPABASE
+  // SALVA CLIENTE
+  // =========================
+
+  if(typeof clientes !== 'undefined'){
+
+    // Remove tudo que não for número
+const telefoneLimpo =
+  telefone.replace(/\D/g, '');
+
+// Procura cliente existente
+const clienteExiste =
+  clientes.find(c => {
+
+    const telefoneCliente =
+      (c.telefone || '')
+      .replace(/\D/g, '');
+
+    return telefoneCliente === telefoneLimpo;
+
+  });
+
+    if(!clienteExiste){
+
+      clientes.push({
+        nome: cliente,
+        telefone: telefoneLimpo,
+        endereco: endereco
+      });
+
+    }
+
+  }
+
+  // =========================
+  // SALVA DADOS
   // =========================
 
   try{
-    sbUpsert('pedidos', [novoPedido]);
 
-    const telefoneLimpo = telefone.replace(/\D/g, '');
-    const clienteExiste = clientes.find(c =>
-      (c.id||'').toString().replace(/\D/g,'') === telefoneLimpo ||
-      (c.tel||'').toString().replace(/\D/g,'') === telefoneLimpo
-    );
-    if(!clienteExiste && telefoneLimpo){
-      const novoCliente = { id: telefoneLimpo, nome: cliente, tel: telefoneLimpo, end: endereco };
-      clientes.push(novoCliente);
-      sbUpsert('clientes', [novoCliente]);
+    if(typeof salvarLS === 'function'){
+      salvarLS();
     }
+
   }catch(erro){
-    console.error('Erro ao salvar:', erro);
+
+    console.error(
+      'Erro ao salvar:',
+      erro
+    );
+
   }
 
   // =========================
@@ -1227,28 +1314,29 @@ function limparPedido(){
 
 /* ===== Cadastro de Cliente (Versão Unificada) ===== */
 
-async function adicionarCliente() {
-    const id    = document.getElementById('telCliente').value.trim();
-    const nome  = document.getElementById('nomeCliente').value.trim();
-    const rua   = document.getElementById('rua').value.trim();
-    const num   = document.getElementById('numero').value.trim();
-    const bairro = document.getElementById('bairro').value.trim();
-    const ref   = document.getElementById('referencia').value.trim();
+function adicionarCliente() {
+    let id = document.getElementById('telCliente').value;
+    let nome = document.getElementById('nomeCliente').value;
+    let rua = document.getElementById('rua').value;
+    let num = document.getElementById('numero').value;
+    let bairro = document.getElementById('bairro').value;
+    let ref = document.getElementById('referencia').value;
 
-    if (!nome || !id) { alert('Preencha o nome e o telefone!'); return; }
+    if(nome === "" || id === "") { alert("Preencha o nome e o telefone!"); return; }
 
-    const endCompleto = `${rua}${num ? ', ' + num : ''}${bairro ? ' - ' + bairro : ''}${ref ? ' (Ref: ' + ref + ')' : ''}`;
-    const novoCliente = { id: id, nome: nome, tel: id, end: endCompleto };
+    let enderecoCompleto = `${rua}, ${num} - ${bairro} (Ref: ${ref})`;
+    let novoCliente = { id: id, nome: nome, tel: id, end: enderecoCompleto };
 
-    const { error } = await sbClient.from('clientes').upsert([novoCliente], { onConflict: 'id' });
-    if (error) { alert('Erro ao salvar cliente: ' + error.message); return; }
+    let index = clientes.findIndex(c => c.id === id);
+    if(index !== -1) {
+        clientes[index] = novoCliente;
+    } else {
+        clientes.push(novoCliente);
+    }
 
-    const idx = clientes.findIndex(c => String(c.id) === String(id));
-    if (idx !== -1) clientes[idx] = novoCliente; else clientes.push(novoCliente);
-
+    salvarLS();
     renderizarClientes();
     limparCamposCliente();
-    alert('Cliente salvo com sucesso!');
 }
 
 function renderizarClientes() {
@@ -1280,8 +1368,8 @@ function carregarParaEditar(id) {
 
 function excluirCliente(id) {
     if(confirm('Tem certeza que deseja excluir este cliente?')) {
-        sbDeletar('clientes', id);
-        clientes = clientes.filter(c => String(c.id) !== String(id));
+        clientes = clientes.filter(c => c.id !== id);
+        salvarLS();
         renderizarClientes();
     }
 }
@@ -1292,79 +1380,38 @@ function limparCamposCliente() {
     });
 }
 /* ===== BUSCAR CLIENTE PELO TELEFONE ===== */
+function buscarClientePorTelefone() {
+  const campoTelefone = document.getElementById('telefone');
+  if (!campoTelefone) return;
+  const telefone = campoTelefone.value.replace(/\D/g, '');
+  const campoCliente  = document.getElementById('cliente');
+  const campoEndereco = document.getElementById('endereco');
+  let statusEl = document.getElementById('statusBuscaCliente');
 
-function buscarClientePorTelefone(){
-
-  const campoTelefone =
-    document.getElementById('telefone');
-
-  if(!campoTelefone) return;
-
-  // Remove máscara
-  const telefone =
-    campoTelefone.value.replace(/\D/g,'');
-
-  // Campos do formulário
-  const campoCliente =
-    document.getElementById('cliente');
-
-  const campoEndereco =
-    document.getElementById('endereco');
-
-  if(telefone.length < 8){
-
-    if(campoCliente) campoCliente.value = '';
-
-    if(campoEndereco) campoEndereco.value = '';
-
+  if (telefone.length < 8) {
+    if (campoCliente)  campoCliente.value  = '';
+    if (campoEndereco) campoEndereco.value = '';
+    if (statusEl) statusEl.innerHTML = '';
     return;
   }
 
-  // Procura cliente
-  const clienteEncontrado =
-    clientes.find(cliente => {
+  const encontrado = clientes.find(c => {
+    const t1 = (c.id       || '').toString().replace(/\D/g, '');
+    const t2 = (c.tel      || '').toString().replace(/\D/g, '');
+    const t3 = (c.telefone || '').toString().replace(/\D/g, '');
+    return t1 === telefone || t2 === telefone || t3 === telefone;
+  });
 
-      const telCliente =
-        (cliente.telefone || '')
-        .replace(/\D/g,'');
-
-      return telCliente === telefone;
-
-    });
-
-  // Se encontrou
-  if(clienteEncontrado){
-
-    if(campoCliente){
-      campoCliente.value =
-        clienteEncontrado.nome || '';
-    }
-
-    if(campoEndereco){
-      campoEndereco.value =
-        clienteEncontrado.endereco || '';
-    }
-
+  if (encontrado) {
+    if (campoCliente)  campoCliente.value  = encontrado.nome || '';
+    if (campoEndereco) campoEndereco.value = encontrado.end || encontrado.endereco || '';
+    if (statusEl) statusEl.innerHTML = `<span style="color:#28a745;font-weight:600;">✔ Cliente encontrado: ${encontrado.nome}</span>`;
+  } else {
+    if (campoCliente)  campoCliente.value  = '';
+    if (campoEndereco) campoEndereco.value = '';
+    if (statusEl) statusEl.innerHTML = `<span style="color:#e65100;font-weight:600;">⚠ Não encontrado — será cadastrado ao salvar.</span>`;
   }
-
 }
-/* ===== EVENTO TELEFONE ===== */
-
-document.addEventListener('DOMContentLoaded', () => {
-
-  const campoTelefone =
-    document.getElementById('telefone');
-
-  if(campoTelefone){
-
-    campoTelefone.addEventListener(
-      'input',
-      buscarClientePorTelefone
-    );
-
-  }
-
-});
 
 /* ===== MEUS PEDIDOS ===== */
 function renderPedidos(){
@@ -1479,10 +1526,10 @@ function salvarEdicaoPedido(){
   pedidos[idx].entrada   = entradaInformada;
   pedidos[idx].itens     = [...itensEditandoPedido];
   pedidos[idx].total     = totalCalculado;
-  sbUpsert('pedidos', [pedidos[idx]]); atualizarTodasAsTelas(); fecharModalEditar();
+  salvarLS(); atualizarTodasAsTelas(); fecharModalEditar();
 }
 function fecharModalEditar(){ document.getElementById('modalEditarPedido').classList.remove('active'); }
-function excluirPedido(id){ if(confirm('Excluir este pedido permanentemente?')){ sbDeletar('pedidos', id); pedidos=pedidos.filter(x=>x.id!==id); atualizarTodasAsTelas(); } }
+function excluirPedido(id){ if(confirm('Excluir este pedido permanentemente?')){ pedidos=pedidos.filter(x=>x.id!==id); salvarLS(); atualizarTodasAsTelas(); } }
 
 /* ===== AGENDA ===== */
 function atualizarAgenda(){
@@ -1626,9 +1673,8 @@ function salvarInsumo(){
   const estoque = parseFloat(document.getElementById('estoqueInsumo').value)||0; const preco = parseFloat(document.getElementById('precoInsumo').value)||0;
   const dataCompra = document.getElementById('dataCompraInsumo').value || defaultDateInput;
   if(!nome) return;
-  const novo = {id: Date.now(), nome, unidade, estoque, preco, data: dataCompra};
-  insumos.push(novo);
-  sbUpsert('insumos', [novo]); renderInsumos();
+  insumos.push({id: Date.now(), nome, unidade, estoque, preco, data: dataCompra});
+  salvarLS(); renderInsumos();
   document.getElementById('nomeInsumo').value = ''; document.getElementById('estoqueInsumo').value = '0'; document.getElementById('precoInsumo').value = '0.00';
   document.getElementById('dataCompraInsumo').value = defaultDateInput;
 }
@@ -1644,15 +1690,14 @@ function renderInsumos(){
     </div>
   `).join('');
 }
-function excluirInsumo(id){ sbDeletar('insumos', id); insumos=insumos.filter(x=>x.id!==id); renderInsumos(); }
+function excluirInsumo(id){ insumos=insumos.filter(x=>x.id!==id); salvarLS(); renderInsumos(); }
 
 /* ===== PRODUTOS ===== */
 function salvarProduto(){
   const nome = document.getElementById('nomeProduto').value.trim(); const preco = parseFloat(document.getElementById('precoProduto').value);
   if(!nome || isNaN(preco)) return;
-  const novo = {id: Date.now(), nome, preco};
-  produtos.push(novo);
-  sbUpsert('produtos', [novo]); renderProdutos(); popularSelectProduto();
+  produtos.push({id: Date.now(), nome, preco});
+  salvarLS(); renderProdutos(); popularSelectProduto();
   document.getElementById('nomeProduto').value = ''; document.getElementById('precoProduto').value = '';
 }
 function renderProdutos(){
@@ -1661,7 +1706,7 @@ function renderProdutos(){
     <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirProduto(${p.id})">🗑</button></div>
   `).join('');
 }
-function excluirProduto(id){ sbDeletar('produtos', id); produtos=produtos.filter(x=>x.id!==id); renderProdutos(); popularSelectProduto(); }
+function excluirProduto(id){ produtos=produtos.filter(x=>x.id!==id); salvarLS(); renderProdutos(); popularSelectProduto(); }
 
 /* ===== PRODUÇÃO ===== */
 function atualizarProducao(){
