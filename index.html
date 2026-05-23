@@ -1561,9 +1561,13 @@ function abrirA4(data, pedidosDia) {
 
     let totalGeral = 0;
     pedidosDia.forEach(p => {
-        totalGeral += p.itens.reduce((s, i) => s + i.qtd, 0);
+    totalGeral += p.itens.reduce((s, i) => {
+        const nome = i.produto.trim().toLowerCase();
+        return nome === "bem casado" ? s : s + i.qtd; // ignora bem casado
+    }, 0);
         p.itens.forEach(i => {
             const nomeChave = i.produto.trim().toLowerCase();
+            if (nomeChave === "bem casado") return;
             consolidadoDocesDia[nomeChave] = (consolidadoDocesDia[nomeChave] || 0) + i.qtd;
             const tipo = mapeamento[nomeChave] || "Massa Branca";
             if (tipo === "Meio a Meio") {
