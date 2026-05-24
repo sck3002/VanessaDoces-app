@@ -309,41 +309,39 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 <div class="aba">
   <div class="dashboard-premium">
     <div class="dash-header-filtros">
-      <div>
-        <h2>Fluxo de Caixa e Produção</h2>
-        <p style="font-size:12px; color:#4e5d7c;">Gestão de Pedidos e Balanço Geral Operacional</p>
-      </div>
-      <div class="dash-filtro-anos" id="dashFiltroAnosContainer"></div>
-    </div>
+  <div>
+    <h2>Fluxo de Caixa e Produção</h2>
+    <p style="font-size:12px; color:#c49070;">Gestão de Pedidos e Balanço Geral Operacional</p>
+  </div>
+  <div class="dash-filtros-wrapper">
+    <div class="dash-filtro-anos" id="dashFiltroAnosContainer"></div>
+    <div class="dash-filtro-meses" id="dashFiltroMesesContainer"></div>
+  </div>
+</div>
 
     <div class="dash-cards-row">
-      <div class="card-premium">
-        <span>Saldo Atual Real</span>
-        <div class="valor-destaque txt-ouro" id="kpiSaldoAtual">R$ 0,00</div>
-        <div class="sub-legenda" id="kpiSaldoMesRef">Histórico Total</div>
-      </div>
-      <div class="card-premium">
-        <span>Total Entradas</span>
-        <div class="valor-destaque txt-verde" id="kpiTotalEntradas">R$ 0,00</div>
-        <div class="sub-legenda" id="kpiContEntradas">0 Encomendas Ativas</div>
-      </div>
-      <div class="card-premium">
-        <span>Total Saídas</span>
-        <div class="valor-destaque txt-vermelho" id="kpiTotalSaidas">R$ 0,00</div>
-        <div class="sub-legenda">Com base na data dos insumos</div>
-      </div>
-      <div class="card-premium">
-        <span>Resultado Líquido</span>
-        <div class="valor-destaque txt-verde" id="kpiResultadoLiquido">R$ 0,00</div>
-        <div class="sub-legenda" id="kpiResultadoStatus">superávit</div>
-      </div>
-      <div class="card-premium">
-        <span>Volume de Doces</span>
-        <div class="valor-destaque txt-azul" id="kpiVolumeDoces">0 un</div>
-        <div class="sub-legenda">Produção do Período</div>
-      </div>
-    </div>
-
+  <div class="card-premium">
+    <span>Total Entradas</span>
+    <div class="valor-destaque txt-verde" id="kpiTotalEntradas">R$ 0,00</div>
+    <div class="sub-legenda" id="kpiContEntradas">0 Encomendas Ativas</div>
+  </div>
+  <div class="card-premium">
+    <span>Total Saídas</span>
+    <div class="valor-destaque txt-vermelho" id="kpiTotalSaidas">R$ 0,00</div>
+    <div class="sub-legenda">Com base na data dos insumos</div>
+  </div>
+  <div class="card-premium">
+    <span>Resultado Líquido</span>
+    <div class="valor-destaque txt-verde" id="kpiResultadoLiquido">R$ 0,00</div>
+    <div class="sub-legenda" id="kpiResultadoStatus">superávit</div>
+  </div>
+  <div class="card-premium">
+    <span>Volume de Doces</span>
+    <div class="valor-destaque txt-azul" id="kpiVolumeDoces">0 un</div>
+    <div class="sub-legenda">Produção do Período</div>
+  </div>
+</div>
+    
     <div class="dash-layout-corpo-trio">
       <div>
         <div class="section-titulo-interna">📈 Quantidade de Doces por Mês</div>
@@ -357,11 +355,11 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
         <div class="section-titulo-interna">📋 Detalhamento Mensal</div>
         <div class="tabela-premium-wrapper">
           <table class="tabela-premium">
-            <thead>
-              <tr><th>Mês/Ano</th><th>Entradas</th><th>Saídas</th><th>Resultado</th><th>Saldo</th></tr>
-            </thead>
-            <tbody id="tbodyDetalhamentoMensal"></tbody>
-          </table>
+  <thead>
+    <tr><th>Mês/Ano</th><th>Entradas</th><th>Saídas</th><th>Resultado</th></tr>
+  </thead>
+  <tbody id="tbodyDetalhamentoMensal"></tbody>
+</table>
         </div>
       </div>
     </div>
@@ -1119,26 +1117,57 @@ function atualizarProducao(){
 
 /* ===== DASHBOARD ===== */
 function gerenciarFiltrosAnoDashboard() {
-  const container = document.getElementById('dashFiltroAnosContainer'); const anosExistentes = new Set();
+  const container = document.getElementById('dashFiltroAnosContainer');
+  const anosExistentes = new Set();
   pedidos.forEach(p => { if(p.data) anosExistentes.add(p.data.split('-')[0]); });
   insumos.forEach(i => { if(i.data) anosExistentes.add(i.data.split('-')[0]); });
   let anosOrdenados = Array.from(anosExistentes).sort((a,b)=>b-a);
   let html = `<button class="btn-filtro-ano ${anoFiltroSelecionado==='Todos'?'active':''}" onclick="mudarAnoFiltroDashboard('Todos')">Todos</button>`;
-  anosOrdenados.forEach(ano => { html += `<button class="btn-filtro-ano ${anoFiltroSelecionado===ano?'active':''}" onclick="mudarAnoFiltroDashboard('${ano}')">${ano}</button>`; });
+  anosOrdenados.forEach(ano => {
+    html += `<button class="btn-filtro-ano ${anoFiltroSelecionado===ano?'active':''}" onclick="mudarAnoFiltroDashboard('${ano}')">${ano}</button>`;
+  });
+  container.innerHTML = html;
+  atualizarFiltroMeses();
+}
+  function atualizarFiltroMeses() {
+  const container = document.getElementById('dashFiltroMesesContainer');
+  if (anoFiltroSelecionado === 'Todos') { container.innerHTML = ''; return; }
+  const mesesComDados = new Set();
+  pedidos.forEach(p => {
+    if(p.data && p.data.startsWith(anoFiltroSelecionado)) mesesComDados.add(p.data.split('-')[1]);
+  });
+  insumos.forEach(i => {
+    if(i.data && i.data.startsWith(anoFiltroSelecionado)) mesesComDados.add(i.data.split('-')[1]);
+  });
+  let html = `<button class="btn-filtro-mes ${mesFiltroSelecionado==='Todos'?'active':''}" onclick="mudarMesFiltro('Todos')">Todos os meses</button>`;
+  Array.from(mesesComDados).sort().forEach(mes => {
+    html += `<button class="btn-filtro-mes ${mesFiltroSelecionado===mes?'active':''}" onclick="mudarMesFiltro('${mes}')">${NOMES_MESES[parseInt(mes)-1]}</button>`;
+  });
   container.innerHTML = html;
 }
-function mudarAnoFiltroDashboard(ano) { anoFiltroSelecionado = ano; gerenciarFiltrosAnoDashboard(); atualizarDashboard(); }
-
+ function mudarAnoFiltroDashboard(ano) {
+  anoFiltroSelecionado = ano;
+  mesFiltroSelecionado = 'Todos';
+  gerenciarFiltrosAnoDashboard();
+  atualizarDashboard();
+}
+  function mudarMesFiltro(mes) {
+  mesFiltroSelecionado = mes;
+  atualizarFiltroMeses();
+  atualizarDashboard();
+}
 function atualizarDashboard(){
   const pedidosFiltrados = pedidos.filter(p => {
-    if(p.status === 'cancelado') return false;
-    if(anoFiltroSelecionado === "Todos") return true;
-    return p.data && p.data.startsWith(anoFiltroSelecionado);
-  });
+  if(p.status === 'cancelado') return false;
+  if(anoFiltroSelecionado !== 'Todos' && (!p.data || !p.data.startsWith(anoFiltroSelecionado))) return false;
+  if(mesFiltroSelecionado !== 'Todos' && (!p.data || p.data.split('-')[1] !== mesFiltroSelecionado)) return false;
+  return true;
+});
   const insumosFiltrados = insumos.filter(i => {
-    if(anoFiltroSelecionado === "Todos") return true;
-    return i.data && i.data.startsWith(anoFiltroSelecionado);
-  });
+  if(anoFiltroSelecionado !== 'Todos' && (!i.data || !i.data.startsWith(anoFiltroSelecionado))) return false;
+  if(mesFiltroSelecionado !== 'Todos' && (!i.data || i.data.split('-')[1] !== mesFiltroSelecionado)) return false;
+  return true;
+});
   let totalEntradas = 0; let volumeDoces = 0;
   const contagemSaboresRanking = {};
   pedidosFiltrados.forEach(p => {
@@ -1201,9 +1230,9 @@ function atualizarDashboard(){
     const resultadoMes = dadosM.entradas - dadosM.saidas; saldoCumulativoPasso += resultadoMes;
     const tr = document.createElement('tr');
     tr.innerHTML = `<td><b>${NOMES_MESES[idx].substring(0,3)}</b></td>
-      <td class="txt-verde">R$ ${dadosM.entradas.toFixed(0)}</td>
-      <td class="txt-vermelho">R$ ${dadosM.saidas.toFixed(0)}</td>
-      <td class="${resultadoMes >= 0 ? 'txt-verde' : 'txt-vermelho'}">R$ ${resultadoMes.toFixed(0)}</td>
+  <td class="txt-verde">R$ ${dadosM.entradas.toFixed(0)}</td>
+  <td class="txt-vermelho">R$ ${dadosM.saidas.toFixed(0)}</td>
+  <td class="${resultadoMes >= 0 ? 'txt-verde' : 'txt-vermelho'}">R$ ${resultadoMes.toFixed(0)}</td>`;
       <td class="txt-ouro">R$ ${saldoCumulativoPasso.toFixed(0)}</td>`;
     tbodyTabela.appendChild(tr);
   });
