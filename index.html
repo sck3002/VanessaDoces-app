@@ -993,9 +993,9 @@ async function adicionarCliente() {
   renderizarClientes(); limparCamposCliente(); alert('Cliente salvo com sucesso!');
 }
  
-function renderizarClientes() {
+function renderizarClientes(filtroExterno) {
   const campoFiltro = document.getElementById('filtroCliente');
-  const filtro = campoFiltro ? campoFiltro.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"") : '';
+  const filtro = (filtroExterno !== undefined ? filtroExterno : (campoFiltro ? campoFiltro.value : '')).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
   const tbody = document.getElementById('tabelaClientes').getElementsByTagName('tbody')[0];
   tbody.innerHTML = "";
   const lista = clientes.filter(c => {
