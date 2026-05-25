@@ -820,7 +820,7 @@ function trocarAba(index) {
   fecharAutocompletes();
   if(index === 1) renderPedidos();
   if(index === 2) atualizarAgenda();
-  if(index === 3) { setTimeout(() => renderizarClientes(), 100); }
+  if(index === 3) renderizarClientes();
   if(index === 5) { renderInsumos(); renderTiposInsumos(); atualizarFiltroAnoInsumos(); }
   if(index === 6) { gerenciarFiltrosAnoDashboard(); atualizarDashboard(); }
 }
@@ -1575,6 +1575,7 @@ function atualizarTodasAsTelas() {
 carregarSistema().then(() => {
   atualizarTodasAsTelas();
   atualizarFiltroAnoInsumos();
+  renderizarClientes();
 }).catch(err => {
   console.error('Erro ao iniciar banco:', err);
   alert('Erro ao carregar o banco de dados. Verifique o console.');
