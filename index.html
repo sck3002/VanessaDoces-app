@@ -141,9 +141,12 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 <div class="container">
 <div class="topo">
   <h1>Vanessa Doces Finos</h1>
-  <h2 id="dataAtual"></h2>
+  <div style="display:flex;align-items:center;gap:15px;">
+    <h2 id="dataAtual"></h2>
+    <button onclick="fazerLogout()" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.5);color:white;padding:5px 14px;border-radius:8px;cursor:pointer;font-size:13px;">Sair</button>
+  </div>
 </div>
-<div class="menu">
+ <div class="menu">
   <button class="active" onclick="trocarAba(0)">Pedidos</button>
   <button onclick="trocarAba(1)">Meus Pedidos</button>
   <button onclick="trocarAba(2)">Agenda</button>
@@ -499,6 +502,127 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 const SUPABASE_URL = 'https://stwqlmxymyixgbwxynxh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_jBjgD5yEzdHdGT1pEZ6Jkw_kj3lowPV';
 const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function fazerLogout() {
+  await sbClient.auth.signOut();
+  location.reload();
+}
+
+async function verificarLogin(){
+  const {
+    data: { session }
+  } = await sbClient.auth.getSession();
+
+  if(!session){
+
+    document.body.innerHTML = `
+
+      <div style="
+        width:100vw;
+        height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:#f4f4f4;
+      ">
+
+        <div style="
+          width:350px;
+          background:white;
+          padding:30px;
+          border-radius:15px;
+          box-shadow:0 4px 20px rgba(0,0,0,0.15);
+        ">
+
+          <h2 style="
+            color:#8a5a34;
+            margin-bottom:20px;
+            text-align:center;
+          ">
+            Vanessa Doces Finos
+          </h2>
+
+          <input
+            type="email"
+            id="loginEmail"
+            placeholder="E-mail"
+            style="
+              width:100%;
+              padding:12px;
+              margin-bottom:15px;
+              border:1px solid #ccc;
+              border-radius:10px;
+            "
+          >
+
+          <input
+            type="password"
+            id="loginSenha"
+            placeholder="Senha"
+            style="
+              width:100%;
+              padding:12px;
+              margin-bottom:15px;
+              border:1px solid #ccc;
+              border-radius:10px;
+            "
+          >
+
+          <button
+            onclick="fazerLogin()"
+            style="
+              width:100%;
+              padding:12px;
+              border:none;
+              border-radius:10px;
+              background:#d94d7d;
+              color:white;
+              font-size:15px;
+              cursor:pointer;
+            "
+          >
+            Entrar
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+async function fazerLogin(){
+
+  const email =
+    document.getElementById('loginEmail').value;
+
+  const senha =
+    document.getElementById('loginSenha').value;
+
+  const { error } =
+    await sbClient.auth.signInWithPassword({
+
+      email,
+      password: senha
+
+    });
+
+  if(error){
+
+    alert('E-mail ou senha inválidos');
+
+    return;
+
+  }
+
+  location.reload();
+
+}
+
+verificarLogin();
  
 async function sbListar(tabela) {
   const { data, error } = await sbClient.from(tabela).select('*');
