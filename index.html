@@ -1000,7 +1000,10 @@ function renderizarClientes() {
   tbody.innerHTML = "";
   const lista = clientes.filter(c => {
     if (!filtro) return true;
-    return (c.nome||'').toLowerCase().includes(filtro) || (c.tel||'').replace(/\D/g,'').includes(filtro.replace(/\D/g,''));
+    const nome = (c.nome||'').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+    const filtroNorm = filtro.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+    const tel = (c.tel||'').replace(/\D/g,'');
+    return nome.includes(filtroNorm) || tel.includes(filtro.replace(/\D/g,''));
   });
   lista.forEach(c => {
     let row = tbody.insertRow();
