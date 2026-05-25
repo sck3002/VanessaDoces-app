@@ -995,15 +995,14 @@ async function adicionarCliente() {
  
 function renderizarClientes() {
   const campoFiltro = document.getElementById('filtroCliente');
-  const filtro = campoFiltro ? campoFiltro.value.toLowerCase() : '';
+  const filtro = campoFiltro ? campoFiltro.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"") : '';
   const tbody = document.getElementById('tabelaClientes').getElementsByTagName('tbody')[0];
   tbody.innerHTML = "";
   const lista = clientes.filter(c => {
     if (!filtro) return true;
     const nome = (c.nome||'').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-    const filtroNorm = filtro.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
     const tel = (c.tel||'').replace(/\D/g,'');
-    return nome.includes(filtroNorm) || tel.includes(filtro.replace(/\D/g,''));
+    return nome.includes(filtro) || tel.includes(filtro.replace(/\D/g,''));
   });
   lista.forEach(c => {
     let row = tbody.insertRow();
