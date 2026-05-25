@@ -661,9 +661,11 @@ let mesFiltroSelecionado = "Todos";
  
 const NOMES_MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
  
-document.getElementById('dataAtual').innerText = new Date().toLocaleDateString('pt-BR');
-const defaultDateInput = "2026-03-15";
-document.getElementById('dataCompraInsumo').value = defaultDateInput;
+document.getElementById('dataAtual').innerText =
+  new Date().toLocaleDateString('pt-BR');
+
+document.getElementById('dataCompraInsumo').value =
+  new Date().toISOString().split('T')[0];
  
 const BANCO_INICIAL = {
   produtos: [
