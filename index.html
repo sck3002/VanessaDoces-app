@@ -264,6 +264,8 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
     <h2>Buscar Cliente</h2>
     <div class="filtros">
       <input type="text" id="filtroCliente" placeholder="Buscar por nome ou telefone..." oninput="renderizarClientes()">
+      <button class="btn btn-rosa" onclick="renderizarClientes()">🔍 Buscar</button>
+      <button class="btn btn-cinza" onclick="document.getElementById('filtroCliente').value='';renderizarClientes()">Limpar</button>
     </div>
     <table id="tabelaClientes">
       <thead><tr><th>Nome</th><th>Telefone</th><th>Endereço</th><th>Ações</th></tr></thead>
@@ -983,7 +985,8 @@ async function adicionarCliente() {
 }
  
 function renderizarClientes() {
-  const filtro = (document.getElementById('filtroCliente')?.value || '').toLowerCase();
+  const campoFiltro = document.getElementById('filtroCliente');
+  const filtro = campoFiltro ? campoFiltro.value.toLowerCase() : '';
   const tbody = document.getElementById('tabelaClientes').getElementsByTagName('tbody')[0];
   tbody.innerHTML = "";
   const lista = clientes.filter(c => {
