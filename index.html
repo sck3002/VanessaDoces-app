@@ -820,7 +820,7 @@ function trocarAba(index) {
   fecharAutocompletes();
   if(index === 1) renderPedidos();
   if(index === 2) atualizarAgenda();
-  if(index === 3) renderizarClientes();
+  if(index === 3) { setTimeout(() => renderizarClientes(), 100); }
   if(index === 5) { renderInsumos(); renderTiposInsumos(); atualizarFiltroAnoInsumos(); }
   if(index === 6) { gerenciarFiltrosAnoDashboard(); atualizarDashboard(); }
 }
