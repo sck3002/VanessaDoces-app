@@ -624,7 +624,16 @@ async function fazerLogin(){
 
 }
 
-verificarLogin();
+verificarLogin().then(() => {
+  carregarSistema().then(() => {
+    atualizarTodasAsTelas();
+    atualizarFiltroAnoInsumos();
+    renderizarClientes();
+  }).catch(err => {
+    console.error('Erro ao iniciar banco:', err);
+    alert('Erro ao carregar o banco de dados. Verifique o console.');
+  });
+});
  
 async function sbListar(tabela) {
   const { data, error } = await sbClient.from(tabela).select('*');
