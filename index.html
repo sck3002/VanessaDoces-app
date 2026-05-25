@@ -263,7 +263,7 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
   <div class="card">
     <h2>Buscar Cliente</h2>
     <div class="filtros">
-      <input type="text" id="filtroCliente" placeholder="Buscar por nome ou telefone..." oninput="renderizarClientes()">
+      <input type="text" id="filtroCliente" placeholder="Buscar por nome ou telefone..." oninput="renderizarClientes()" onkeyup="renderizarClientes()">
       <button class="btn btn-rosa" onclick="renderizarClientes()">🔍 Buscar</button>
       <button class="btn btn-cinza" onclick="document.getElementById('filtroCliente').value='';renderizarClientes()">Limpar</button>
     </div>
