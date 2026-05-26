@@ -1666,32 +1666,102 @@ function abrirA4(data, pedidosDia) {
     <button onclick="window.close()" style="background:#dc3545;color:white;">✕ Fechar</button>
   </div>
 
-  <!-- ══ PÁGINA 1: PRODUÇÃO ══ -->
-  <div class="pagina">
-    <h1 style="font-size:18px;">Mapa de Entregas — ${formatarData(data)}</h1>
+<!-- ══ PÁGINA 1: PRODUÇÃO ══ -->
+<div class="pagina">
 
-    <div class="print-colunas-wrapper">
-      ${colunas.map(c=>`<div class="print-coluna">${c}</div>`).join('')}
-    </div>
+  <h1 style="font-size:18px;">
+    Mapa de Entregas — ${formatarData(data)}
+  </h1>
 
-    <div class="footer-total-box">
-      <div class="footer-cols">
-        <div>
-          <h3>Massas necessárias</h3>
-          ${Object.entries(totaisMassas).map(([k,v])=>v>0?`<div>${k}: <b>${v.toFixed(2)} kg</b></div>`:'').join('')}
-        </div>
-        <div style="flex:2">
-          <h3>Consolidado de doces</h3>
-          <div class="lista-doces">
-            ${Object.entries(consolidadoDocesDia).map(([k,v])=>`<div>${k}: <b>${v}</b></div>`).join('')}
-          </div>
-        </div>
+  <div class="print-colunas-wrapper">
+    ${colunas.map(c => `
+      <div class="print-coluna">
+        ${c}
       </div>
-      <div class="total-geral">Total Geral: ${totalGeralStr}</div>
-    </div>
+    `).join('')}
   </div>
 
-  <!-- ══ PÁGINA 2: ROTEIRO ══ -->
+  <div class="footer-total-box">
+
+    <div
+      class="footer-cols"
+      style="
+        display:flex;
+        align-items:flex-start;
+        justify-content:space-between;
+        gap:120px;
+      "
+    >
+
+      <!-- MASSAS -->
+
+      <div
+        style="
+          flex:1;
+          min-width:220px;
+        "
+      >
+
+        <h3>
+          Massas necessárias
+        </h3>
+
+        ${Object.entries(totaisMassas).map(([k,v]) =>
+
+          v > 0
+
+            ? `
+              <div>
+                ${k}: <b>${v.toFixed(2)} kg</b>
+              </div>
+            `
+
+            : ''
+
+        ).join('')}
+
+      </div>
+
+
+      <!-- CONSOLIDADO -->
+
+      <div
+        style="
+          flex:1.2;
+          min-width:320px;
+          margin-left:auto;
+        "
+      >
+
+        <h3>
+          Consolidado de doces
+        </h3>
+
+        <div class="lista-doces">
+
+          ${Object.entries(consolidadoDocesDia).map(([k,v]) => `
+
+            <div>
+              ${k}: <b>${v}</b>
+            </div>
+
+          `).join('')}
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="total-geral">
+      Total Geral: ${totalGeralStr}
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ══ PÁGINA 2: ROTEIRO ══ -->
   <div class="pagina">
     <h1 style="font-size:20px;">Roteiro de Entregas — ${formatarData(data)}</h1>
 
