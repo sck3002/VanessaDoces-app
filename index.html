@@ -1859,27 +1859,168 @@ function renderInsumos() {
 function excluirInsumo(id) { sbDeletar('insumos',id); insumos=insumos.filter(x=>x.id!==id); renderInsumos(); }
  
 /* ===== PRODUTOS ===== */
+
 function salvarProduto() {
-  const nome = document.getElementById('nomeProduto').value.trim();
-  const preco = parseFloat(document.getElementById('precoProduto').value);
-  if(!nome||isNaN(preco)) return;
-  const novo = {id:Date.now(),nome,preco};
-  produtos.push(novo); sbUpsert('produtos',[novo]); renderProdutos(); popularSelectProduto();
-  document.getElementById('nomeProduto').value = ''; document.getElementById('precoProduto').value = '';
+
+  const nome =
+    document.getElementById('nomeProduto').value.trim();
+
+  const preco =
+    parseFloat(
+      document.getElementById('precoProduto').value
+    );
+
+  if (!nome || isNaN(preco)) return;
+
+  const novo = {
+    id: Date.now(),
+    nome,
+    preco
+  };
+
+  produtos.push(novo);
+
+  sbUpsert('produtos', [novo]);
+
+  renderProdutos();
+
+  popularSelectProduto();
+
+  document.getElementById('nomeProduto').value = '';
+  document.getElementById('precoProduto').value = '';
+
 }
+
+
+/* ===== ALTERAR VALOR ===== */
+
+function alterarValorProduto(id) {
+
+  const produto =
+    produtos.find(p => p.id === id);
+
+  if (!produto) return;
+
+  const novoPreco = prompt(
+    `Alterar valor de "${produto.nome}"\n\nValor atual: R$ ${produto.preco.toFixed(2)}\n\nDigite o novo valor:`,
+    produto.preco
+  );
+
+  if (novoPreco === null) return;
+
+  const precoFormatado =
+    parseFloat(
+      novoPreco.toString().replace(',', '.')
+    );
+
+  if (isNaN(precoFormatado) || precoFormatado < 0) {
+    alert('Valor inválido');
+    return;
+  }
+
+  produto.preco = precoFormatado;
+
+  sbUpsert('produtos', [produto]);
+
+  renderProdutos();
+
+  alert('Valor atualizado com sucesso!');
+
+}
+
+
+/* ===== LISTAR PRODUTOS ===== */
+
 function renderProdutos() {
-  document.getElementById('listaProdutos').innerHTML = produtos.map(p=>`
-    <div class="produto-item"><div class="produto-info"><strong>${p.nome}</strong><span>R$ ${p.preco.toFixed(2)} un</span></div>
-    <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirProduto(${p.id})">🗑</button></div>`).join('');
+
+  document.getElementById('listaProdutos').innerHTML =
+    produtos.map(p => `
+
+      <div class="produto-item">
+
+        <div class="produto-info">
+          <strong>${p.nome}</strong>
+          <span>R$ ${p.preco.toFixed(2)} un</span>
+        </div>
+
+        <div style="display:flex; gap:8px;">
+
+          <button
+            class="btn"
+            style="padding:6px 12px;"
+            onclick="alterarValorProduto(${p.id})">
+            ✏️
+          </button>
+
+          <button
+            class="btn btn-vermelho"
+            style="padding:6px 12px;"
+            onclick="excluirProduto(${p.id})">
+            🗑
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join('');
+
 }
-function excluirProduto(id) { sbDeletar('produtos',id); produtos=produtos.filter(x=>x.id!==id); renderProdutos(); popularSelectProduto(); }
- 
+
+
+/* ===== EXCLUIR PRODUTO ===== */
+
+function excluirProduto(id) {
+
+  sbDeletar('produtos', id);
+
+  produtos =
+    produtos.filter(x => x.id !== id);
+
+  renderProdutos();
+
+  popularSelectProduto();
+
+}
+
+
+/* ===== PRODUÇÃO ===== */
+
 function atualizarProducao() {
-  const el = document.querySelector('#tabelaProducao tbody');
+
+  const el =
+    document.querySelector('#tabelaProducao tbody');
+
   if (!el) return;
+
   const prod = {};
-  pedidos.forEach(p=>{ if(p.status!=='cancelado') p.itens.forEach(i=>{ prod[i.produto]=(prod[i.produto]||0)+i.qtd; }); });
-  el.innerHTML = Object.keys(prod).map(name=>`<tr><td>${name}</td><td>${Math.round(prod[name])} un</td><td>${Math.ceil(prod[name]/50)} receitas</td></tr>`).join('');
+
+  pedidos.forEach(p => {
+
+    if (p.status !== 'cancelado') {
+
+      p.itens.forEach(i => {
+
+        prod[i.produto] =
+          (prod[i.produto] || 0) + i.qtd;
+
+      });
+
+    }
+
+  });
+
+  el.innerHTML =
+    Object.keys(prod).map(name => `
+
+      <tr>
+        <td>${name}</td>
+        <td>${Math.round(prod[name])} un</td>
+        <td>${Math.ceil(prod[name] / 50)} receitas</td>
+      </tr>
+
+    `).join('');
+
 }
  
 /* ===== DASHBOARD ===== */
