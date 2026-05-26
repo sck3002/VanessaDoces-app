@@ -1585,6 +1585,91 @@ function abrirA4(data, pedidosDia) {
       </div>
       <div style="text-align:center;font-weight:bold;border-top:1px solid #6b3f20;margin-top:5px;padding-top:5px;">Total Geral: ${totalGeralStr}</div>
     </div>
+        <!-- ===== ROTEIRO DE ENTREGA ===== -->
+
+    <div style="
+      page-break-before:always;
+      width:100%;
+      margin-top:10px;
+    ">
+
+      <h1 style="
+        text-align:center;
+        color:#6b3f20;
+        margin:0 0 20px 0;
+        font-size:22px;
+      ">
+        Roteiro de Entregas (${formatarData(data)})
+      </h1>
+
+      ${pedidosDia.map(p => {
+
+        const clienteCadastro =
+          clientes.find(c =>
+            String(c.id) === String(p.telefone)
+          ) ||
+
+          clientes.find(c =>
+            c.nome?.trim().toLowerCase() ===
+            p.cliente?.trim().toLowerCase()
+          ) ||
+
+          {};
+
+        const saldo =
+          (p.total || 0) -
+          (p.entrada || 0);
+
+        return `
+
+          <div style="
+            border:1px solid #ccc;
+            padding:12px;
+            margin-bottom:12px;
+            font-size:13px;
+            break-inside:avoid;
+          ">
+
+            <div style="
+              font-size:16px;
+              font-weight:bold;
+              color:#8a5a34;
+              margin-bottom:10px;
+              border-bottom:1px dashed #ddd;
+              padding-bottom:5px;
+            ">
+              ${p.cliente}
+            </div>
+
+            <div style="margin-bottom:6px;">
+              <b>Endereço:</b>
+              ${clienteCadastro.end || '-'}
+            </div>
+
+            <div style="margin-bottom:6px;">
+              <b>Telefone:</b>
+              ${clienteCadastro.tel || p.telefone || '-'}
+            </div>
+
+            <div style="
+              margin-top:10px;
+              padding-top:8px;
+              border-top:1px dashed #ccc;
+              font-size:16px;
+              font-weight:bold;
+              color:#d94d7d;
+            ">
+              Saldo a Receber:
+              R$ ${saldo.toFixed(2).replace('.',',')}
+            </div>
+
+          </div>
+
+        `;
+
+      }).join('')}
+
+    </div>
     <div class="no-print" style="text-align:center;margin-top:20px;">
       <button onclick="window.print()" style="padding:10px 20px;background:#28a745;color:white;border:none;cursor:pointer;">🖨️ Imprimir</button>
       <button onclick="fecharModal()" style="padding:10px 20px;background:#dc3545;color:white;border:none;cursor:pointer;">Fechar</button>
