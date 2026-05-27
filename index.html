@@ -335,7 +335,7 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
       <label>Data Entrega</label>
       <input type="date" id="entrega">
       <label>Valor de Entrada (R$)</label>
-      <input type="number" id="valorEntrada" step="0.01" value="0.00">
+      <input type="text" inputmode="decimal" id="valorEntrada" value="0.00" placeholder="0,00">
       <label>Observações</label>
       <textarea id="obs"></textarea>
     </div>
@@ -409,7 +409,7 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 
 <!-- ABA 3: COMPRAS -->
 <div class="aba">
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
+  <div style="display:grid;grid-template-columns:1fr;gap:15px;margin-bottom:15px;max-width:600px;margin-left:auto;margin-right:auto;">
 
     <!-- LANÇAR GASTO -->
     <div class="card" style="padding:15px;">
@@ -425,9 +425,9 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
       <label style="font-size:11px;margin-top:8px;">Data da Compra</label>
       <input type="date" id="dataCompraInsumo" style="padding:9px;font-size:11px;border-radius:8px;">
       <label style="font-size:11px;margin-top:8px;">Quantidade</label>
-      <input type="number" id="estoqueInsumo" value="0" oninput="calcularTotalInsumo()" style="padding:9px;font-size:11px;border-radius:8px;">
+      <input type="text" inputmode="decimal" id="estoqueInsumo" value="0" oninput="calcularTotalInsumo()" style="padding:9px;font-size:11px;border-radius:8px;">
       <label style="font-size:11px;margin-top:8px;">Preço Unitário (R$)</label>
-      <input type="number" id="precoInsumo" step="0.01" value="0.00" oninput="calcularTotalInsumo()" style="padding:9px;font-size:11px;border-radius:8px;">
+      <input type="text" inputmode="decimal" id="precoInsumo" value="0,00" oninput="calcularTotalInsumo()" style="padding:9px;font-size:11px;border-radius:8px;">
       <div style="margin-top:10px;padding:8px 12px;background:#f9f9f9;border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:11px;color:#666;">Total da Compra:</span>
         <span id="totalInsumoCalc" style="font-size:15px;font-weight:bold;color:#d94d7d;">R$ 0,00</span>
@@ -437,16 +437,6 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
       </div>
     </div>
 
-    <!-- SEGURANÇA E BACKUPS -->
-    <div class="card" style="padding:15px;">
-      <h2 style="font-size:18px;margin-bottom:10px;">Segurança e Backups</h2>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-verde" onclick="exportarBackup()" style="padding:9px 14px;font-size:11px;border-radius:8px;">💾 Baixar Cópia de Segurança</button>
-        <button class="btn btn-laranja" onclick="document.getElementById('inputBackup').click()" style="padding:9px 14px;font-size:11px;border-radius:8px;">📂 Restaurar Cópia</button>
-        <input type="file" id="inputBackup" accept=".json" style="display:none;" onchange="importarBackup(this)">
-        <button class="btn btn-azul" onclick="importarBancoCompleto()" style="padding:9px 14px;font-size:11px;border-radius:8px;">🔄 Resetar de Fábrica</button>
-      </div>
-    </div>
   </div>
 
   <!-- HISTÓRICO DE GASTOS -->
@@ -508,7 +498,7 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
       <div class="card">
         <h2 id="tituloProdutoForm">Novo Produto</h2>
         <label>Nome do Produto</label><input type="text" id="nomeProduto">
-        <label>Preço Unitário Real (R$)</label><input type="number" id="precoProduto" step="0.01">
+        <label>Preço Unitário Real (R$)</label><input type="text" inputmode="decimal" id="precoProduto" placeholder="0,00">
         <div class="botoes"><button class="btn btn-rosa" onclick="salvarProduto()">Salvar</button></div>
       </div>
       <div class="card"><h2>Produtos no Cardápio (Preços Unitários)</h2><div id="listaProdutos"></div></div>
@@ -620,63 +610,71 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 </div>
 <!-- MODAL EDITAR PEDIDO -->
 <div class="modal" id="modalEditarPedido">
-  <div class="modal-box" style="width:900px;">
-    <h2 style="color:#8a5a34;margin-bottom:15px;border-bottom:2px solid #eee;padding-bottom:8px;">Visualização & Edição Detalhada do Pedido</h2>
+  <div class="modal-box" style="width:700px;">
+
+    <!-- Cabeçalho -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:2px solid #eee;padding-bottom:10px;">
+      <h2 style="color:#8a5a34;font-size:17px;">✏️ Editar Pedido</h2>
+      <button class="btn btn-cinza" style="padding:6px 14px;font-size:13px;" onclick="fecharModalEditar()">✕ Fechar</button>
+    </div>
+
     <input type="hidden" id="editPedidoId">
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;">
-      <div>
-        <label>Cliente</label><input type="text" id="editCliente">
-        <label>Telefone</label><input type="text" id="editTelefone">
-        <label>Data de Entrega</label><input type="date" id="editEntrega">
+
+    <!-- DADOS DO CLIENTE -->
+    <div style="background:#f9f9f9;border-radius:12px;padding:14px;margin-bottom:14px;">
+      <p style="font-size:11px;font-weight:600;color:#8a5a34;text-transform:uppercase;margin-bottom:10px;">👤 Cliente</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label style="font-size:12px;">Nome</label><input type="text" id="editCliente"></div>
+        <div><label style="font-size:12px;">Telefone</label><input type="text" id="editTelefone"></div>
+        <div><label style="font-size:12px;">Data de Entrega</label><input type="date" id="editEntrega"></div>
+        <div><label style="font-size:12px;">Status</label>
+          <select id="editStatus" onchange="verificarMudancaStatusModal()">
+            <option value="pendente">Pendente</option>
+            <option value="pago">Pago</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1;"><label style="font-size:12px;">Endereço</label><input type="text" id="editEndereco"></div>
+        <div style="grid-column:1/-1;"><label style="font-size:12px;">Observações</label><textarea id="editObs" style="height:60px;"></textarea></div>
       </div>
-      <div>
-        <label>Endereço de Entrega</label><input type="text" id="editEndereco">
-        <label>Status do Pedido</label>
-        <select id="editStatus" onchange="verificarMudancaStatusModal()">
-          <option value="pendente">Pendente</option>
-          <option value="pago">Pago</option>
-          <option value="cancelado">Cancelado</option>
-        </select>
-        <label>Observações</label><textarea id="editObs"></textarea>
-      </div>
-      <div style="background:#fbf6f0;border:1px dashed #8a5a34;border-radius:12px;padding:15px;">
-        <h3 style="color:#6b3f20;font-size:14px;margin-bottom:10px;">Balanço Financeiro</h3>
-        <label style="margin-top:0;">Valor Total (R$)</label>
-        <input type="number" id="editValorTotal" readonly style="background:#eee;font-weight:bold;color:#d94d7d;">
-        <label>Valor de Entrada / Pagamento Acumulado (R$)</label>
-        <input type="number" id="editValorEntrada" step="0.01" oninput="calcularBalançoModalEditar()">
-        <div style="margin-top:15px;padding-top:10px;border-top:1px solid #ddd;text-align:right;">
-          <span style="font-size:12px;color:#555;font-weight:500;">SALDO A PAGAR:</span>
-          <div id="editSaldoAPagar" style="font-size:22px;font-weight:bold;color:#28a745;">R$ 0,00</div>
+    </div>
+
+    <!-- BALANÇO FINANCEIRO -->
+    <div style="background:#fbf6f0;border:1px dashed #8a5a34;border-radius:12px;padding:14px;margin-bottom:14px;">
+      <p style="font-size:11px;font-weight:600;color:#8a5a34;text-transform:uppercase;margin-bottom:10px;">💰 Balanço Financeiro</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;">
+        <div>
+          <label style="font-size:12px;">Valor Total (R$)</label>
+          <input type="text" id="editValorTotal" readonly style="background:#eee;font-weight:bold;color:#d94d7d;font-size:16px;">
+        </div>
+        <div>
+          <label style="font-size:12px;">Entrada / Pagamento (R$)</label>
+          <input type="text" inputmode="decimal" id="editValorEntrada" placeholder="0,00" oninput="calcularBalançoModalEditar()">
         </div>
       </div>
-    </div>
-    <div style="margin-top:20px;border-top:1px solid #eee;padding-top:15px;">
-      <h3 style="color:#8a5a34;font-size:14px;margin-bottom:10px;">Doces inclusos nesta Encomenda</h3>
-      <div style="display:grid;grid-template-columns:3fr 1fr auto;gap:10px;align-items:end;background:#f9f9f9;padding:10px;border-radius:8px;">
-        <div><label style="margin-top:0;">Adicionar outro Doce/Sabor</label><select id="editAdicionarDoceSelect"></select></div>
-        <div><label style="margin-top:0;">Quantidade</label><input type="number" id="editAdicionarDoceQtd" min="1"></div>
-        <div><button class="btn btn-rosa" onclick="adicionarDoceNoPedidoEditado()">+ Inserir</button></div>
-      </div>
-      <div style="max-height:180px;overflow-y:auto;margin-top:10px;border:1px solid #ddd;border-radius:8px;">
-        <table style="width:100%;margin-top:0;" id="tableItensEditando">
-          <thead style="position:sticky;top:0;z-index:1;">
-            <tr>
-              <th style="padding:8px;">Doce / Sabor</th>
-              <th style="padding:8px;text-align:center;">Quantidade</th>
-              <th style="padding:8px;text-align:right;">Unitário</th>
-              <th style="padding:8px;text-align:right;">Subtotal</th>
-              <th style="padding:8px;text-align:center;">Remover</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <div style="margin-top:12px;text-align:right;padding-top:10px;border-top:1px solid #e8d5c0;">
+        <span style="font-size:12px;color:#555;font-weight:500;">SALDO A PAGAR:</span>
+        <div id="editSaldoAPagar" style="font-size:24px;font-weight:bold;color:#28a745;">R$ 0,00</div>
       </div>
     </div>
-    <div class="botoes" style="margin-top:20px;">
-      <button class="btn btn-verde" onclick="salvarEdicaoPedido()">💾 Salvar Modificações</button>
-      <button class="btn btn-cinza" onclick="fecharModalEditar()">Voltar</button>
+
+    <!-- ITENS DO PEDIDO -->
+    <div style="background:#f9f9f9;border-radius:12px;padding:14px;margin-bottom:14px;">
+      <p style="font-size:11px;font-weight:600;color:#8a5a34;text-transform:uppercase;margin-bottom:10px;">🍬 Doces da Encomenda</p>
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end;margin-bottom:10px;">
+        <div><label style="font-size:12px;">Doce / Sabor</label><select id="editAdicionarDoceSelect" style="font-size:13px;"></select></div>
+        <div><label style="font-size:12px;">Qtd</label><input type="number" id="editAdicionarDoceQtd" min="1" style="width:65px;"></div>
+        <div><button class="btn btn-rosa" style="padding:12px 14px;white-space:nowrap;" onclick="adicionarDoceNoPedidoEditado()">+ Add</button></div>
+      </div>
+      <div id="listaItensEditando" style="max-height:240px;overflow-y:auto;"></div>
     </div>
+
+    <!-- BOTÕES DE AÇÃO -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <button class="btn btn-verde" style="font-size:14px;" onclick="salvarEdicaoPedido()">💾 Salvar</button>
+      <button class="btn btn-azul" style="font-size:14px;" onclick="compartilharPedido()">📤 Compartilhar</button>
+    </div>
+
   </div>
 </div>
  
