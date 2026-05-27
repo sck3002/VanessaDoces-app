@@ -337,6 +337,8 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
       <input type="date" id="entrega">
       <label>Valor de Entrada (R$)</label>
       <input type="text" inputmode="decimal" id="valorEntrada" value="0.00" placeholder="0,00">
+      <label>Taxa de Entrega (R$) <span style="font-size:11px;color:#aaa;">deixe 0 se retirar no local</span></label>
+      <input type="text" inputmode="decimal" id="taxaEntrega" value="0.00" placeholder="0,00" oninput="atualizarTotalComEntrega()">
       <label>Observações</label>
       <textarea id="obs"></textarea>
     </div>
@@ -671,8 +673,9 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
     </div>
 
     <!-- BOTÕES DE AÇÃO -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
       <button class="btn btn-verde" style="font-size:14px;" onclick="salvarEdicaoPedido()">💾 Salvar</button>
+      <button class="btn btn-marrom" style="font-size:14px;" onclick="abrirContratoDoModal()">📄 Contrato</button>
       <button class="btn btn-azul" style="font-size:14px;" onclick="compartilharPedido()">📤 Compartilhar</button>
     </div>
 
@@ -1129,20 +1132,30 @@ function atualizarResumoAtual() {
   document.getElementById('rodapeTotalPedido').innerText = 'R$ '+valorTotalAtual.toFixed(2);
 }
  
+/* ===== TAXA DE ENTREGA ===== */
+function atualizarTotalComEntrega() {
+  const taxa = parseFloat((document.getElementById('taxaEntrega').value||'').replace(',','.')) || 0;
+  const subtotal = itensPedidoAtual.reduce((s,i)=>s+i.total,0);
+  valorTotalAtual = subtotal + taxa;
+  atualizarResumoAtual();
+}
+
 /* ===== FINALIZAR PEDIDO ===== */
 function finalizarPedido() {
   const telefone = document.getElementById('telefone').value.trim();
   const cliente  = document.getElementById('cliente').value.trim();
   const dataEntrega = document.getElementById('entrega').value;
   const entrada = parseFloat((document.getElementById('valorEntrada').value||'').replace(',','.')) || 0;
+  const taxa    = parseFloat((document.getElementById('taxaEntrega').value||'').replace(',','.')) || 0;
   const endereco = document.getElementById('endereco').value.trim();
   const observacoes = document.getElementById('obs').value.trim();
   if(cliente === ''){ alert('Informe o nome do cliente.'); return; }
   if(telefone === ''){ alert('Informe o telefone.'); return; }
   if(dataEntrega === ''){ alert('Informe a data de entrega.'); return; }
   if(itensPedidoAtual.length === 0){ alert('Adicione pelo menos um item.'); return; }
-  const statusPedido = (valorTotalAtual - entrada > 0) ? 'pendente' : 'pago';
-  const novoPedido = { id: Date.now(), cliente, telefone, data: dataEntrega, endereco, obs: observacoes, itens: [...itensPedidoAtual], status: statusPedido, entrada, total: valorTotalAtual };
+  const totalFinal = itensPedidoAtual.reduce((s,i)=>s+i.total,0) + taxa;
+  const statusPedido = (totalFinal - entrada > 0) ? 'pendente' : 'pago';
+  const novoPedido = { id: Date.now(), cliente, telefone, data: dataEntrega, endereco, obs: observacoes, itens: [...itensPedidoAtual], status: statusPedido, entrada, total: totalFinal, taxaEntrega: taxa };
   pedidos.push(novoPedido);
   try {
     sbUpsert('pedidos', [novoPedido]);
@@ -1158,8 +1171,8 @@ function finalizarPedido() {
   limparPedido();
 }
 function limparPedido() {
-  ['cliente','telefone','endereco','entrega','obs','valorEntrada'].forEach(id => {
-    const el = document.getElementById(id); if(el) el.value = (id === 'valorEntrada') ? '0.00' : '';
+  ['cliente','telefone','endereco','entrega','obs','valorEntrada','taxaEntrega'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = (id === 'valorEntrada' || id === 'taxaEntrega') ? '0.00' : '';
   });
   const p = document.getElementById('produto'); if(p) p.selectedIndex = 0;
   const q = document.getElementById('quantidade'); if(q) q.value = '';
@@ -1169,6 +1182,163 @@ function limparPedido() {
   atualizarResumoAtual(); renderItensTabela();
   const r = document.getElementById('rodapeTotalPedido'); if(r) r.innerHTML = 'R$ 0,00';
 }
+
+/* ===== CONTRATO ===== */
+function mascaraCpf(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,11);
+  v = v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+  el.value = v;
+}
+function abrirContrato(id) {
+  document.getElementById('cpfContratoPedidoId').value = id;
+  document.getElementById('cpfContratante').value = '';
+  document.getElementById('modalCpfContrato').classList.add('active');
+}
+function abrirContratoDoModal() {
+  const id = document.getElementById('editPedidoId').value;
+  if(!id) return;
+  abrirContrato(id);
+}
+function gerarContrato() {
+  const cpf = document.getElementById('cpfContratante').value.trim();
+  if(!cpf){ alert('Informe o CPF do cliente.'); return; }
+  const id = parseInt(document.getElementById('cpfContratoPedidoId').value);
+  const p  = pedidos.find(x=>x.id===id); if(!p) return;
+  document.getElementById('modalCpfContrato').classList.remove('active');
+
+  const dataEntrega = p.data ? p.data.split('-').reverse().join('/') : '—';
+  const hoje = new Date().toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
+  const taxa = p.taxaEntrega || 0;
+  const totalDoces = p.itens.reduce((s,i)=>s+i.qtd,0);
+  const bemCasados = p.itens.filter(i=>i.produto.toLowerCase().includes('bem casado')).reduce((s,i)=>s+i.qtd,0);
+  const docesComuns = totalDoces - bemCasados;
+  const descricaoObjeto = bemCasados > 0
+    ? `${docesComuns > 0 ? docesComuns+' doces e '+bemCasados+' bem casados' : bemCasados+' bem casados'}`
+    : `${totalDoces} doces`;
+
+  const linhasItens = p.itens.map(i=>`
+    <tr>
+      <td style="padding:6px 10px;border:1px solid #ccc;">${i.produto}</td>
+      <td style="padding:6px 10px;border:1px solid #ccc;text-align:center;">${i.qtd}</td>
+      <td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">R$ ${(i.valor||0).toFixed(2).replace('.',',')}</td>
+      <td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">R$ ${(i.total||0).toFixed(2).replace('.',',')}</td>
+    </tr>`).join('');
+
+  const linhaTaxa = taxa > 0 ? `
+    <tr>
+      <td style="padding:6px 10px;border:1px solid #ccc;">Taxa de entrega</td>
+      <td style="padding:6px 10px;border:1px solid #ccc;text-align:center;">1</td>
+      <td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">R$ ${taxa.toFixed(2).replace('.',',')}</td>
+      <td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">R$ ${taxa.toFixed(2).replace('.',',')}</td>
+    </tr>` : '';
+
+  const html = `<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8">
+  <title>Contrato - ${p.cliente}</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Times New Roman',serif;font-size:12pt;color:#000;padding:30px 50px;}
+    .logo{text-align:center;margin-bottom:20px;}
+    .logo img{max-height:80px;}
+    h1{text-align:center;font-size:14pt;font-weight:bold;margin-bottom:24px;letter-spacing:1px;}
+    h2{font-size:12pt;font-weight:bold;margin:18px 0 6px;}
+    p{text-align:justify;line-height:1.7;margin-bottom:8px;}
+    .assinaturas{margin-top:50px;display:flex;justify-content:space-around;text-align:center;}
+    .assinatura{width:220px;border-top:1px solid #000;padding-top:6px;font-size:11pt;}
+    table{width:100%;border-collapse:collapse;margin-top:10px;}
+    th{background:#f0f0f0;padding:7px 10px;border:1px solid #ccc;text-align:left;font-size:11pt;}
+    td{font-size:11pt;}
+    .total-row td{font-weight:bold;background:#f9f9f9;padding:7px 10px;border:1px solid #ccc;}
+    .pagamentos th,  .pagamentos td{padding:10px;}
+    @media print{body{padding:15px 30px;} button{display:none;}}
+  </style></head><body>
+  <div class="logo"><img src="https://sck3002.github.io/VanessaDoces-app/icon-192.png"></div>
+  <h1>CONTRATO DE PRESTAÇÃO DE SERVIÇOS</h1>
+
+  <h2>1. DA IDENTIFICAÇÃO DAS PARTES</h2>
+  <p>Pelo presente contrato de prestação de serviços, firmado entre <b>${p.cliente}</b>, C.P.F ${cpf},
+  endereço ${p.endereco||'—'}, telefone ${p.telefone||'—'}, doravante denominada <b>CONTRATANTE</b>,
+  e <b>Vanessa Alvarenga Pinto</b>, C.P.F. 143.725.727-51, telefone 22-99874-9536 doravante denominada
+  <b>CONTRATADA</b>, as partes identificadas acima têm entre si justos e acertados os termos que reger-se-ão
+  pelas cláusulas seguintes.</p>
+
+  <h2>2. DO OBJETO DO CONTRATO</h2>
+  <p><b>Cláusula 1ª.</b> É objeto do presente contrato o fornecimento de ${descricaoObjeto} pela <b>CONTRATADA</b>
+  à <b>CONTRATANTE</b>, com entrega em ${dataEntrega}.</p>
+  <p><b>Parágrafo Único:</b> A Contratada fará a entrega dos doces no endereço informado pela contratante,
+  desde que num raio de no máximo 15km do Centro da Cidade de Campos dos Goytacazes, sendo responsável
+  pelo transporte e acondicionamento dos mesmos, não incidindo quaisquer responsabilidades sobre a
+  contratante em caso de danos decorrentes de mau uso do transporte.</p>
+
+  <h2>3. OBRIGAÇÕES DA CONTRATANTE E DA CONTRATADA</h2>
+  <p><b>Cláusula 2ª.</b> A <b>CONTRATANTE</b> no ato da efetivação da encomenda declara conhecimento de todas
+  as informações necessárias sobre a qualidade dos doces, tendo-os previamente os experimentado.</p>
+  <p><b>Cláusula 3ª.</b> A <b>CONTRATANTE</b> deverá efetuar o pagamento na forma e condições estabelecidas
+  na cláusula 4ª.</p>
+
+  <h2>4. DO PREÇO E DAS CONDIÇÕES DE PAGAMENTO</h2>
+  <p><b>Cláusula 4a.</b> O serviço contratado no presente instrumento será remunerado pela quantia anotada
+  no <b>anexo</b> (Anexo I) deste documento, devendo ser pagos no mínimo 50% em dinheiro, pix ou
+  transferência até 15 dias da data do evento da contratação do serviço e os outros 50% até a data de
+  entrega dos produtos.<br>A <b>CONTRATADA</b> se compromete a fornecer o cardápio escolhido pela
+  <b>CONTRATANTE</b>, cujas especificações, inclusive de quantidade a ser entregue, encontram-se no
+  anexo do presente contrato, salvo em caso de impossibilidade ocasionada por força maior, devidamente
+  comprovada, onde o valor pago deverá ser devolvido integralmente à <b>CONTRATANTE</b>.</p>
+  <p><b>Cláusula 5a.</b> Em caso de inadimplemento de quantitativo parcial ou total por parte da
+  <b>CONTRATANTE</b> quanto ao pagamento do serviço prestado, a <b>CONTRATADA</b> se reserva o direito
+  de não entregar o pedido, sem prejuízo da multa contratual.</p>
+
+  <h2>5. DA RESCISÃO</h2>
+  <p><b>Cláusula 6ª.</b> O presente contrato poderá ser rescindido unilateralmente por qualquer uma das
+  partes, desde que haja comunicação formal por escrito justificando o motivo. Deverá acontecer, além
+  disso, até 45 dias corridos antes da data prevista para a entrega.</p>
+  <p><b>Cláusula 7ª.</b> Salvo o caso de rescisão já previsto na cláusula imediatamente anterior, fica
+  estabelecido que a parte infratora a quaisquer cláusulas do presente contrato, pagará à parte prejudicada
+  multa equivalente a 50% (cinquenta por cento) sobre o valor do contrato, independente de ação judicial
+  específica para ressarcimento de perdas e danos que poderá ser movida pela parte prejudicada.</p>
+
+  <h2>6. DAS CONDIÇÕES GERAIS</h2>
+  <p><b>Cláusula 8ª.</b> O cardápio foi elaborado de acordo com o número de doces determinado pela
+  <b>CONTRATANTE</b> e de acordo com as solicitações desta. Portanto, a <b>CONTRATADA</b> não será
+  responsabilizada se, atendidas as especificações contratadas, a insuficiência dos doces resultar da
+  entrada de número maior de pessoas no evento.</p>
+
+  <p style="text-align:center;margin-top:24px;">Campos dos Goytacazes, ${hoje}.</p>
+
+  <div class="assinaturas">
+    <div class="assinatura">Contratante</div>
+    <div class="assinatura">Contratada</div>
+  </div>
+
+  <div style="page-break-before:always;padding-top:30px;">
+    <h2 style="text-align:center;margin-bottom:14px;">Anexo I — Discriminação do Pedido</h2>
+    <table>
+      <thead><tr><th>Modelo/Sabor</th><th style="text-align:center;">Quantidade</th><th style="text-align:right;">Valor Unit</th><th style="text-align:right;">Valor Total</th></tr></thead>
+      <tbody>${linhasItens}${linhaTaxa}</tbody>
+      <tfoot>
+        <tr class="total-row">
+          <td colspan="3" style="text-align:right;padding:7px 10px;border:1px solid #ccc;">Valor Total do Pedido</td>
+          <td style="text-align:right;padding:7px 10px;border:1px solid #ccc;">R$ ${p.total.toFixed(2).replace('.',',')}</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <h2 style="text-align:center;margin:24px 0 10px;">Discriminação dos Pagamentos</h2>
+    <table class="pagamentos">
+      <thead><tr><th>Data</th><th>Valor</th><th>Saldo</th><th>Ass Vanessa</th><th>Ass Cliente</th></tr></thead>
+      <tbody><tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr><tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr></tbody>
+    </table>
+  </div>
+
+  <div style="text-align:center;margin-top:20px;">
+    <button onclick="window.print()" style="padding:10px 28px;background:#d94d7d;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;">🖨️ Imprimir</button>
+  </div>
+</body></html>`;
+
+  const win = window.open('','_blank','width=900,height=700');
+  win.document.write(html);
+  win.document.close();
+}
+
  
 /* ===== CLIENTES ===== */
 async function adicionarCliente() {
@@ -1250,6 +1420,7 @@ function renderPedidos() {
       <div style="display:flex;gap:10px;align-items:center;">
         <span class="badge badge-${p.status}">${p.status.toUpperCase()}</span>
         <button class="btn btn-azul" style="padding:6px 12px;" onclick="abrirEditar(${p.id})">✏️ Ver / Alterar</button>
+        <button class="btn btn-marrom" style="padding:6px 12px;" onclick="abrirContrato(${p.id})">📄 Contrato</button>
         <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirPedido(${p.id})">🗑</button>
       </div>
     </div>`;
@@ -2146,7 +2317,19 @@ carregarSistema().then(() => {
 });
 </script>
 
-<!-- PWA: Registro do Service Worker -->
+<!-- MODAL CPF CONTRATO -->
+<div class="modal" id="modalCpfContrato">
+  <div class="modal-box" style="width:420px;">
+    <h2 style="color:#8a5a34;font-size:17px;margin-bottom:16px;">📄 Gerar Contrato</h2>
+    <input type="hidden" id="cpfContratoPedidoId">
+    <label>CPF do Cliente</label>
+    <input type="text" id="cpfContratante" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCpf(this)">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">
+      <button class="btn btn-cinza" onclick="document.getElementById('modalCpfContrato').classList.remove('active')">Cancelar</button>
+      <button class="btn btn-marrom" onclick="gerarContrato()">Gerar</button>
+    </div>
+  </div>
+</div>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
