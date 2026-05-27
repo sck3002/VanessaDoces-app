@@ -1133,7 +1133,7 @@ function finalizarPedido() {
   const telefone = document.getElementById('telefone').value.trim();
   const cliente  = document.getElementById('cliente').value.trim();
   const dataEntrega = document.getElementById('entrega').value;
-  const entrada = parseFloat(document.getElementById('valorEntrada').value) || 0;
+  const entrada = parseFloat((document.getElementById('valorEntrada').value||'').replace(',','.')) || 0;
   const endereco = document.getElementById('endereco').value.trim();
   const observacoes = document.getElementById('obs').value.trim();
   if(cliente === ''){ alert('Informe o nome do cliente.'); return; }
@@ -1277,18 +1277,29 @@ function verificarMudancaStatusModal() {
   calcularBalançoModalEditar();
 }
 function atualizarItensTabelaModalEditar() {
-  const tbody = document.querySelector('#tableItensEditando tbody');
+  const lista = document.getElementById('listaItensEditando');
   let totalAcumulado = 0;
-  tbody.innerHTML = itensEditandoPedido.map((item, idx) => {
-    const unitario = item.valor || 1.00; const subtotal = item.qtd * unitario; totalAcumulado += subtotal;
-    return `<tr>
-      <td><b>${item.produto}</b></td>
-      <td style="text-align:center;"><input type="number" value="${item.qtd}" min="1" style="width:70px;padding:4px;text-align:center;" onchange="alterarQtdItemModalEditar(${idx},this.value)"> un</td>
-      <td style="text-align:right;">R$ ${unitario.toFixed(2)}</td>
-      <td style="text-align:right;font-weight:600;">R$ ${subtotal.toFixed(2)}</td>
-      <td style="text-align:center;"><button class="btn btn-vermelho" style="padding:2px 8px;font-size:11px;" onclick="removerItemModalEditar(${idx})">✕</button></td>
-    </tr>`;
-  }).join('');
+  if (!itensEditandoPedido.length) {
+    lista.innerHTML = '<p style="text-align:center;color:#aaa;padding:20px;font-size:13px;">Nenhum item adicionado</p>';
+  } else {
+    lista.innerHTML = itensEditandoPedido.map((item, idx) => {
+      const unitario = item.valor || 1.00;
+      const subtotal = item.qtd * unitario;
+      totalAcumulado += subtotal;
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:white;border-radius:10px;margin-bottom:6px;border:1px solid #eee;gap:8px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:13px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.produto}</div>
+          <div style="font-size:11px;color:#888;">R$ ${unitario.toFixed(2)} un · Total: <b style="color:#d94d7d;">R$ ${subtotal.toFixed(2)}</b></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <button onclick="alterarQtdItemModalEditar(${idx}, ${item.qtd - 1})" style="width:30px;height:30px;border:1px solid #ddd;border-radius:8px;background:white;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+          <span style="min-width:28px;text-align:center;font-weight:600;font-size:14px;">${item.qtd}</span>
+          <button onclick="alterarQtdItemModalEditar(${idx}, ${item.qtd + 1})" style="width:30px;height:30px;border:1px solid #ddd;border-radius:8px;background:white;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+          <button onclick="removerItemModalEditar(${idx})" style="width:30px;height:30px;border:none;border-radius:8px;background:#ffe0e0;color:#c0392b;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
   document.getElementById('editValorTotal').value = totalAcumulado.toFixed(2);
   calcularBalançoModalEditar();
 }
@@ -1315,19 +1326,35 @@ function adicionarDoceNoPedidoEditado() {
   qtdInput.value = ''; atualizarItensTabelaModalEditar();
 }
 function calcularBalançoModalEditar() {
-  const total  = parseFloat(document.getElementById('editValorTotal').value) || 0;
-  const entrada = parseFloat(document.getElementById('editValorEntrada').value) || 0;
-  const saldo  = total - entrada;
+  const total   = parseFloat(document.getElementById('editValorTotal').value) || 0;
+  const rawEnt  = (document.getElementById('editValorEntrada').value||'').replace(',','.');
+  const entrada = parseFloat(rawEnt) || 0;
+  const saldo   = total - entrada;
   const divSaldo = document.getElementById('editSaldoAPagar');
-  divSaldo.innerText = 'R$ ' + (saldo < 0 ? 0.00 : saldo).toFixed(2);
+  divSaldo.innerText = 'R$ ' + (saldo < 0 ? 0.00 : saldo).toFixed(2).replace('.',',');
   divSaldo.style.color = saldo > 0 ? '#ff9800' : '#28a745';
+}
+function compartilharPedido() {
+  const id = parseInt(document.getElementById('editPedidoId').value);
+  const p  = pedidos.find(x => x.id === id); if (!p) return;
+  const dataFmt = p.data ? p.data.split('-').reverse().join('/') : '—';
+  const itens   = (p.itens||[]).map(i => `  • ${i.produto}: ${i.qtd} un — R$ ${(i.total||0).toFixed(2).replace('.',',')}`).join('\n');
+  const total   = (p.total||0).toFixed(2).replace('.',',');
+  const entrada = (p.entrada||0).toFixed(2).replace('.',',');
+  const saldo   = Math.max(0, (p.total||0) - (p.entrada||0)).toFixed(2).replace('.',',');
+  const texto   = `🍬 *Vanessa Doces Finos*\n\n👤 Cliente: ${p.cliente}\n📅 Entrega: ${dataFmt}\n📍 Endereço: ${p.endereco||'—'}\n\n*Itens do pedido:*\n${itens}\n\n💰 Total: R$ ${total}\n✅ Entrada: R$ ${entrada}\n⏳ Saldo a pagar: R$ ${saldo}\n\n${p.obs ? '📝 Obs: ' + p.obs : ''}`.trim();
+  if (navigator.share) {
+    navigator.share({ title: 'Pedido — ' + p.cliente, text: texto });
+  } else {
+    navigator.clipboard.writeText(texto).then(() => alert('Pedido copiado para a área de transferência!'));
+  }
 }
 function salvarEdicaoPedido() {
   const id = parseInt(document.getElementById('editPedidoId').value);
   const idx = pedidos.findIndex(x=>x.id===id); if(idx===-1) return;
   if(itensEditandoPedido.length === 0) { alert("O pedido não pode ficar vazio!"); return; }
   const totalCalculado = itensEditandoPedido.reduce((acc,i) => acc+i.total, 0);
-  const entradaInformada = parseFloat(document.getElementById('editValorEntrada').value) || 0;
+  const entradaInformada = parseFloat((document.getElementById('editValorEntrada').value||'').replace(',','.')) || 0;
   let statusInformado = document.getElementById('editStatus').value;
   if (totalCalculado - entradaInformada > 0) statusInformado = 'pendente';
   else if (statusInformado === 'pendente' && entradaInformada >= totalCalculado) statusInformado = 'pago';
@@ -1719,17 +1746,17 @@ function selecionarTipoInsumo(id) {
   calcularTotalInsumo();
 }
 function calcularTotalInsumo() {
-  const qtd = parseFloat(document.getElementById('estoqueInsumo').value) || 0;
-  const preco = parseFloat(document.getElementById('precoInsumo').value) || 0;
-  document.getElementById('totalInsumoCalc').textContent = 'R$ ' + (qtd * preco).toFixed(2);
+  const qtd   = parseFloat((document.getElementById('estoqueInsumo').value||'').replace(',','.')) || 0;
+  const preco = parseFloat((document.getElementById('precoInsumo').value||'').replace(',','.')) || 0;
+  document.getElementById('totalInsumoCalc').textContent = 'R$ ' + (qtd * preco).toFixed(2).replace('.',',');
 }
  
 /* ===== INSUMOS (GASTOS) ===== */
 function salvarInsumo() {
   const nome = document.getElementById('insumoSelecionadoNome').value.trim() || document.getElementById('nomeInsumo').value.trim();
   const unidade = document.getElementById('insumoSelecionadoUnidade').value.trim() || 'un';
-  const estoque = parseFloat(document.getElementById('estoqueInsumo').value) || 0;
-  const preco   = parseFloat(document.getElementById('precoInsumo').value) || 0;
+  const estoque = parseFloat((document.getElementById('estoqueInsumo').value||'').replace(',','.')) || 0;
+  const preco   = parseFloat((document.getElementById('precoInsumo').value||'').replace(',','.')) || 0;
   const dataCompra = document.getElementById('dataCompraInsumo').value || defaultDateInput;
   if (!nome) { alert('Selecione ou informe um insumo.'); return; }
   if (estoque <= 0) { alert('Informe a quantidade.'); return; }
@@ -1812,7 +1839,7 @@ function salvarProduto() {
 
   const preco =
     parseFloat(
-      document.getElementById('precoProduto').value
+      (document.getElementById('precoProduto').value||'').replace(',','.')
     );
 
   if (!nome || isNaN(preco)) return;
