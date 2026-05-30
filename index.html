@@ -1414,7 +1414,7 @@ function renderPedidos() {
     (!busca || p.cliente.toLowerCase().includes(busca)) &&
     (!status || p.status === status) &&
     (!data || p.data === data)
-  );
+  ).sort((a,b) => new Date(b.data) - new Date(a.data));
   lista.innerHTML = filtrados.map(p => {
     const entrada = p.entrada || 0; const saldo = p.total - entrada;
     return `<div class="pedido-item">
@@ -2287,11 +2287,12 @@ function atualizarDashboard() {
     if(dadosMensais[mes]) dadosMensais[mes].saidas += (i.estoque*i.preco);
   });
   const tbody = document.getElementById('tbodyDetalhamentoMensal'); tbody.innerHTML = '';
-  mesesChave.forEach((m,idx) => {
+  [...mesesChave].reverse().forEach((m,idx) => {
+    const mesIdx = mesesChave.indexOf(m);
     const d = dadosMensais[m]; if(d.entradas===0&&d.saidas===0) return;
     const resultado = d.entradas - d.saidas;
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td><b>${NOMES_MESES[idx].substring(0,3)}</b></td>
+    tr.innerHTML = `<td><b>${NOMES_MESES[mesIdx].substring(0,3)}</b></td>
       <td class="txt-verde">R$ ${d.entradas.toFixed(0)}</td>
       <td class="txt-vermelho">R$ ${d.saidas.toFixed(0)}</td>
       <td class="${resultado>=0?'txt-verde':'txt-vermelho'}">R$ ${resultado.toFixed(0)}</td>`;
