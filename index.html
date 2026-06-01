@@ -465,6 +465,7 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
     <button class="sub-active" onclick="trocarSubAba(0)">👤 Clientes</button>
     <button onclick="trocarSubAba(1)">🍬 Produtos</button>
     <button onclick="trocarSubAba(2)">📦 Insumos</button>
+    <button onclick="trocarSubAba(3)">📋 Logs</button>
   </div>
 
   <!-- SUBABA 0: CLIENTES -->
@@ -539,9 +540,18 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
       </div>
     </div>
   </div>
-</div>
+  <!-- SUBABA 3: LOGS -->
+  <div class="subaba">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h2 style="margin:0;">📋 Histórico de Atividades</h2>
+        <button class="btn btn-cinza" style="padding:6px 14px;font-size:12px;" onclick="carregarLogs()">🔄 Atualizar</button>
+      </div>
+      <div id="listaLogs" style="max-height:500px;overflow-y:auto;"></div>
+    </div>
+  </div>
 
-<!-- ABA 5: DASHBOARD -->
+</div>
 <div class="aba">
   <div class="dashboard-premium">
     <div class="dash-header-filtros">
@@ -831,6 +841,17 @@ async function sbDeletar(tabela, id) {
   const { error } = await sbClient.from(tabela).delete().eq('id', id);
   if (error) console.error(`Erro ao deletar de ${tabela}:`, error.message);
 }
+
+/* ===== LOG ===== */
+let logs = [];
+async function registrarLog(acao, descricao) {
+  const agora = new Date();
+  const dataHora = agora.toLocaleDateString('pt-BR') + ' - ' + agora.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  const entrada = { acao, descricao, created_at: agora.toISOString() };
+  const { error } = await sbClient.from('logs').insert([entrada]);
+  if (error) console.error('Erro ao registrar log:', error.message);
+  else { logs.unshift({ ...entrada, dataHora }); renderLogs(); }
+}
 function salvarLS() {
   sbUpsert('pedidos', pedidos);
   sbUpsert('produtos', produtos);
@@ -1030,6 +1051,7 @@ function trocarSubAba(index) {
   if(index === 0) renderizarClientes();
   if(index === 1) renderProdutos();
   if(index === 2) renderTiposInsumos();
+  if(index === 3) carregarLogs();
 }
 
 function fecharAutocompletes() {
@@ -1159,11 +1181,13 @@ function finalizarPedido() {
   pedidos.push(novoPedido);
   try {
     sbUpsert('pedidos', [novoPedido]);
+    registrarLog('PEDIDO', `Pedido lançado — Cliente: ${cliente} | Entrega: ${dataEntrega} | Total: R$ ${totalFinal.toFixed(2)}`);
     const telefoneLimpo = telefone.replace(/\D/g,'');
     const clienteExiste = clientes.find(c => (c.tel||'').toString().replace(/\D/g,'') === telefoneLimpo || (c.id||'').toString().replace(/\D/g,'') === telefoneLimpo);
     if(!clienteExiste && telefoneLimpo) {
       const novoCliente = { id: telefoneLimpo, nome: cliente, tel: telefoneLimpo, end: endereco };
       clientes.push(novoCliente); sbUpsert('clientes', [novoCliente]);
+      registrarLog('CLIENTE', `Cliente cadastrado — ${cliente} | Tel: ${telefone}`);
     }
   } catch(e){ console.error('Erro ao salvar:', e); }
   atualizarTodasAsTelas();
@@ -1544,11 +1568,19 @@ function salvarEdicaoPedido() {
   pedidos[idx].entrada  = entradaInformada;
   pedidos[idx].itens    = [...itensEditandoPedido];
   pedidos[idx].total    = totalCalculado;
-  sbUpsert('pedidos',[pedidos[idx]]); atualizarTodasAsTelas(); fecharModalEditar();
+  sbUpsert('pedidos',[pedidos[idx]]); 
+  registrarLog('PEDIDO', `Pedido alterado — Cliente: ${pedidos[idx].cliente} | Entrega: ${pedidos[idx].data} | Total: R$ ${pedidos[idx].total.toFixed(2)}`);
+  atualizarTodasAsTelas(); fecharModalEditar();
 }
 function fecharModalEditar() { document.getElementById('modalEditarPedido').classList.remove('active'); }
 function excluirPedido(id) {
-  if(confirm('Excluir este pedido permanentemente?')){ sbDeletar('pedidos',id); pedidos=pedidos.filter(x=>x.id!==id); atualizarTodasAsTelas(); }
+  if(confirm('Excluir este pedido permanentemente?')){ 
+    const p = pedidos.find(x=>x.id===id);
+    sbDeletar('pedidos',id); 
+    pedidos=pedidos.filter(x=>x.id!==id); 
+    registrarLog('PEDIDO', `Pedido EXCLUÍDO — Cliente: ${p?p.cliente:'?'} | Entrega: ${p?p.data:'?'} | Total: R$ ${p?p.total.toFixed(2):'?'}`);
+    atualizarTodasAsTelas(); 
+  }
 }
  
 /* ===== AGENDA ===== */
@@ -1939,6 +1971,7 @@ function salvarInsumo() {
   if (estoque <= 0) { alert('Informe a quantidade.'); return; }
   const novo = { id: Date.now(), nome, unidade, estoque, preco, data: dataCompra };
   insumos.push(novo); sbUpsert('insumos',[novo]);
+  registrarLog('INSUMO', `Compra lançada — ${nomeInsumo} | Qtd: ${estoque} ${unidade} | Unit: R$ ${preco.toFixed(2)} | Total: R$ ${(estoque*preco).toFixed(2)}`);
   document.getElementById('nomeInsumo').value = '';
   document.getElementById('insumoSelecionadoNome').value = '';
   document.getElementById('insumoSelecionadoUnidade').value = '';
@@ -2005,7 +2038,13 @@ function renderInsumos() {
     resumoDiv.style.display = 'none';
   }
 }
-function excluirInsumo(id) { sbDeletar('insumos',id); insumos=insumos.filter(x=>x.id!==id); renderInsumos(); }
+function excluirInsumo(id) { 
+  const ins = insumos.find(x=>x.id===id);
+  sbDeletar('insumos',id); 
+  insumos=insumos.filter(x=>x.id!==id); 
+  registrarLog('INSUMO', `Compra EXCLUÍDA — ${ins?ins.nome:'?'} | Data: ${ins?ins.data:'?'}`);
+  renderInsumos(); 
+}
  
 /* ===== PRODUTOS ===== */
 
@@ -2028,8 +2067,8 @@ function salvarProduto() {
   };
 
   produtos.push(novo);
-
   sbUpsert('produtos', [novo]);
+  registrarLog('PRODUTO', `Produto cadastrado — ${nome} | Preço: R$ ${preco.toFixed(2)}`);
 
   renderProdutos();
 
@@ -2301,7 +2340,31 @@ function atualizarDashboard() {
   if(tbody.innerHTML==='') tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#c49070;padding:20px;">Sem registros.</td></tr>`;
 }
  
-/* ===== UTILS ===== */
+/* ===== RENDER LOGS ===== */
+async function carregarLogs() {
+  const { data, error } = await sbClient.from('logs').select('*').order('created_at', { ascending: false }).limit(200);
+  if (error) { console.error('Erro ao carregar logs:', error.message); return; }
+  logs = (data||[]).map(l => ({
+    ...l,
+    dataHora: new Date(l.created_at).toLocaleDateString('pt-BR') + ' - ' + new Date(l.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
+  }));
+  renderLogs();
+}
+function renderLogs() {
+  const lista = document.getElementById('listaLogs'); if(!lista) return;
+  if(!logs.length){ lista.innerHTML = '<p style="text-align:center;color:#aaa;padding:20px;">Nenhuma atividade registrada.</p>'; return; }
+  const cores = { 'PEDIDO': '#d94d7d', 'INSUMO': '#8a5a34', 'PRODUTO': '#2196F3', 'CLIENTE': '#28a745', 'SISTEMA': '#888' };
+  lista.innerHTML = logs.map(l => {
+    const cor = cores[l.acao] || '#888';
+    return `<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-bottom:1px solid #f0f0f0;">
+      <span style="background:${cor};color:white;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:600;white-space:nowrap;flex-shrink:0;">${l.acao}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;color:#333;">${l.descricao}</div>
+        <div style="font-size:11px;color:#aaa;margin-top:2px;">🕐 ${l.dataHora}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
 function formatarData(d){ if(!d) return ''; const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function limparFiltros(){ document.getElementById('filtroBusca').value=''; document.getElementById('filtroStatus').value=''; document.getElementById('filtroData').value=''; renderPedidos(); }
  
