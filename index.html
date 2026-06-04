@@ -1186,33 +1186,66 @@ async function finalizarPedido() {
 
   pedidos.push(novoPedido);
   try {
-   console.log('VAI SALVAR:', novoPedido); 
-   await sbUpsert('pedidos', [novoPedido]);
-    registrarLog('PEDIDO', `Pedido lançado — Cliente: ${cliente} | Entrega: ${dataEntrega} | Total: R$ ${totalFinal.toFixed(2)}`);
-    const telefoneLimpo = telefone.replace(/\D/g,'');
-    const clienteExiste = clientes.find(c => (c.tel||'').toString().replace(/\D/g,'') === telefoneLimpo || (c.id||'').toString().replace(/\D/g,'') === telefoneLimpo);
-    if(!clienteExiste && telefoneLimpo) {
-      const novoCliente = { id: telefoneLimpo, nome: cliente, tel: telefoneLimpo, end: endereco };
-      clientes.push(novoCliente);
-      await sbUpsert('clientes', [novoCliente]);
-      registrarLog('CLIENTE', `Cliente cadastrado — ${cliente} | Tel: ${telefone}`);
-    }
-    atualizarTodasAsTelas();
-    alert('Pedido salvo com sucesso!');
-    limparPedido();
- } catch(e) {
-    // Reverte o pedido da memória local se o salvamento falhar
-    pedidos.pop();
+   console.log('VAI SALVAR:', novoPedido);
 
-    console.error('Erro ao salvar pedido:', e);
-    console.error('ERRO COMPLETO:', e);
-    console.log('TIPO:', typeof e);
-    console.log('OBJETO:', JSON.stringify(e, null, 2));
+console.log('PASSO 1');
+await sbUpsert('pedidos', [novoPedido]);
 
-    alert('ENTROU NO CATCH');
-  } finally {
-    if(btnFinalizar) { btnFinalizar.disabled = false; btnFinalizar.textContent = 'Finalizar Pedido'; }
+console.log('PASSO 2');
+registrarLog('PEDIDO', `Pedido lançado — Cliente: ${cliente} | Entrega: ${dataEntrega} | Total: R$ ${totalFinal.toFixed(2)}`);
+
+const telefoneLimpo = telefone.replace(/\D/g,'');
+
+const clienteExiste = clientes.find(c =>
+  (c.tel||'').toString().replace(/\D/g,'') === telefoneLimpo ||
+  (c.id||'').toString().replace(/\D/g,'') === telefoneLimpo
+);
+
+console.log('PASSO 3');
+
+if(!clienteExiste && telefoneLimpo) {
+
+  const novoCliente = {
+    id: telefoneLimpo,
+    nome: cliente,
+    tel: telefoneLimpo,
+    end: endereco
+  };
+
+  clientes.push(novoCliente);
+
+  console.log('PASSO 4');
+  await sbUpsert('clientes', [novoCliente]);
+
+  console.log('PASSO 5');
+  registrarLog('CLIENTE', `Cliente cadastrado — ${cliente} | Tel: ${telefone}`);
+}
+
+console.log('PASSO 6');
+atualizarTodasAsTelas();
+
+console.log('PASSO 7');
+alert('Pedido salvo com sucesso!');
+
+console.log('PASSO 8');
+limparPedido();
+
+} catch(e) {
+
+  pedidos.pop();
+
+  console.error('Erro ao salvar pedido:', e);
+  console.error('ERRO COMPLETO:', e);
+
+  alert('ENTROU NO CATCH');
+
+} finally {
+
+  if(btnFinalizar) {
+    btnFinalizar.disabled = false;
+    btnFinalizar.textContent = 'Finalizar Pedido';
   }
+
 }
 function limparPedido() {
   ['cliente','telefone','endereco','entrega','obs','valorEntrada','taxaEntrega'].forEach(id => {
