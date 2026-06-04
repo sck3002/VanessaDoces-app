@@ -1209,7 +1209,7 @@ async function finalizarPedido() {
     console.log('TIPO:', typeof e);
     console.log('OBJETO:', JSON.stringify(e, null, 2));
 
-    alert('Erro ao salvar o pedido. Verifique sua conexão e tente novamente.');
+    alert('ENTROU NO CATCH');
   } finally {
     if(btnFinalizar) { btnFinalizar.disabled = false; btnFinalizar.textContent = 'Finalizar Pedido'; }
   }
