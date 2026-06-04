@@ -1,8 +1,14 @@
 const CACHE_NAME = 'vanessa-doces-v12';
-const ASSETS = [
+
+// Assets obrigatórios — se qualquer um falhar, a instalação aborta
+const ASSETS_REQUIRED = [
   '/VanessaDoces-app/',
   '/VanessaDoces-app/index.html',
-  '/VanessaDoces-app/manifest.json',
+  '/VanessaDoces-app/manifest.json'
+];
+
+// Assets opcionais — falha individual não impede a instalação
+const ASSETS_OPTIONAL = [
   '/VanessaDoces-app/icon-192.png',
   '/VanessaDoces-app/icon-512.png'
 ];
@@ -10,7 +16,18 @@ const ASSETS = [
 // Instala e armazena os arquivos estáticos em cache
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(ASSETS_REQUIRED).then(() => {
+        // Ícones são cacheados individualmente — erro individual não derruba o install
+        return Promise.allSettled(
+          ASSETS_OPTIONAL.map(url =>
+            cache.add(url).catch(err =>
+              console.warn(`[SW] Asset opcional não encontrado: ${url}`, err)
+            )
+          )
+        );
+      });
+    })
   );
   self.skipWaiting();
 });
@@ -31,6 +48,12 @@ self.addEventListener('fetch', event => {
 
   // Requisições ao Supabase sempre vão para a rede (dados em tempo real)
   if (url.hostname.includes('supabase.co')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // Apenas requisições GET são cacheáveis
+  if (event.request.method !== 'GET') {
     event.respondWith(fetch(event.request));
     return;
   }
