@@ -1247,6 +1247,7 @@ limparPedido();
   }
 
 }
+}
 function limparPedido() {
   ['cliente','telefone','endereco','entrega','obs','valorEntrada','taxaEntrega'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value = (id === 'valorEntrada' || id === 'taxaEntrega') ? '0.00' : '';
