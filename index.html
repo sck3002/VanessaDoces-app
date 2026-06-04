@@ -1163,7 +1163,7 @@ function atualizarTotalComEntrega() {
 }
 
 /* ===== FINALIZAR PEDIDO ===== */
-function finalizarPedido() {
+async function finalizarPedido() {
   const telefone = document.getElementById('telefone').value.trim();
   const cliente  = document.getElementById('cliente').value.trim();
   const dataEntrega = document.getElementById('entrega').value;
@@ -1175,24 +1175,38 @@ function finalizarPedido() {
   if(telefone === ''){ alert('Informe o telefone.'); return; }
   if(dataEntrega === ''){ alert('Informe a data de entrega.'); return; }
   if(itensPedidoAtual.length === 0){ alert('Adicione pelo menos um item.'); return; }
+
+  // Desabilita o botão para evitar duplo clique durante o salvamento
+  const btnFinalizar = document.querySelector('button[onclick="finalizarPedido()"]');
+  if(btnFinalizar) { btnFinalizar.disabled = true; btnFinalizar.textContent = 'Salvando...'; }
+
   const totalFinal = itensPedidoAtual.reduce((s,i)=>s+i.total,0) + taxa;
   const statusPedido = (totalFinal - entrada > 0) ? 'pendente' : 'pago';
   const novoPedido = { id: Date.now(), cliente, telefone, data: dataEntrega, endereco, obs: observacoes, itens: [...itensPedidoAtual], status: statusPedido, entrada, total: totalFinal, taxaEntrega: taxa };
+
   pedidos.push(novoPedido);
   try {
-    sbUpsert('pedidos', [novoPedido]);
+    await sbUpsert('pedidos', [novoPedido]);
     registrarLog('PEDIDO', `Pedido lançado — Cliente: ${cliente} | Entrega: ${dataEntrega} | Total: R$ ${totalFinal.toFixed(2)}`);
     const telefoneLimpo = telefone.replace(/\D/g,'');
     const clienteExiste = clientes.find(c => (c.tel||'').toString().replace(/\D/g,'') === telefoneLimpo || (c.id||'').toString().replace(/\D/g,'') === telefoneLimpo);
     if(!clienteExiste && telefoneLimpo) {
       const novoCliente = { id: telefoneLimpo, nome: cliente, tel: telefoneLimpo, end: endereco };
-      clientes.push(novoCliente); sbUpsert('clientes', [novoCliente]);
+      clientes.push(novoCliente);
+      await sbUpsert('clientes', [novoCliente]);
       registrarLog('CLIENTE', `Cliente cadastrado — ${cliente} | Tel: ${telefone}`);
     }
-  } catch(e){ console.error('Erro ao salvar:', e); }
-  atualizarTodasAsTelas();
-  alert('Pedido salvo com sucesso!');
-  limparPedido();
+    atualizarTodasAsTelas();
+    alert('Pedido salvo com sucesso!');
+    limparPedido();
+  } catch(e) {
+    // Reverte o pedido da memória local se o salvamento falhar
+    pedidos.pop();
+    console.error('Erro ao salvar pedido:', e);
+    alert('Erro ao salvar o pedido. Verifique sua conexão e tente novamente.');
+  } finally {
+    if(btnFinalizar) { btnFinalizar.disabled = false; btnFinalizar.textContent = 'Finalizar Pedido'; }
+  }
 }
 function limparPedido() {
   ['cliente','telefone','endereco','entrega','obs','valorEntrada','taxaEntrega'].forEach(id => {
@@ -2377,14 +2391,6 @@ function atualizarTodasAsTelas() {
   gerenciarFiltrosAnoDashboard(); atualizarDashboard();
 }
  
-carregarSistema().then(() => {
-  atualizarTodasAsTelas();
-  atualizarFiltroAnoInsumos();
-  renderizarClientes();
-}).catch(err => {
-  console.error('Erro ao iniciar banco:', err);
-  alert('Erro ao carregar o banco de dados. Verifique o console.');
-});
 </script>
 
 <!-- MODAL CPF CONTRATO -->

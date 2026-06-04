@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vanessa-doces-v11';
+const CACHE_NAME = 'vanessa-doces-v12';
 const ASSETS = [
   '/VanessaDoces-app/',
   '/VanessaDoces-app/index.html',
