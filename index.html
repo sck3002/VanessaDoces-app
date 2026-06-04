@@ -1186,7 +1186,8 @@ async function finalizarPedido() {
 
   pedidos.push(novoPedido);
   try {
-    await sbUpsert('pedidos', [novoPedido]);
+   console.log('VAI SALVAR:', novoPedido); 
+   await sbUpsert('pedidos', [novoPedido]);
     registrarLog('PEDIDO', `Pedido lançado — Cliente: ${cliente} | Entrega: ${dataEntrega} | Total: R$ ${totalFinal.toFixed(2)}`);
     const telefoneLimpo = telefone.replace(/\D/g,'');
     const clienteExiste = clientes.find(c => (c.tel||'').toString().replace(/\D/g,'') === telefoneLimpo || (c.id||'').toString().replace(/\D/g,'') === telefoneLimpo);
