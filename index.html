@@ -1200,10 +1200,15 @@ async function finalizarPedido() {
     atualizarTodasAsTelas();
     alert('Pedido salvo com sucesso!');
     limparPedido();
-  } catch(e) {
+ } catch(e) {
     // Reverte o pedido da memória local se o salvamento falhar
     pedidos.pop();
+
     console.error('Erro ao salvar pedido:', e);
+    console.error('ERRO COMPLETO:', e);
+    console.log('TIPO:', typeof e);
+    console.log('OBJETO:', JSON.stringify(e, null, 2));
+
     alert('Erro ao salvar o pedido. Verifique sua conexão e tente novamente.');
   } finally {
     if(btnFinalizar) { btnFinalizar.disabled = false; btnFinalizar.textContent = 'Finalizar Pedido'; }
