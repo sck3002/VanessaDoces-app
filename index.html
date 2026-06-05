@@ -830,8 +830,8 @@ verificarLogin().then(() => {
 async function sbListar(tabela) {
   const { data, error } = await sbClient.from(tabela).select('*');
   if (error) {
-    console.error(`[Supabase] Erro ao listar "${tabela}":`, error.code, error.message);
-    throw error;
+    console.error(`[Supabase] Erro ao listar "${tabela}": [${error.code}] ${error.message}`);
+    return [];        // retorna vazio mas NÃO lança exceção — carregarSistema continua
   }
   return data || [];
 }
@@ -839,25 +839,25 @@ async function sbUpsert(tabela, lista) {
   if (!lista || lista.length === 0) return;
   const { error } = await sbClient.from(tabela).upsert(lista, { onConflict: 'id' });
   if (error) {
-    console.error(`[Supabase] Erro ao salvar em "${tabela}":`, error.code, error.message, error.details);
-    throw error;
+    console.error(`[Supabase] Erro ao salvar em "${tabela}": [${error.code}] ${error.message}`);
+    throw error;      // lança para que o caller possa tratar o erro
   }
 }
 async function sbDeletar(tabela, id) {
   const { error } = await sbClient.from(tabela).delete().eq('id', id);
   if (error) {
-    console.error(`[Supabase] Erro ao deletar de "${tabela}":`, error.code, error.message);
+    console.error(`[Supabase] Erro ao deletar de "${tabela}": [${error.code}] ${error.message}`);
     throw error;
   }
 }
 
-/* ===== GERADOR DE ID SEGURO ===== */
-// Date.now() gera ~1.748 trilhões — estoura o tipo int4 do Supabase (máx ~2,1 bilhões).
-// Esta função gera o próximo inteiro sequencial a partir do maior ID existente no array.
+/* ===== GERADOR DE ID SEGURO =====
+   Date.now() gera ~1,748 trilhões — estoura int4 do Supabase (máx ~2,1 bi).
+   Esta função usa o próximo inteiro a partir do maior ID existente.          */
 function gerarNovoId(array) {
   if (!array || array.length === 0) return 1;
-  const maxId = Math.max(...array.map(item => Number(item.id) || 0));
-  return isFinite(maxId) ? maxId + 1 : 1;
+  const max = Math.max(...array.map(item => Number(item.id) || 0));
+  return isFinite(max) ? max + 1 : 1;
 }
 
 /* ===== LOG ===== */
@@ -1017,24 +1017,23 @@ function importarBackup(input) {
  
 /* ===== CARREGAR SISTEMA ===== */
 async function carregarSistema() {
-  try {
-    const [p, pr, ins, cli, ti] = await Promise.all([
-      sbListar('pedidos'), sbListar('produtos'), sbListar('insumos'),
-      sbListar('clientes'), sbListar('tipos_insumos')
+  const [p, pr, ins, cli, ti] = await Promise.all([
+    sbListar('pedidos'), sbListar('produtos'), sbListar('insumos'),
+    sbListar('clientes'), sbListar('tipos_insumos')
+  ]);
+  if (p.length === 0 && pr.length === 0 && ins.length === 0) {
+    pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
+    produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
+    insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
+    clientes = []; tiposInsumos = [];
+    await Promise.all([
+      sbUpsert('pedidos',pedidos).catch(e=>console.error('[init] pedidos:',e.message)),
+      sbUpsert('produtos',produtos).catch(e=>console.error('[init] produtos:',e.message)),
+      sbUpsert('insumos',insumos).catch(e=>console.error('[init] insumos:',e.message))
     ]);
-    if (p.length === 0 && pr.length === 0 && ins.length === 0) {
-      pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
-      produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
-      insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
-      clientes = []; tiposInsumos = [];
-      await Promise.all([sbUpsert('pedidos',pedidos),sbUpsert('produtos',produtos),sbUpsert('insumos',insumos)]);
-    } else {
-      pedidos = p || []; produtos = pr || []; insumos = ins || [];
-      clientes = cli || []; tiposInsumos = ti || [];
-    }
-  } catch(e) {
-    console.error('[carregarSistema] Erro:', e);
-    alert(`Erro ao carregar dados: ${e.message || e}\n\nVerifique o console para detalhes.`);
+  } else {
+    pedidos = p || []; produtos = pr || []; insumos = ins || [];
+    clientes = cli || []; tiposInsumos = ti || [];
   }
 }
  
@@ -1199,17 +1198,13 @@ async function finalizarPedido() {
   if(dataEntrega === ''){ alert('Informe a data de entrega.'); return; }
   if(itensPedidoAtual.length === 0){ alert('Adicione pelo menos um item.'); return; }
 
+  // Desabilita o botão para evitar duplo clique durante o salvamento
   const btnFinalizar = document.querySelector('button[onclick="finalizarPedido()"]');
   if(btnFinalizar) { btnFinalizar.disabled = true; btnFinalizar.textContent = 'Salvando...'; }
 
   const totalFinal = itensPedidoAtual.reduce((s,i)=>s+i.total,0) + taxa;
   const statusPedido = (totalFinal - entrada > 0) ? 'pendente' : 'pago';
-  const novoPedido = {
-    id: gerarNovoId(pedidos),
-    cliente, telefone, data: dataEntrega, endereco, obs: observacoes,
-    itens: [...itensPedidoAtual], status: statusPedido,
-    entrada, total: totalFinal, taxaEntrega: taxa
-  };
+  const novoPedido = { id: gerarNovoId(pedidos), cliente, telefone, data: dataEntrega, endereco, obs: observacoes, itens: [...itensPedidoAtual], status: statusPedido, entrada, total: totalFinal, taxaEntrega: taxa };
 
   pedidos.push(novoPedido);
   try {
@@ -1223,7 +1218,7 @@ async function finalizarPedido() {
     if(!clienteExiste && telefoneLimpo) {
       const novoCliente = { id: telefoneLimpo, nome: cliente, tel: telefoneLimpo, end: endereco };
       clientes.push(novoCliente);
-      await sbUpsert('clientes', [novoCliente]);
+      await sbUpsert('clientes', [novoCliente]).catch(e => console.warn('Cliente não salvo:', e.message));
       registrarLog('CLIENTE', `Cliente cadastrado — ${cliente} | Tel: ${telefone}`);
     }
     atualizarTodasAsTelas();
@@ -1231,7 +1226,9 @@ async function finalizarPedido() {
     limparPedido();
   } catch(e) {
     pedidos.pop();
-    alert(`Erro ao salvar pedido:\n${e.message || e}\n\nCódigo: ${e.code || 'desconhecido'}`);
+    const msg = e.message || String(e);
+    const code = e.code || '';
+    alert(`Erro ao salvar pedido:\n${msg}${code ? '\n\nCódigo: ' + code : ''}`);
   } finally {
     if(btnFinalizar) { btnFinalizar.disabled = false; btnFinalizar.textContent = 'Finalizar Pedido'; }
   }
@@ -1951,6 +1948,7 @@ function salvarTipoInsumo() {
   const jaExiste = tiposInsumos.find(t => t.nome.toLowerCase() === nome.toLowerCase());
   if (jaExiste) { alert('Esse insumo já está cadastrado.'); return; }
   const novo = { id: gerarNovoId(tiposInsumos), nome, unidade };
+  tiposInsumos.push(novo);
   sbUpsert('tipos_insumos', [novo]);
   document.getElementById('nomeNovoTipoInsumo').value = '';
   renderTiposInsumos();
