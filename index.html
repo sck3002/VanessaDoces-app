@@ -829,17 +829,35 @@ verificarLogin().then(() => {
  
 async function sbListar(tabela) {
   const { data, error } = await sbClient.from(tabela).select('*');
-  if (error) { console.error(`Erro ao listar ${tabela}:`, error.message); return []; }
+  if (error) {
+    console.error(`[Supabase] Erro ao listar "${tabela}":`, error.code, error.message);
+    throw error;
+  }
   return data || [];
 }
 async function sbUpsert(tabela, lista) {
   if (!lista || lista.length === 0) return;
   const { error } = await sbClient.from(tabela).upsert(lista, { onConflict: 'id' });
-  if (error) console.error(`Erro ao salvar em ${tabela}:`, error.message);
+  if (error) {
+    console.error(`[Supabase] Erro ao salvar em "${tabela}":`, error.code, error.message, error.details);
+    throw error;
+  }
 }
 async function sbDeletar(tabela, id) {
   const { error } = await sbClient.from(tabela).delete().eq('id', id);
-  if (error) console.error(`Erro ao deletar de ${tabela}:`, error.message);
+  if (error) {
+    console.error(`[Supabase] Erro ao deletar de "${tabela}":`, error.code, error.message);
+    throw error;
+  }
+}
+
+/* ===== GERADOR DE ID SEGURO ===== */
+// Date.now() gera ~1.748 trilhões — estoura o tipo int4 do Supabase (máx ~2,1 bilhões).
+// Esta função gera o próximo inteiro sequencial a partir do maior ID existente no array.
+function gerarNovoId(array) {
+  if (!array || array.length === 0) return 1;
+  const maxId = Math.max(...array.map(item => Number(item.id) || 0));
+  return isFinite(maxId) ? maxId + 1 : 1;
 }
 
 /* ===== LOG ===== */
@@ -999,19 +1017,24 @@ function importarBackup(input) {
  
 /* ===== CARREGAR SISTEMA ===== */
 async function carregarSistema() {
-  const [p, pr, ins, cli, ti] = await Promise.all([
-    sbListar('pedidos'), sbListar('produtos'), sbListar('insumos'),
-    sbListar('clientes'), sbListar('tipos_insumos')
-  ]);
-  if (p.length === 0 && pr.length === 0 && ins.length === 0) {
-    pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
-    produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
-    insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
-    clientes = []; tiposInsumos = [];
-    await Promise.all([sbUpsert('pedidos',pedidos),sbUpsert('produtos',produtos),sbUpsert('insumos',insumos)]);
-  } else {
-    pedidos = p || []; produtos = pr || []; insumos = ins || [];
-    clientes = cli || []; tiposInsumos = ti || [];
+  try {
+    const [p, pr, ins, cli, ti] = await Promise.all([
+      sbListar('pedidos'), sbListar('produtos'), sbListar('insumos'),
+      sbListar('clientes'), sbListar('tipos_insumos')
+    ]);
+    if (p.length === 0 && pr.length === 0 && ins.length === 0) {
+      pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
+      produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
+      insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
+      clientes = []; tiposInsumos = [];
+      await Promise.all([sbUpsert('pedidos',pedidos),sbUpsert('produtos',produtos),sbUpsert('insumos',insumos)]);
+    } else {
+      pedidos = p || []; produtos = pr || []; insumos = ins || [];
+      clientes = cli || []; tiposInsumos = ti || [];
+    }
+  } catch(e) {
+    console.error('[carregarSistema] Erro:', e);
+    alert(`Erro ao carregar dados: ${e.message || e}\n\nVerifique o console para detalhes.`);
   }
 }
  
@@ -1176,77 +1199,42 @@ async function finalizarPedido() {
   if(dataEntrega === ''){ alert('Informe a data de entrega.'); return; }
   if(itensPedidoAtual.length === 0){ alert('Adicione pelo menos um item.'); return; }
 
-  // Desabilita o botão para evitar duplo clique durante o salvamento
   const btnFinalizar = document.querySelector('button[onclick="finalizarPedido()"]');
   if(btnFinalizar) { btnFinalizar.disabled = true; btnFinalizar.textContent = 'Salvando...'; }
 
   const totalFinal = itensPedidoAtual.reduce((s,i)=>s+i.total,0) + taxa;
   const statusPedido = (totalFinal - entrada > 0) ? 'pendente' : 'pago';
-  const novoPedido = { id: Date.now(), cliente, telefone, data: dataEntrega, endereco, obs: observacoes, itens: [...itensPedidoAtual], status: statusPedido, entrada, total: totalFinal, taxaEntrega: taxa };
+  const novoPedido = {
+    id: gerarNovoId(pedidos),
+    cliente, telefone, data: dataEntrega, endereco, obs: observacoes,
+    itens: [...itensPedidoAtual], status: statusPedido,
+    entrada, total: totalFinal, taxaEntrega: taxa
+  };
 
   pedidos.push(novoPedido);
   try {
-   console.log('VAI SALVAR:', novoPedido);
-
-console.log('PASSO 1');
-await sbUpsert('pedidos', [novoPedido]);
-
-console.log('PASSO 2');
-registrarLog('PEDIDO', `Pedido lançado — Cliente: ${cliente} | Entrega: ${dataEntrega} | Total: R$ ${totalFinal.toFixed(2)}`);
-
-const telefoneLimpo = telefone.replace(/\D/g,'');
-
-const clienteExiste = clientes.find(c =>
-  (c.tel||'').toString().replace(/\D/g,'') === telefoneLimpo ||
-  (c.id||'').toString().replace(/\D/g,'') === telefoneLimpo
-);
-
-console.log('PASSO 3');
-
-if(!clienteExiste && telefoneLimpo) {
-
-  const novoCliente = {
-    id: telefoneLimpo,
-    nome: cliente,
-    tel: telefoneLimpo,
-    end: endereco
-  };
-
-  clientes.push(novoCliente);
-
-  console.log('PASSO 4');
-  await sbUpsert('clientes', [novoCliente]);
-
-  console.log('PASSO 5');
-  registrarLog('CLIENTE', `Cliente cadastrado — ${cliente} | Tel: ${telefone}`);
-}
-
-console.log('PASSO 6');
-atualizarTodasAsTelas();
-
-console.log('PASSO 7');
-alert('Pedido salvo com sucesso!');
-
-console.log('PASSO 8');
-limparPedido();
-
-} catch(e) {
-
-  pedidos.pop();
-
-  console.error('Erro ao salvar pedido:', e);
-  console.error('ERRO COMPLETO:', e);
-
-  alert('ENTROU NO CATCH');
-
-} finally {
-
-  if(btnFinalizar) {
-    btnFinalizar.disabled = false;
-    btnFinalizar.textContent = 'Finalizar Pedido';
+    await sbUpsert('pedidos', [novoPedido]);
+    registrarLog('PEDIDO', `Pedido lançado — Cliente: ${cliente} | Entrega: ${dataEntrega} | Total: R$ ${totalFinal.toFixed(2)}`);
+    const telefoneLimpo = telefone.replace(/\D/g,'');
+    const clienteExiste = clientes.find(c =>
+      (c.tel||'').toString().replace(/\D/g,'') === telefoneLimpo ||
+      (c.id||'').toString().replace(/\D/g,'') === telefoneLimpo
+    );
+    if(!clienteExiste && telefoneLimpo) {
+      const novoCliente = { id: telefoneLimpo, nome: cliente, tel: telefoneLimpo, end: endereco };
+      clientes.push(novoCliente);
+      await sbUpsert('clientes', [novoCliente]);
+      registrarLog('CLIENTE', `Cliente cadastrado — ${cliente} | Tel: ${telefone}`);
+    }
+    atualizarTodasAsTelas();
+    alert('Pedido salvo com sucesso!');
+    limparPedido();
+  } catch(e) {
+    pedidos.pop();
+    alert(`Erro ao salvar pedido:\n${e.message || e}\n\nCódigo: ${e.code || 'desconhecido'}`);
+  } finally {
+    if(btnFinalizar) { btnFinalizar.disabled = false; btnFinalizar.textContent = 'Finalizar Pedido'; }
   }
-
-}
 }
 function limparPedido() {
   ['cliente','telefone','endereco','entrega','obs','valorEntrada','taxaEntrega'].forEach(id => {
@@ -1604,7 +1592,7 @@ function compartilharPedido() {
     navigator.clipboard.writeText(texto).then(() => alert('Pedido copiado para a área de transferência!'));
   }
 }
-function salvarEdicaoPedido() {
+async function salvarEdicaoPedido() {
   const id = parseInt(document.getElementById('editPedidoId').value);
   const idx = pedidos.findIndex(x=>x.id===id); if(idx===-1) return;
   if(itensEditandoPedido.length === 0) { alert("O pedido não pode ficar vazio!"); return; }
@@ -1622,9 +1610,13 @@ function salvarEdicaoPedido() {
   pedidos[idx].entrada  = entradaInformada;
   pedidos[idx].itens    = [...itensEditandoPedido];
   pedidos[idx].total    = totalCalculado;
-  sbUpsert('pedidos',[pedidos[idx]]); 
-  registrarLog('PEDIDO', `Pedido alterado — Cliente: ${pedidos[idx].cliente} | Entrega: ${pedidos[idx].data} | Total: R$ ${pedidos[idx].total.toFixed(2)}`);
-  atualizarTodasAsTelas(); fecharModalEditar();
+  try {
+    await sbUpsert('pedidos',[pedidos[idx]]);
+    registrarLog('PEDIDO', `Pedido alterado — Cliente: ${pedidos[idx].cliente} | Entrega: ${pedidos[idx].data} | Total: R$ ${pedidos[idx].total.toFixed(2)}`);
+    atualizarTodasAsTelas(); fecharModalEditar();
+  } catch(e) {
+    alert(`Erro ao salvar alteração:\n${e.message || e}`);
+  }
 }
 function fecharModalEditar() { document.getElementById('modalEditarPedido').classList.remove('active'); }
 function excluirPedido(id) {
@@ -1958,8 +1950,7 @@ function salvarTipoInsumo() {
   if (!nome) { alert('Informe o nome do insumo.'); return; }
   const jaExiste = tiposInsumos.find(t => t.nome.toLowerCase() === nome.toLowerCase());
   if (jaExiste) { alert('Esse insumo já está cadastrado.'); return; }
-  const novo = { id: Date.now(), nome, unidade };
-  tiposInsumos.push(novo);
+  const novo = { id: gerarNovoId(tiposInsumos), nome, unidade };
   sbUpsert('tipos_insumos', [novo]);
   document.getElementById('nomeNovoTipoInsumo').value = '';
   renderTiposInsumos();
@@ -2023,7 +2014,7 @@ function salvarInsumo() {
   const dataCompra = document.getElementById('dataCompraInsumo').value || defaultDateInput;
   if (!nome) { alert('Selecione ou informe um insumo.'); return; }
   if (estoque <= 0) { alert('Informe a quantidade.'); return; }
-  const novo = { id: Date.now(), nome, unidade, estoque, preco, data: dataCompra };
+  const novo = { id: gerarNovoId(insumos), nome, unidade, estoque, preco, data: dataCompra };
   insumos.push(novo); sbUpsert('insumos',[novo]);
   registrarLog('INSUMO', `Compra lançada — ${nomeInsumo} | Qtd: ${estoque} ${unidade} | Unit: R$ ${preco.toFixed(2)} | Total: R$ ${(estoque*preco).toFixed(2)}`);
   document.getElementById('nomeInsumo').value = '';
@@ -2115,7 +2106,7 @@ function salvarProduto() {
   if (!nome || isNaN(preco)) return;
 
   const novo = {
-    id: Date.now(),
+    id: gerarNovoId(produtos),
     nome,
     preco
   };
