@@ -784,8 +784,10 @@ async function verificarLogin(){
 
     `;
 
+    return false; /* FIX: sinaliza "não autenticado" para o .then() */
   }
 
+  return true; /* FIX: sinaliza "autenticado" */
 }
 
 async function fazerLogin(){
@@ -816,7 +818,8 @@ async function fazerLogin(){
 
 }
 
-verificarLogin().then(() => {
+verificarLogin().then(logado => {
+  if (!logado) return; /* FIX: não prossegue se não há sessão */
   carregarSistema().then(() => {
     atualizarTodasAsTelas();
     atualizarFiltroAnoInsumos();
@@ -1190,9 +1193,9 @@ function finalizarPedido() {
       registrarLog('CLIENTE', `Cliente cadastrado — ${cliente} | Tel: ${telefone}`);
     }
   } catch(e){ console.error('Erro ao salvar:', e); }
-  alert('Pedido salvo com sucesso!');
-limparPedido();
-try { atualizarTodasAsTelas(); } catch(e) { console.error('Erro ao atualizar telas:', e); }
+  alert('Pedido salvo com sucesso!'); /* FIX: movido para antes do atualizarTodasAsTelas */
+  limparPedido();
+  try { atualizarTodasAsTelas(); } catch(e) { console.error('Erro ao atualizar telas:', e); }
 }
 function limparPedido() {
   ['cliente','telefone','endereco','entrega','obs','valorEntrada','taxaEntrega'].forEach(id => {
@@ -1435,20 +1438,25 @@ function renderPedidos() {
   const data   = document.getElementById('filtroData').value;
   const lista  = document.getElementById('listaPedidos');
   let filtrados = pedidos.filter(p =>
-    (!busca || (p.cliente || '').toLowerCase().includes(busca)) &&
+    (!busca || (p.cliente || '').toLowerCase().includes(busca)) && /* FIX: guarda nulo */
     (!status || p.status === status) &&
     (!data || p.data === data)
   ).sort((a,b) => new Date(b.data) - new Date(a.data));
   lista.innerHTML = filtrados.map(p => {
-    const entrada = p.entrada || 0; const saldo = (p.total || 0) - entrada;
+    const entrada = p.entrada || 0;
+    const total   = p.total   || 0; /* FIX: guarda nulo */
+    const saldo   = total - entrada;
+    const itens   = p.itens   || []; /* FIX: guarda nulo */
+    const status  = p.status  || 'pendente'; /* FIX: guarda nulo */
+    const cliente = p.cliente || '—'; /* FIX: guarda nulo */
     return `<div class="pedido-item">
       <div class="pedido-info">
-        <strong>${p.cliente.toUpperCase()}</strong>
-        <span>📅 ${formatarData(p.data)} &nbsp;|&nbsp; 🍬 ${Math.round(p.itens.reduce((s,i)=>s+i.qtd,0))} un &nbsp;|&nbsp; 💰 Total: R$ ${p.total.toFixed(2)}</span>
-        <span style="font-size:12px;color:#555;margin-top:4px;">💰 Entrada Paga: <b>R$ ${entrada.toFixed(2)}</b> &nbsp;|&nbsp; <b style="color:${saldo>0?'#ff9800':'#28a745'};">Saldo: R$ ${saldo.toFixed(2)}</b></span>
+        <strong>${cliente.toUpperCase()}</strong>
+        <span>📅 ${formatarData(p.data)} &nbsp;|&nbsp; 🍬 ${Math.round(itens.reduce((s,i)=>s+(i.qtd||0),0))} un &nbsp;|&nbsp; 💰 Total: R$ ${total.toFixed(2)}</span>
+        <span style="font-size:12px;color:#555;margin-top:4px;">💰 Entrada Paga: <b>R$ ${entrada.toFixed(2)}</b> &nbsp;|&nbsp; <b style="color:${saldo>0?'#ff9800':'#28a745'};">Saldo: R$ ${(saldo<0?0:saldo).toFixed(2)}</b></span>
       </div>
       <div style="display:flex;gap:10px;align-items:center;">
-        <span class="badge badge-${p.status}">${p.status.toUpperCase()}</span>
+        <span class="badge badge-${status}">${status.toUpperCase()}</span>
         <button class="btn btn-azul" style="padding:6px 12px;" onclick="abrirEditar(${p.id})">✏️ Ver / Alterar</button>
         <button class="btn btn-marrom" style="padding:6px 12px;" onclick="abrirContrato(${p.id})">📄 Contrato</button>
         <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirPedido(${p.id})">🗑</button>
