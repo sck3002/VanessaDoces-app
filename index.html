@@ -1190,9 +1190,9 @@ function finalizarPedido() {
       registrarLog('CLIENTE', `Cliente cadastrado — ${cliente} | Tel: ${telefone}`);
     }
   } catch(e){ console.error('Erro ao salvar:', e); }
-  atualizarTodasAsTelas();
   alert('Pedido salvo com sucesso!');
-  limparPedido();
+limparPedido();
+try { atualizarTodasAsTelas(); } catch(e) { console.error('Erro ao atualizar telas:', e); }
 }
 function limparPedido() {
   ['cliente','telefone','endereco','entrega','obs','valorEntrada','taxaEntrega'].forEach(id => {
@@ -1435,12 +1435,12 @@ function renderPedidos() {
   const data   = document.getElementById('filtroData').value;
   const lista  = document.getElementById('listaPedidos');
   let filtrados = pedidos.filter(p =>
-    (!busca || p.cliente.toLowerCase().includes(busca)) &&
+    (!busca || (p.cliente || '').toLowerCase().includes(busca)) &&
     (!status || p.status === status) &&
     (!data || p.data === data)
   ).sort((a,b) => new Date(b.data) - new Date(a.data));
   lista.innerHTML = filtrados.map(p => {
-    const entrada = p.entrada || 0; const saldo = p.total - entrada;
+    const entrada = p.entrada || 0; const saldo = (p.total || 0) - entrada;
     return `<div class="pedido-item">
       <div class="pedido-info">
         <strong>${p.cliente.toUpperCase()}</strong>
