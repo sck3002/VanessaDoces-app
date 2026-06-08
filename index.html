@@ -819,15 +819,17 @@ async function fazerLogin(){
 }
 
 verificarLogin().then(logado => {
-  if (!logado) return; /* FIX: não prossegue se não há sessão */
-  carregarSistema().then(() => {
-    atualizarTodasAsTelas();
-    atualizarFiltroAnoInsumos();
-    renderizarClientes();
-  }).catch(err => {
-    console.error('Erro ao iniciar banco:', err);
-    alert('Erro ao carregar o banco de dados. Verifique o console.');
-  });
+  if (!logado) return;
+  carregarSistema()
+    .then(() => {
+      try { atualizarTodasAsTelas(); } catch(e) { console.error('Erro ao renderizar telas:', e); }
+      try { atualizarFiltroAnoInsumos(); } catch(e) { console.error(e); }
+      try { renderizarClientes(); } catch(e) { console.error(e); }
+    })
+    .catch(err => {
+      console.error('Erro ao carregar banco:', err);
+      alert('Erro ao carregar o banco de dados. Verifique o console.');
+    });
 });
  
 async function sbListar(tabela) {
@@ -1111,7 +1113,7 @@ function popularSelectProduto() {
   const selEdit = document.getElementById('editAdicionarDoceSelect');
   sel.innerHTML = ''; selEdit.innerHTML = '';
   produtos.forEach(p => {
-    const opt = document.createElement('option'); opt.value = p.id; opt.textContent = `${p.nome} (R$ ${p.preco.toFixed(2)}/un)`;
+    const opt = document.createElement('option'); opt.value = p.id; opt.textContent = `${p.nome} (R$ ${(p.preco || 0).toFixed(2)}/un)`;
     sel.appendChild(opt); selEdit.appendChild(opt.cloneNode(true));
   });
   atualizarValor();
@@ -1119,7 +1121,7 @@ function popularSelectProduto() {
 function atualizarValor() {
   const selectElem = document.getElementById('produto'); if(!selectElem.value) return;
   const prod = produtos.find(p=>p.id===parseInt(selectElem.value)); if(!prod) return;
-  document.getElementById('valor').value = prod.preco.toFixed(2);
+  document.getElementById('valor').value = (prod.preco || 0).toFixed(2);
   calcularTotalItem();
 }
 function calcularTotalItem() {
@@ -2016,7 +2018,7 @@ function renderInsumos() {
     <div class="insumo-item">
       <div class="insumo-info">
         <strong>${i.nome}</strong>
-        <span>📅 ${formatarData(i.data||defaultDateInput)} &nbsp;|&nbsp; Qtde: ${i.estoque} (${i.unidade}) &nbsp;|&nbsp; Unit: R$ ${i.preco.toFixed(2)} &nbsp;|&nbsp; <b>Total: R$ ${(i.estoque*i.preco).toFixed(2)}</b></span>
+        <span>📅 ${formatarData(i.data||defaultDateInput)} &nbsp;|&nbsp; Qtde: ${i.estoque||0} (${i.unidade||'?'}) &nbsp;|&nbsp; Unit: R$ ${(i.preco||0).toFixed(2)} &nbsp;|&nbsp; <b>Total: R$ ${((i.estoque||0)*(i.preco||0)).toFixed(2)}</b></span>
       </div>
       <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirInsumo(${i.id})">🗑</button>
     </div>`).join('');
@@ -2136,7 +2138,7 @@ function renderProdutos() {
 
         <div class="produto-info">
           <strong>${p.nome}</strong>
-          <span>R$ ${p.preco.toFixed(2)} un</span>
+          <span>R$ ${(p.preco || 0).toFixed(2)} un</span>
         </div>
 
         <div style="display:flex; gap:8px;">
@@ -2385,14 +2387,7 @@ function atualizarTodasAsTelas() {
   gerenciarFiltrosAnoDashboard(); atualizarDashboard();
 }
  
-carregarSistema().then(() => {
-  atualizarTodasAsTelas();
-  atualizarFiltroAnoInsumos();
-  renderizarClientes();
-}).catch(err => {
-  console.error('Erro ao iniciar banco:', err);
-  alert('Erro ao carregar o banco de dados. Verifique o console.');
-});
+/* bloco duplicado removido — carregarSistema já é chamado dentro de verificarLogin().then() */
 </script>
 
 <!-- MODAL CPF CONTRATO -->
