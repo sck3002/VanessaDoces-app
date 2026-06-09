@@ -217,8 +217,8 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
   .grid { grid-template-columns: 1fr !important; gap: 12px; }
 
   /* Cards */
-  .card { padding: 14px; border-radius: 12px; margin-bottom: 12px; }
-  .card h2 { font-size: 16px; margin-bottom: 14px; }
+  .card { padding: 12px; border-radius: 12px; margin-bottom: 10px; }
+  .card h2 { font-size: 15px; margin-bottom: 10px; }
 
   /* Grid itens do pedido → empilhado */
   .card > div[style*="grid-template-columns:2fr"] {
@@ -226,17 +226,22 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
     gap: 8px !important;
   }
 
-  /* Inputs e selects com altura mínima de toque */
-  input, select, textarea {
-    padding: 14px 12px;
-    font-size: 16px !important; /* evita zoom automático no iOS */
-    min-height: 48px;
-    border-radius: 10px;
+  /* Campos compactos porém tocáveis */
+  label {
+    margin-top: 8px;
+    margin-bottom: 2px;
+    font-size: 12px;
   }
-  textarea { height: 70px; font-size: 14px !important; }
+  input, select, textarea {
+    padding: 9px 11px;
+    font-size: 15px !important; /* ≥15px evita zoom automático no Chrome Android */
+    min-height: 42px;
+    border-radius: 8px;
+  }
+  textarea { height: 58px; font-size: 14px !important; }
 
-  /* Botões maiores para toque */
-  .btn { padding: 14px 16px; font-size: 14px; min-height: 48px; }
+  /* Botões proporcionais ao novo tamanho */
+  .btn { padding: 11px 16px; font-size: 14px; min-height: 44px; }
   .botoes { gap: 10px; }
   .botoes button { min-width: unset; }
 
