@@ -320,7 +320,7 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
   div[style*="grid-template-columns:340px"] { grid-template-columns: 1fr !important; }
 
   /* Modal: full screen no mobile */
-  .modal-box { width: 100% !important; max-width: 100vw !important; margin: 0 !important; border-radius: 0 !important; min-height: 100vh; }
+  .modal-box { width: 100% !important; max-width: 100vw !important; margin: 0 !important; border-radius: 0 !important; min-height: 100vh; padding-bottom: 90px !important; }
   .modal { padding: 0; }
 
   /* Rodapé escondido (menu substituiu) */
@@ -1578,11 +1578,17 @@ function renderPedidos() {
   const status = document.getElementById('filtroStatus').value;
   const data   = document.getElementById('filtroData').value;
   const lista  = document.getElementById('listaPedidos');
-  let filtrados = pedidos.filter(p =>
-    (!busca || (p.cliente || '').toLowerCase().includes(busca)) && /* FIX: guarda nulo */
-    (!status || p.status === status) &&
-    (!data || p.data === data)
-  ).sort((a,b) => new Date(b.data) - new Date(a.data));
+  let filtrados = pedidos.filter(p => {
+    const nome = (p.cliente || '').toLowerCase();
+    const tel  = (p.telefone || '').replace(/\D/g,'');
+    const buscaTel = busca.replace(/\D/g,'');
+    const matchBusca = !busca ||
+      nome.includes(busca) ||
+      (buscaTel && tel.includes(buscaTel));
+    return matchBusca &&
+      (!status || p.status === status) &&
+      (!data   || p.data   === data);
+  }).sort((a,b) => new Date(b.data) - new Date(a.data));
   lista.innerHTML = filtrados.map(p => {
     const entrada = p.entrada || 0;
     const total   = p.total   || 0; /* FIX: guarda nulo */
@@ -2729,16 +2735,15 @@ function renderMassasAgenda() {
     </div>`;
 }
 function salvarMassaDiario(data) {
-  const { massas } = calcularPrevistoPorMassa(data, data);
-  const tipos = Object.keys(massas);
-  const producao = tipos.map(nome => {
-    const inputId = `massaInput_${data}_${nome.replace(/\s/g,'_')}`;
-    const el = document.getElementById(inputId);
-    const quantidade = parseFloat(el?.value||'0')||0;
-    return { tipo_id: massas[nome].tipo_id, nome, quantidade };
-  }).filter(r=>r.quantidade>0);
+  /* Coleta os inputs renderizados para TODOS os tipos de massa cadastrados */
+  const producao = tiposMassa.map(t => {
+    const el = document.getElementById(`massaInput_${data}_${t.nome.replace(/\s/g,'_')}`);
+    if (!el) return null;
+    const quantidade = parseFloat((el.value||'0').replace(',','.')) || 0;
+    return quantidade > 0 ? { tipo_id: t.id, nome: t.nome, quantidade } : null;
+  }).filter(Boolean);
 
-  const existente = massasDiario.find(d=>d.data===data);
+  const existente = massasDiario.find(d => d.data === data);
   const novoId    = existente ? existente.id : gerarNovoId(massasDiario);
   const registro  = { id: novoId, data, producao };
   if (existente) { Object.assign(existente, registro); } else { massasDiario.push(registro); }
