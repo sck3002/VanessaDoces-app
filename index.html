@@ -2695,15 +2695,17 @@ function renderMassasAgenda() {
       </div>`;
     }).join('');
 
-    /* Formulário de lançamento */
-    const inputsMassa = tipos.map(nome=>`
+    /* Formulário de lançamento — sempre mostra todos os tipos cadastrados */
+    const tiposForm = tiposMassa.length ? tiposMassa.map(t=>t.nome) : tipos;
+    const inputsMassa = tiposForm.map(nome=>`
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
         <label style="flex:1;font-size:12px;color:#6b3f20;">🍫 ${nome}</label>
         <input type="number" step="0.1" min="0" placeholder="0.0"
           id="massaInput_${data}_${nome.replace(/\s/g,'_')}"
           style="width:80px;padding:6px;border-radius:8px;border:1px solid #ccc;font-size:12px;"
           value="${realDia[nome]||''}">
-        <span style="font-size:11px;color:#aaa;">UN (prev: ${(prevDia[nome]?.previsto||0).toFixed(1)})</span>
+        <span style="font-size:11px;color:#aaa;">UN${prevDia[nome]?` (prev:${prevDia[nome].previsto.toFixed(1)})`:''}
+        </span>
       </div>`).join('');
 
     return `<div class="dia-log-row ${lancado?'lancado':''}">
@@ -2734,20 +2736,29 @@ function renderMassasAgenda() {
       ${diarioHtml}
     </div>`;
 }
-function salvarMassaDiario(data) {
-  /* Coleta os inputs renderizados para TODOS os tipos de massa cadastrados */
-  const producao = tiposMassa.map(t => {
-    const el = document.getElementById(`massaInput_${data}_${t.nome.replace(/\s/g,'_')}`);
-    if (!el) return null;
-    const quantidade = parseFloat((el.value||'0').replace(',','.')) || 0;
-    return quantidade > 0 ? { tipo_id: t.id, nome: t.nome, quantidade } : null;
-  }).filter(Boolean);
+async function salvarMassaDiario(data) {
+  /* Busca os inputs pelo prefixo do ID — robusto independente de tiposMassa */
+  const prefixo = `massaInput_${data}_`;
+  const producao = [];
+  document.querySelectorAll(`input[id^="${prefixo}"]`).forEach(el => {
+    const qtd = parseFloat((el.value||'0').replace(',','.')) || 0;
+    if (!qtd) return;
+    const nomeRaw = el.id.slice(prefixo.length).replace(/_/g,' ');
+    const tipo = tiposMassa.find(t => t.nome === nomeRaw);
+    producao.push({ tipo_id: tipo ? tipo.id : 0, nome: nomeRaw, quantidade: qtd });
+  });
+
+  if (!producao.length) {
+    alert('Informe pelo menos uma quantidade antes de salvar.');
+    return;
+  }
 
   const existente = massasDiario.find(d => d.data === data);
   const novoId    = existente ? existente.id : gerarNovoId(massasDiario);
   const registro  = { id: novoId, data, producao };
   if (existente) { Object.assign(existente, registro); } else { massasDiario.push(registro); }
-  sbUpsert('massas_diario', [registro]);
+  await sbUpsert('massas_diario', [registro]);
+  alert(`✅ Produção de ${formatarData(data)} salva com sucesso!`);
   renderMassasAgenda();
 }
 
