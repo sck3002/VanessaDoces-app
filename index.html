@@ -115,17 +115,26 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 /* Módulo Massas */
 .massa-painel{background:#fffaf5;border:1px solid #f5c5a3;border-radius:12px;padding:14px;margin-bottom:14px;}
 .massa-painel h3{color:#8a5a34;font-size:14px;margin-bottom:10px;}
-.massa-tabela{width:100%;border-collapse:collapse;font-size:13px;}
-.massa-tabela th{background:#f5c5a3;color:#6b3f20;padding:6px 10px;text-align:left;}
-.massa-tabela td{padding:6px 10px;border-bottom:1px solid #f0e0d0;}
+.massa-tabela{width:100%;border-collapse:collapse;font-size:12px;}
+.massa-tabela th{background:#f5c5a3;color:#6b3f20;padding:5px 8px;text-align:left;font-size:11px;}
+.massa-tabela td{padding:5px 8px;border-bottom:1px solid #f0e0d0;font-size:12px;}
 .massa-tabela tr:last-child td{border-bottom:none;}
 .massa-saldo-neg{color:#28a745;font-weight:700;}
 .massa-saldo-pos{color:#ff9800;font-weight:700;}
-.dia-log-row{background:white;border-radius:10px;padding:10px 14px;margin-bottom:8px;border:1px solid #f0e0d0;}
+.dia-log-row{background:white;border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1px solid #f0e0d0;}
 .dia-log-row.lancado{border-color:#28a745;background:#f6fff9;}
 /* Receita do produto */
 .receita-linha{display:flex;align-items:center;gap:8px;background:#fff5f0;border-radius:8px;padding:6px 10px;margin-bottom:5px;font-size:12px;}
 .receita-linha span{flex:1;color:#6b3f20;font-weight:600;}
+/* Período de massas — mobile-first */
+.massa-periodo-form{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+.massa-periodo-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.massa-date-input{width:100%;padding:9px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px;box-sizing:border-box;}
+.massa-btn-consultar{width:100%;padding:11px;font-size:14px;}
+/* Diário — linha de detalhe compacta */
+.massa-det-linha{display:grid;grid-template-columns:1fr auto auto auto;gap:4px 10px;font-size:11px;color:#555;padding:3px 0;align-items:center;}
+.massa-det-nome{color:#6b3f20;font-weight:600;}
+.massa-det-valor{text-align:right;white-space:nowrap;}
 .rodape{height:45px;background:#6b3f20;color:white;display:flex;align-items:center;justify-content:center;}
  
 /* === DASHBOARD === */
@@ -439,29 +448,43 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 
 <!-- ABA 2: AGENDA -->
 <div class="aba">
-  <div class="card">
-    <h2>Agenda de Encomendas</h2>
-    <p style="font-size:13px;color:#666;margin-bottom:20px;">Selecione o mês desejado para abrir o calendário de entregas e os relatórios diários de produção.</p>
-    <div id="agendaAnosContainer"></div>
-    <div id="agendaDiasSecao" class="agenda-dias-container" style="display:none;">
-      <div class="agenda-dias-titulo">
-        <h3 id="agendaDiasTituloTexto">Dias com entregas</h3>
-        <button class="btn btn-cinza" style="padding:5px 12px;font-size:12px;" onclick="fecharSecaoDias()">✕ Fechar Mês</button>
+  <div class="subabas">
+    <button class="sub-active" onclick="trocarSubAbaAgenda(0)">📅 Encomendas</button>
+    <button onclick="trocarSubAbaAgenda(1)">🍫 Produção</button>
+  </div>
+
+  <!-- SUBABA 0: ENCOMENDAS -->
+  <div class="subaba sub-active">
+    <div class="card">
+      <h2>Agenda de Encomendas</h2>
+      <p style="font-size:13px;color:#666;margin-bottom:20px;">Selecione o mês para abrir o calendário de entregas.</p>
+      <div id="agendaAnosContainer"></div>
+      <div id="agendaDiasSecao" class="agenda-dias-container" style="display:none;">
+        <div class="agenda-dias-titulo">
+          <h3 id="agendaDiasTituloTexto">Dias com entregas</h3>
+          <button class="btn btn-cinza" style="padding:5px 12px;font-size:12px;" onclick="fecharSecaoDias()">✕ Fechar</button>
+        </div>
+        <div class="agenda-grid" id="agendaGridDias"></div>
       </div>
-      <div class="agenda-grid" id="agendaGridDias"></div>
     </div>
   </div>
 
-  <!-- CONTROLE DE MASSAS -->
-  <div class="card" id="cardMassas">
-    <h2>🍫 Controle de Massas</h2>
-    <p style="font-size:12px;color:#666;margin-bottom:12px;">Selecione o período para ver a previsão de massas dos pedidos e lançar a produção diária.</p>
-    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px;">
-      <div><label style="font-size:12px;">De</label><input type="date" id="massaDataInicio" style="padding:8px;border-radius:8px;border:1px solid #ccc;font-size:13px;"></div>
-      <div><label style="font-size:12px;">Até</label><input type="date" id="massaDataFim" style="padding:8px;border-radius:8px;border:1px solid #ccc;font-size:13px;"></div>
-      <button class="btn btn-rosa" style="padding:9px 18px;" onclick="renderMassasAgenda()">Consultar</button>
+  <!-- SUBABA 1: CONTROLE DE MASSAS -->
+  <div class="subaba">
+    <div class="card">
+      <h2>🍫 Controle de Massas</h2>
+      <p style="font-size:12px;color:#666;margin-bottom:12px;">Escolha o período para ver a previsão e lançar a produção diária.</p>
+      <div class="massa-periodo-form">
+        <div class="massa-periodo-inputs">
+          <div><label style="font-size:11px;display:block;margin-bottom:3px;">De</label>
+            <input type="date" id="massaDataInicio" class="massa-date-input"></div>
+          <div><label style="font-size:11px;display:block;margin-bottom:3px;">Até</label>
+            <input type="date" id="massaDataFim" class="massa-date-input"></div>
+        </div>
+        <button class="btn btn-rosa massa-btn-consultar" onclick="renderMassasAgenda()">🔍 Consultar</button>
+      </div>
+      <div id="massasResultado"></div>
     </div>
-    <div id="massasResultado"></div>
   </div>
 </div>
 
@@ -1141,10 +1164,23 @@ function trocarAba(index) {
   document.querySelectorAll('.menu button')[index].classList.add('active');
   fecharAutocompletes();
   if(index === 1) renderPedidos();
-  if(index === 2) atualizarAgenda();
+  if(index === 2) trocarSubAbaAgenda(0);
   if(index === 3) { renderInsumos(); atualizarFiltroAnoInsumos(); }
   if(index === 4) { renderizarClientes(); renderProdutos(); renderTiposInsumos(); }
   if(index === 5) { gerenciarFiltrosAnoDashboard(); atualizarDashboard(); }
+}
+
+/* ===== SUBABAS AGENDA ===== */
+function trocarSubAbaAgenda(index) {
+  const abaAtiva = document.querySelector('.aba.active');
+  if (!abaAtiva) return;
+  abaAtiva.querySelectorAll('.subaba').forEach(s=>s.classList.remove('sub-active'));
+  abaAtiva.querySelectorAll('.subabas button').forEach(b=>b.classList.remove('sub-active'));
+  const subabas = abaAtiva.querySelectorAll('.subaba');
+  const botoes  = abaAtiva.querySelectorAll('.subabas button');
+  if (subabas[index]) subabas[index].classList.add('sub-active');
+  if (botoes[index])  botoes[index].classList.add('sub-active');
+  if (index === 0) atualizarAgenda();
 }
 
 /* ===== SUBABAS CADASTROS ===== */
@@ -2645,11 +2681,11 @@ function renderMassasAgenda() {
       const rl = realDia[nome]||0;
       const sd = pv - rl;
       const cls = sd<=0?'massa-saldo-neg':'massa-saldo-pos';
-      return `<div style="display:flex;gap:12px;font-size:11px;color:#555;padding:2px 0;">
-        <span style="flex:1;color:#6b3f20;font-weight:600;">🍫 ${nome}</span>
-        <span>prev <b>${pv.toFixed(1)}</b></span>
-        <span>prod <b>${rl.toFixed(1)}</b></span>
-        <span class="${cls}">saldo <b>${sd.toFixed(1)}</b></span>
+      return `<div class="massa-det-linha">
+        <span class="massa-det-nome">🍫 ${nome}</span>
+        <span class="massa-det-valor" style="color:#555;">prev <b>${pv.toFixed(1)}</b></span>
+        <span class="massa-det-valor" style="color:#333;">prod <b>${rl.toFixed(1)}</b></span>
+        <span class="massa-det-valor ${cls}">saldo <b>${sd.toFixed(1)}</b></span>
       </div>`;
     }).join('');
 
