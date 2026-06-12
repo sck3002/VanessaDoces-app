@@ -94,12 +94,38 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 .badge-pendente{background:#fff3cd;color:#856404;}
 .badge-pago{background:#d4edda;color:#155724;}
 .badge-cancelado{background:#f8d7da;color:#721c24;}
-.pedido-item, .produto-item, .insumo-item{background:white;border-radius:12px;padding:14px 18px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.pedido-info, .produto-info, .insumo-info{flex:1;}
-.pedido-info strong, .produto-info strong, .insumo-info strong{color:#8a5a34;}
-.pedido-info span, .produto-info span, .insumo-info span{display:block;color:#666;font-size:13px;}
-.filtros{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
-.filtros input,.filtros select{width:auto;flex:1;min-width:140px;padding:10px 14px;}
+/* Botões de ação dos pedidos — mesma altura do badge */
+.pedido-acoes{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;}
+.btn-acao{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;border:none;cursor:pointer;white-space:nowrap;line-height:1.6;}
+.btn-acao-azul{background:#2563eb;color:white;}
+.btn-acao-marrom{background:#7c5c2e;color:white;}
+.btn-acao-vermelho{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;}
+/* Cards de lista */
+.pedido-item,.produto-item,.insumo-item{background:white;border-radius:12px;padding:14px 18px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.pedido-info,.produto-info,.insumo-info{flex:1;}
+.pedido-info strong,.produto-info strong,.insumo-info strong{color:#8a5a34;}
+.pedido-info span,.produto-info span,.insumo-info span{display:block;color:#666;font-size:13px;}
+/* Estrutura dos filtros */
+.filtros{display:flex;gap:8px;margin-bottom:16px;flex-direction:column;}
+.filtros-topo{display:flex;gap:8px;}
+.filtros-topo input,.filtros-topo select{flex:1;}
+.filtros-data{display:flex;gap:8px;align-items:center;}
+.filtros-data input[type="date"]{flex:1;}
+.btn-limpar{background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer;white-space:nowrap;}
+/* Módulo Massas */
+.massa-painel{background:#fffaf5;border:1px solid #f5c5a3;border-radius:12px;padding:14px;margin-bottom:14px;}
+.massa-painel h3{color:#8a5a34;font-size:14px;margin-bottom:10px;}
+.massa-tabela{width:100%;border-collapse:collapse;font-size:13px;}
+.massa-tabela th{background:#f5c5a3;color:#6b3f20;padding:6px 10px;text-align:left;}
+.massa-tabela td{padding:6px 10px;border-bottom:1px solid #f0e0d0;}
+.massa-tabela tr:last-child td{border-bottom:none;}
+.massa-saldo-neg{color:#28a745;font-weight:700;}
+.massa-saldo-pos{color:#ff9800;font-weight:700;}
+.dia-log-row{background:white;border-radius:10px;padding:10px 14px;margin-bottom:8px;border:1px solid #f0e0d0;}
+.dia-log-row.lancado{border-color:#28a745;background:#f6fff9;}
+/* Receita do produto */
+.receita-linha{display:flex;align-items:center;gap:8px;background:#fff5f0;border-radius:8px;padding:6px 10px;margin-bottom:5px;font-size:12px;}
+.receita-linha span{flex:1;color:#6b3f20;font-weight:600;}
 .rodape{height:45px;background:#6b3f20;color:white;display:flex;align-items:center;justify-content:center;}
  
 /* === DASHBOARD === */
@@ -219,6 +245,11 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
   /* Cards */
   .card { padding: 12px; border-radius: 12px; margin-bottom: 10px; }
   .card h2 { font-size: 15px; margin-bottom: 10px; }
+  /* Pedido-item vira coluna no mobile */
+  .pedido-item{flex-direction:column;align-items:flex-start;gap:8px;}
+  .pedido-acoes{width:100%;justify-content:flex-end;}
+  /* Filtros: busca+status em grid 2 col */
+  .filtros-topo{display:grid;grid-template-columns:1fr 1fr;}
 
   /* Grid itens do pedido → empilhado */
   .card > div[style*="grid-template-columns:2fr"] {
@@ -330,9 +361,12 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
     <div class="card">
       <h2>Cliente</h2>
       <label>Telefone</label>
-      <div class="autocomplete-wrapper">
-        <input type="text" id="telefone" placeholder="Digite o telefone..." oninput="buscarClientePorTelefone()">
-        <div class="autocomplete-lista" id="listaAutocompleteTelefone" style="display:none;"></div>
+      <div style="display:flex;gap:8px;align-items:flex-start;">
+        <div class="autocomplete-wrapper" style="flex:1;">
+          <input type="text" id="telefone" placeholder="Digite o telefone..." oninput="buscarClientePorTelefone()">
+          <div class="autocomplete-lista" id="listaAutocompleteTelefone" style="display:none;"></div>
+        </div>
+        <button class="btn btn-cinza" style="padding:9px 12px;font-size:18px;white-space:nowrap;" onclick="importarContato()" title="Importar da agenda do celular">📱</button>
       </div>
       <label>Nome</label>
       <input type="text" id="cliente">
@@ -385,15 +419,19 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
   <div class="card">
     <h2>Pedidos Finalizados</h2>
     <div class="filtros">
-      <input type="text" id="filtroBusca" placeholder="Buscar cliente..." oninput="renderPedidos()">
-      <select id="filtroStatus" onchange="renderPedidos()">
-        <option value="">Todos os status</option>
-        <option value="pendente">Pendente</option>
-        <option value="pago">Pago</option>
-        <option value="cancelado">Cancelado</option>
-      </select>
-      <input type="date" id="filtroData" onchange="renderPedidos()">
-      <button class="btn btn-cinza" onclick="limparFiltros()">Limpar Filtros</button>
+      <div class="filtros-topo">
+        <input type="text" id="filtroBusca" placeholder="🔍 Buscar cliente..." oninput="renderPedidos()">
+        <select id="filtroStatus" onchange="renderPedidos()">
+          <option value="">Todos os status</option>
+          <option value="pendente">Pendente</option>
+          <option value="pago">Pago</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+      </div>
+      <div class="filtros-data">
+        <input type="date" id="filtroData" onchange="renderPedidos()">
+        <button class="btn-limpar" onclick="limparFiltros()">✕ Limpar</button>
+      </div>
     </div>
     <div id="listaPedidos"></div>
   </div>
@@ -412,6 +450,18 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
       </div>
       <div class="agenda-grid" id="agendaGridDias"></div>
     </div>
+  </div>
+
+  <!-- CONTROLE DE MASSAS -->
+  <div class="card" id="cardMassas">
+    <h2>🍫 Controle de Massas</h2>
+    <p style="font-size:12px;color:#666;margin-bottom:12px;">Selecione o período para ver a previsão de massas dos pedidos e lançar a produção diária.</p>
+    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px;">
+      <div><label style="font-size:12px;">De</label><input type="date" id="massaDataInicio" style="padding:8px;border-radius:8px;border:1px solid #ccc;font-size:13px;"></div>
+      <div><label style="font-size:12px;">Até</label><input type="date" id="massaDataFim" style="padding:8px;border-radius:8px;border:1px solid #ccc;font-size:13px;"></div>
+      <button class="btn btn-rosa" style="padding:9px 18px;" onclick="renderMassasAgenda()">Consultar</button>
+    </div>
+    <div id="massasResultado"></div>
   </div>
 </div>
 
@@ -470,7 +520,8 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
     <button class="sub-active" onclick="trocarSubAba(0)">👤 Clientes</button>
     <button onclick="trocarSubAba(1)">🍬 Produtos</button>
     <button onclick="trocarSubAba(2)">📦 Insumos</button>
-    <button onclick="trocarSubAba(3)">📋 Logs</button>
+    <button onclick="trocarSubAba(3)">🍫 Massas</button>
+    <button onclick="trocarSubAba(4)">📋 Logs</button>
   </div>
 
   <!-- SUBABA 0: CLIENTES -->
@@ -510,7 +561,30 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
         <label>Preço Unitário Real (R$)</label><input type="text" inputmode="decimal" id="precoProduto" placeholder="0,00">
         <div class="botoes"><button class="btn btn-rosa" onclick="salvarProduto()">Salvar</button></div>
       </div>
-      <div class="card"><h2>Produtos no Cardápio (Preços Unitários)</h2><div id="listaProdutos"></div></div>
+      <div class="card">
+        <h2>Produtos no Cardápio</h2>
+        <div id="listaProdutos"></div>
+      </div>
+    </div>
+    <!-- Painel de receita inline -->
+    <div id="receitaPanel" style="display:none;" class="card" style="margin-top:0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h2 style="margin:0;">🍫 Receita: <span id="receitaProdutoNome" style="color:#d94d7d;"></span></h2>
+        <button class="btn btn-cinza" style="padding:4px 12px;font-size:12px;" onclick="fecharReceita()">✕ Fechar</button>
+      </div>
+      <div id="receitaLinhas" style="margin-bottom:10px;min-height:30px;"></div>
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+        <div style="flex:2;min-width:140px;">
+          <label style="font-size:11px;">Tipo de Massa</label>
+          <select id="receitaTipoSelect" style="padding:8px;font-size:12px;border-radius:8px;border:1px solid #ccc;width:100%;"></select>
+        </div>
+        <div style="flex:1;min-width:80px;">
+          <label style="font-size:11px;">Qtde por 100 un</label>
+          <input type="number" id="receitaPor100" step="0.1" min="0" placeholder="ex: 5.0" style="padding:8px;font-size:12px;border-radius:8px;border:1px solid #ccc;width:100%;">
+        </div>
+        <button class="btn btn-rosa" style="padding:8px 14px;font-size:12px;" onclick="adicionarLinhaReceita()">+ Adicionar</button>
+      </div>
+      <input type="hidden" id="receitaProdutoId">
     </div>
   </div>
 
@@ -545,7 +619,27 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
       </div>
     </div>
   </div>
-  <!-- SUBABA 3: LOGS -->
+
+  <!-- SUBABA 3: TIPOS DE MASSA -->
+  <div class="subaba">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+      <div class="card" style="padding:15px;">
+        <h2 style="font-size:16px;margin-bottom:10px;">🍫 Cadastrar Tipo de Massa</h2>
+        <p style="font-size:10px;color:#888;margin-bottom:10px;">Cadastre os tipos de massa usados nos seus produtos. Eles serão vinculados à receita de cada produto.</p>
+        <label style="font-size:11px;">Nome do Tipo de Massa</label>
+        <input type="text" id="nomeTipoMassa" placeholder="Ex: Massa Preta, Coco..." style="padding:9px;font-size:12px;border-radius:8px;">
+        <div class="botoes" style="margin-top:10px;">
+          <button class="btn btn-marrom" onclick="salvarTipoMassa()" style="padding:9px 14px;font-size:12px;border-radius:8px;">+ Cadastrar</button>
+        </div>
+      </div>
+      <div class="card" style="padding:15px;">
+        <h2 style="font-size:16px;margin-bottom:10px;">Tipos Cadastrados</h2>
+        <div id="listaTiposMassa" style="max-height:260px;overflow-y:auto;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBABA 4: LOGS -->
   <div class="subaba">
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
@@ -871,6 +965,7 @@ function salvarLS() {
 }
  
 let pedidos = [], produtos = [], insumos = [], clientes = [], tiposInsumos = [];
+let tiposMassa = [], massasDiario = [];
 let itensPedidoAtual = [], itensEditandoPedido = [];
 let totalItensAtual = 0, quantidadeTotalAtual = 0, valorTotalAtual = 0;
 let anoFiltroSelecionado = "Todos";
@@ -1009,19 +1104,21 @@ function importarBackup(input) {
  
 /* ===== CARREGAR SISTEMA ===== */
 async function carregarSistema() {
-  const [p, pr, ins, cli, ti] = await Promise.all([
+  const [p, pr, ins, cli, ti, tm, md] = await Promise.all([
     sbListar('pedidos'), sbListar('produtos'), sbListar('insumos'),
-    sbListar('clientes'), sbListar('tipos_insumos')
+    sbListar('clientes'), sbListar('tipos_insumos'),
+    sbListar('tipos_massa'), sbListar('massas_diario')
   ]);
   if (p.length === 0 && pr.length === 0 && ins.length === 0) {
     pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
     produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
     insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
-    clientes = []; tiposInsumos = [];
+    clientes = []; tiposInsumos = []; tiposMassa = []; massasDiario = [];
     await Promise.all([sbUpsert('pedidos',pedidos),sbUpsert('produtos',produtos),sbUpsert('insumos',insumos)]);
   } else {
     pedidos = p || []; produtos = pr || []; insumos = ins || [];
     clientes = cli || []; tiposInsumos = ti || [];
+    tiposMassa = tm || []; massasDiario = md || [];
   }
 }
  
@@ -1059,9 +1156,10 @@ function trocarSubAba(index) {
   abaAtiva.querySelectorAll('.subaba')[index].classList.add('sub-active');
   abaAtiva.querySelectorAll('.subabas button')[index].classList.add('sub-active');
   if(index === 0) renderizarClientes();
-  if(index === 1) renderProdutos();
+  if(index === 1) { renderProdutos(); fecharReceita(); }
   if(index === 2) renderTiposInsumos();
-  if(index === 3) carregarLogs();
+  if(index === 3) renderTiposMassa();
+  if(index === 4) carregarLogs();
 }
 
 function fecharAutocompletes() {
@@ -1462,11 +1560,12 @@ function renderPedidos() {
         <span>📅 ${formatarData(p.data)} &nbsp;|&nbsp; 🍬 ${Math.round(itens.reduce((s,i)=>s+(i.qtd||0),0))} un &nbsp;|&nbsp; 💰 Total: R$ ${total.toFixed(2)}</span>
         <span style="font-size:12px;color:#555;margin-top:4px;">💰 Entrada Paga: <b>R$ ${entrada.toFixed(2)}</b> &nbsp;|&nbsp; <b style="color:${saldo>0?'#ff9800':'#28a745'};">Saldo: R$ ${(saldo<0?0:saldo).toFixed(2)}</b></span>
       </div>
-      <div style="display:flex;gap:10px;align-items:center;">
+      <div class="pedido-acoes">
         <span class="badge badge-${status}">${status.toUpperCase()}</span>
-        <button class="btn btn-azul" style="padding:6px 12px;" onclick="abrirEditar(${p.id})">✏️ Ver / Alterar</button>
-        <button class="btn btn-marrom" style="padding:6px 12px;" onclick="abrirContrato(${p.id})">📄 Contrato</button>
-        <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirPedido(${p.id})">🗑</button>
+        <div style="flex:1"></div>
+        <button class="btn-acao btn-acao-azul" onclick="abrirEditar(${p.id})">✏️ Editar</button>
+        <button class="btn-acao btn-acao-marrom" onclick="abrirContrato(${p.id})">📄 Contrato</button>
+        <button class="btn-acao btn-acao-vermelho" onclick="excluirPedido(${p.id})">🗑 Excluir</button>
       </div>
     </div>`;
   }).join('');
@@ -1657,19 +1756,10 @@ function fecharModal() {
 /* ===== IMPRESSÃO A4 ===== */
 function abrirA4(data, pedidosDia) {
   const consolidadoDocesDia = {};
-  const totaisMassas = {"Massa Branca":0,"Massa Preta":0,"Coco":0,"Café":0,"Amendoim":0,"Os Copinhos":0,"Abacaxi":0,"Ninho":0};
-  const fatores = {"Massa Branca":0.05,"Massa Preta":0.05,"Coco":0.04,"Café":0.04,"Ninho":0.04,"Amendoim":0.04,"Os Copinhos":0.03,"Abacaxi":0.03};
-  const mapeamento = {
-    "brigadeiro":"Massa Preta","cajuzinho":"Amendoim","ninho com nutella":"Ninho","casadinho":"Meio a Meio",
-    "brigadeiro de churros":"Massa Branca","beijinho":"Coco","chocobol":"Massa Preta","camafeu":"Massa Preta",
-    "camafeu de nozes":"Massa Preta","olho de sogra":"Coco","brigadeiro de cafe":"Café","brigadeiro de café":"Café",
-    "ferrero":"Massa Preta","uva":"Massa Branca","bombom de uva":"Massa Branca","coco":"Coco","bombom de coco":"Coco",
-    "nozes":"Massa Preta","bombom de nozes":"Massa Preta","flocos":"Massa Branca","bombom de flocos":"Massa Branca",
-    "cereja":"Massa Branca","bombom de cereja":"Massa Branca","ouriço":"Massa Branca","bombom ouriço":"Massa Branca",
-    "bombom de brigadeiro":"Massa Preta","bombom de amendoim":"Amendoim","coco com damasco":"Coco","abacaxi com coco":"Abacaxi",
-    "copinho de limao":"Os Copinhos","copinho de limão":"Os Copinhos","copinho de maracuja":"Os Copinhos","copinho de maracujá":"Os Copinhos",
-    "gotas de paçoca":"Amendoim","damasco recheado":"Massa Branca","copinho de cereja":"Os Copinhos","copinho de morango":"Os Copinhos","bolinho":"Massa Branca"
-  };
+  /* Inicializa massas com os tipos cadastrados — sem hardcode */
+  const totaisMassas = {};
+  tiposMassa.forEach(t => { totaisMassas[t.nome] = 0; });
+  const semReceita = new Set();
 
   let totalGeral = 0, totalBemCasados = 0;
   pedidosDia.forEach(p => {
@@ -1681,13 +1771,12 @@ function abrirA4(data, pedidosDia) {
       const nomeChave = i.produto.trim().toLowerCase();
       if(nomeChave==="bem casado") return;
       consolidadoDocesDia[nomeChave] = (consolidadoDocesDia[nomeChave]||0)+i.qtd;
-      const tipo = mapeamento[nomeChave]||"Massa Branca";
-      if(tipo==="Meio a Meio"){
-        totaisMassas["Massa Branca"]+=(i.qtd/2)*0.05;
-        totaisMassas["Massa Preta"]+=(i.qtd/2)*0.05;
-      } else {
-        totaisMassas[tipo]+=i.qtd*(fatores[tipo]||0.05);
-      }
+      const prod = produtos.find(pr => pr.nome.trim().toLowerCase() === nomeChave);
+      if (!prod || !(prod.receita||[]).length) { semReceita.add(i.produto); return; }
+      (prod.receita||[]).forEach(comp => {
+        if (!(comp.nome in totaisMassas)) totaisMassas[comp.nome] = 0;
+        totaisMassas[comp.nome] += (i.qtd / 100) * comp.por100;
+      });
     });
   });
 
@@ -1833,18 +1922,10 @@ function abrirA4(data, pedidosDia) {
         </h3>
 
         ${Object.entries(totaisMassas).map(([k,v]) =>
-
-          v > 0
-
-            ? `
-              <div>
-                ${k}: <b>${v.toFixed(2)}</b>
-              </div>
-            `
-
-            : ''
-
+          v > 0 ? `<div>${k}: <b>${v.toFixed(2)} UN</b></div>` : ''
         ).join('')}
+        ${!Object.values(totaisMassas).some(v=>v>0) ? '<div style="color:#aaa;font-size:10px;">Configure a receita nos produtos</div>' : ''}
+        ${semReceita.size > 0 ? `<div style="color:#c07000;font-size:9px;margin-top:4px;">⚠️ Sem receita: ${[...semReceita].join(', ')}</div>` : ''}
 
       </div>
 
@@ -2133,41 +2214,25 @@ function alterarValorProduto(id) {
 
 
 /* ===== LISTAR PRODUTOS ===== */
-
 function renderProdutos() {
-
-  document.getElementById('listaProdutos').innerHTML =
-    produtos.map(p => `
-
-      <div class="produto-item">
-
-        <div class="produto-info">
-          <strong>${p.nome}</strong>
-          <span>R$ ${(p.preco || 0).toFixed(2)} un</span>
-        </div>
-
-        <div style="display:flex; gap:8px;">
-
-          <button
-            class="btn"
-            style="padding:6px 12px;"
-            onclick="alterarValorProduto(${p.id})">
-            ✏️
-          </button>
-
-          <button
-            class="btn btn-vermelho"
-            style="padding:6px 12px;"
-            onclick="excluirProduto(${p.id})">
-            🗑
-          </button>
-
-        </div>
-
+  document.getElementById('listaProdutos').innerHTML = produtos.map(p => {
+    const rec = p.receita || [];
+    const recLabel = rec.length
+      ? rec.map(r=>`${r.nome} ${r.por100}UN`).join(' · ')
+      : '<span style="color:#ccc;">sem receita</span>';
+    return `<div class="produto-item">
+      <div class="produto-info">
+        <strong>${p.nome}</strong>
+        <span>R$ ${(p.preco||0).toFixed(2)} un</span>
+        <span style="font-size:11px;color:#8a5a34;">🍫 ${recLabel}</span>
       </div>
-
-    `).join('');
-
+      <div style="display:flex;gap:6px;">
+        <button class="btn-acao btn-acao-marrom" onclick="abrirReceita(${p.id})">🍫 Receita</button>
+        <button class="btn" style="padding:6px 10px;" onclick="alterarValorProduto(${p.id})">✏️</button>
+        <button class="btn btn-vermelho" style="padding:6px 10px;" onclick="excluirProduto(${p.id})">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 
@@ -2381,15 +2446,274 @@ function renderLogs() {
   }).join('');
 }
 function formatarData(d){ if(!d) return ''; const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function gerarNovoId(arr){ return arr.length===0 ? 1 : Math.max(...arr.map(x=>x.id||0))+1; }
 function limparFiltros(){ document.getElementById('filtroBusca').value=''; document.getElementById('filtroStatus').value=''; document.getElementById('filtroData').value=''; renderPedidos(); }
  
 document.getElementById('produto').addEventListener('change', atualizarValor);
 document.getElementById('quantidade').addEventListener('input', calcularTotalItem);
  
+/* ===== IMPORTAR CONTATO DO CELULAR ===== */
+async function importarContato() {
+  if (!('contacts' in navigator && 'ContactsManager' in window)) {
+    alert('Seu navegador não suporta importação de contatos.\nUse o Chrome no Android.'); return;
+  }
+  try {
+    const lista = await navigator.contacts.select(['name','tel'],{multiple:false});
+    if (!lista.length) return;
+    const c = lista[0];
+    if (c.name?.[0])  document.getElementById('cliente').value  = c.name[0];
+    if (c.tel?.[0])   document.getElementById('telefone').value = c.tel[0].replace(/\D/g,'');
+    buscarClientePorTelefone();
+  } catch(e) { console.warn('Contato cancelado ou erro:', e); }
+}
+
+/* ===== TIPOS DE MASSA ===== */
+function renderTiposMassa() {
+  const cont = document.getElementById('listaTiposMassa');
+  if (!cont) return;
+  if (!tiposMassa.length) {
+    cont.innerHTML = '<p style="color:#aaa;font-size:12px;text-align:center;padding:10px;">Nenhum tipo cadastrado.</p>'; return;
+  }
+  cont.innerHTML = tiposMassa.map(t => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#fff5f0;border-radius:8px;margin-bottom:5px;font-size:13px;">
+      <span><b style="color:#8a5a34;">🍫 ${t.nome}</b></span>
+      <button class="btn btn-vermelho" style="padding:3px 8px;font-size:11px;" onclick="excluirTipoMassa(${t.id})">✕</button>
+    </div>`).join('');
+}
+function salvarTipoMassa() {
+  const nome = (document.getElementById('nomeTipoMassa').value||'').trim();
+  if (!nome) { alert('Informe o nome do tipo de massa.'); return; }
+  if (tiposMassa.some(t=>t.nome.toLowerCase()===nome.toLowerCase())) { alert('Tipo já cadastrado.'); return; }
+  const novo = { id: gerarNovoId(tiposMassa), nome };
+  tiposMassa.push(novo);
+  sbUpsert('tipos_massa', [novo]);
+  document.getElementById('nomeTipoMassa').value = '';
+  renderTiposMassa();
+  popularSelectTipoMassa();
+}
+function excluirTipoMassa(id) {
+  if (!confirm('Excluir este tipo de massa?')) return;
+  sbDeletar('tipos_massa', id);
+  tiposMassa = tiposMassa.filter(t=>t.id!==id);
+  renderTiposMassa();
+  popularSelectTipoMassa();
+}
+
+/* ===== RECEITA DOS PRODUTOS ===== */
+function popularSelectTipoMassa() {
+  const sel = document.getElementById('receitaTipoSelect');
+  if (!sel) return;
+  sel.innerHTML = tiposMassa.map(t=>`<option value="${t.id}">${t.nome}</option>`).join('');
+}
+function abrirReceita(prodId) {
+  const p = produtos.find(x=>x.id===prodId); if(!p) return;
+  document.getElementById('receitaProdutoId').value   = prodId;
+  document.getElementById('receitaProdutoNome').textContent = p.nome;
+  popularSelectTipoMassa();
+  renderReceitaLinhas(prodId);
+  document.getElementById('receitaPanel').style.display = 'block';
+  document.getElementById('receitaPanel').scrollIntoView({behavior:'smooth'});
+}
+function fecharReceita() {
+  const p = document.getElementById('receitaPanel');
+  if (p) p.style.display = 'none';
+}
+function renderReceitaLinhas(prodId) {
+  const p   = produtos.find(x=>x.id===prodId); if(!p) return;
+  const rec = p.receita || [];
+  const div = document.getElementById('receitaLinhas');
+  if (!rec.length) { div.innerHTML='<p style="color:#aaa;font-size:12px;">Nenhuma massa configurada.</p>'; return; }
+  div.innerHTML = rec.map((r,i)=>`
+    <div class="receita-linha">
+      <span>🍫 ${r.nome}</span>
+      <span style="color:#666;font-size:12px;">${r.por100} UN / 100 un</span>
+      <button class="btn btn-vermelho" style="padding:2px 8px;font-size:11px;" onclick="removerLinhaReceita(${prodId},${i})">✕</button>
+    </div>`).join('');
+}
+function adicionarLinhaReceita() {
+  const prodId = parseInt(document.getElementById('receitaProdutoId').value);
+  const tipoId = parseInt(document.getElementById('receitaTipoSelect').value);
+  const por100 = parseFloat(document.getElementById('receitaPor100').value);
+  if (!tipoId || isNaN(por100) || por100 <= 0) { alert('Selecione o tipo e informe a quantidade.'); return; }
+  const tipo = tiposMassa.find(t=>t.id===tipoId); if(!tipo) return;
+  const p    = produtos.find(x=>x.id===prodId);   if(!p)    return;
+  if (!p.receita) p.receita = [];
+  if (p.receita.some(r=>r.tipo_id===tipoId)) { alert('Este tipo já está na receita.'); return; }
+  p.receita.push({ tipo_id: tipoId, nome: tipo.nome, por100 });
+  sbUpsert('produtos',[p]);
+  document.getElementById('receitaPor100').value = '';
+  renderReceitaLinhas(prodId);
+  renderProdutos();
+}
+function removerLinhaReceita(prodId, idx) {
+  const p = produtos.find(x=>x.id===prodId); if(!p) return;
+  p.receita.splice(idx,1);
+  sbUpsert('produtos',[p]);
+  renderReceitaLinhas(prodId);
+  renderProdutos();
+}
+
+/* ===== CONTROLE DE MASSAS — AGENDA ===== */
+function calcularPrevistoPorMassa(inicio, fim) {
+  /* Retorna { tipo_nome: { previsto_un, previsto_total_un } } */
+  const resultado = {};
+  let totalUnidades = 0;
+  const semReceita = new Set();
+  pedidos.filter(p => p.data >= inicio && p.data <= fim && p.status !== 'cancelado')
+    .forEach(ped => {
+      (ped.itens||[]).forEach(item => {
+        const nomeLower = (item.produto||'').trim().toLowerCase();
+        if (nomeLower === 'bem casado') return;
+        totalUnidades += (item.qtd||0);
+        const prod = produtos.find(pr => pr.nome.trim().toLowerCase() === nomeLower);
+        if (!prod || !(prod.receita||[]).length) { semReceita.add(item.produto); return; }
+        prod.receita.forEach(r => {
+          if (!resultado[r.nome]) resultado[r.nome] = { tipo_id: r.tipo_id, previsto: 0 };
+          resultado[r.nome].previsto += (item.qtd / 100) * r.por100;
+        });
+      });
+    });
+  return { massas: resultado, totalUnidades, semReceita: [...semReceita] };
+}
+function calcularRealizadoPorMassa(inicio, fim) {
+  const result = {};
+  massasDiario.filter(d => d.data >= inicio && d.data <= fim)
+    .forEach(d => {
+      (d.producao||[]).forEach(r => {
+        result[r.nome] = (result[r.nome]||0) + (r.quantidade||0);
+      });
+    });
+  return result;
+}
+function renderMassasAgenda() {
+  const inicio = document.getElementById('massaDataInicio').value;
+  const fim    = document.getElementById('massaDataFim').value;
+  const div    = document.getElementById('massasResultado');
+  if (!inicio || !fim || inicio > fim) { div.innerHTML='<p style="color:#c00;font-size:13px;">Selecione um período válido.</p>'; return; }
+
+  const { massas, totalUnidades, semReceita } = calcularPrevistoPorMassa(inicio, fim);
+  const realizado = calcularRealizadoPorMassa(inicio, fim);
+  const tipos = Object.keys(massas);
+
+  /* ── Painel consolidado ── */
+  let consolidado = '';
+  if (!tipos.length) {
+    consolidado = '<p style="color:#aaa;font-size:13px;">Nenhuma massa calculada. Verifique as receitas dos produtos.</p>';
+  } else {
+    const linhas = tipos.map(nome => {
+      const prev = massas[nome].previsto;
+      const real = realizado[nome] || 0;
+      const saldo = prev - real;
+      const cls   = saldo <= 0 ? 'massa-saldo-neg' : 'massa-saldo-pos';
+      return `<tr>
+        <td><b style="color:#6b3f20;">🍫 ${nome}</b></td>
+        <td style="text-align:right;">${prev.toFixed(1)} UN</td>
+        <td style="text-align:right;">${real.toFixed(1)} UN</td>
+        <td style="text-align:right;" class="${cls}">${saldo.toFixed(1)} UN</td>
+      </tr>`;
+    }).join('');
+    consolidado = `<table class="massa-tabela">
+      <thead><tr><th>Tipo</th><th>Previsto</th><th>Realizado</th><th>Saldo</th></tr></thead>
+      <tbody>${linhas}</tbody>
+    </table>`;
+  }
+
+  /* ── Aviso produtos sem receita ── */
+  const avisoSem = semReceita.length
+    ? `<p style="font-size:11px;color:#c07000;margin-top:8px;">⚠️ Sem receita configurada: ${semReceita.join(', ')}</p>` : '';
+
+  /* ── Diário por dia ── */
+  const dias = {};
+  pedidos.filter(p=>p.data>=inicio&&p.data<=fim&&p.status!=='cancelado').forEach(p=>{
+    if(!dias[p.data]) dias[p.data]=0;
+    (p.itens||[]).forEach(i=>{ if((i.produto||'').trim().toLowerCase()!=='bem casado') dias[p.data]+=(i.qtd||0); });
+  });
+  /* Incluir também dias com lançamento mas sem pedido */
+  massasDiario.filter(d=>d.data>=inicio&&d.data<=fim).forEach(d=>{ if(!dias[d.data]) dias[d.data]=0; });
+
+  const datasOrdenadas = Object.keys(dias).sort();
+  const diarioHtml = datasOrdenadas.map(data => {
+    const log    = massasDiario.find(d=>d.data===data);
+    const prod   = log ? (log.producao||[]) : [];
+    const lancado = prod.length > 0;
+    const { massas: prevDia } = calcularPrevistoPorMassa(data, data);
+    const realDia  = {};
+    prod.forEach(r=>{ realDia[r.nome]=r.quantidade; });
+
+    const linhasDetalhe = Object.keys(prevDia).map(nome=>{
+      const pv = prevDia[nome].previsto;
+      const rl = realDia[nome]||0;
+      const sd = pv - rl;
+      const cls = sd<=0?'massa-saldo-neg':'massa-saldo-pos';
+      return `<div style="display:flex;gap:12px;font-size:11px;color:#555;padding:2px 0;">
+        <span style="flex:1;color:#6b3f20;font-weight:600;">🍫 ${nome}</span>
+        <span>prev <b>${pv.toFixed(1)}</b></span>
+        <span>prod <b>${rl.toFixed(1)}</b></span>
+        <span class="${cls}">saldo <b>${sd.toFixed(1)}</b></span>
+      </div>`;
+    }).join('');
+
+    /* Formulário de lançamento */
+    const inputsMassa = tipos.map(nome=>`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <label style="flex:1;font-size:12px;color:#6b3f20;">🍫 ${nome}</label>
+        <input type="number" step="0.1" min="0" placeholder="0.0"
+          id="massaInput_${data}_${nome.replace(/\s/g,'_')}"
+          style="width:80px;padding:6px;border-radius:8px;border:1px solid #ccc;font-size:12px;"
+          value="${realDia[nome]||''}">
+        <span style="font-size:11px;color:#aaa;">UN (prev: ${(prevDia[nome]?.previsto||0).toFixed(1)})</span>
+      </div>`).join('');
+
+    return `<div class="dia-log-row ${lancado?'lancado':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <b style="font-size:13px;">${formatarData(data)}</b>
+        <span style="font-size:11px;color:${lancado?'#28a745':'#aaa'};">${lancado?'✅ Lançado':'⏳ Pendente'}</span>
+      </div>
+      ${linhasDetalhe}
+      <details style="margin-top:8px;">
+        <summary style="font-size:12px;color:#d94d7d;cursor:pointer;">${lancado?'✏️ Editar lançamento':'+ Lançar produção do dia'}</summary>
+        <div style="margin-top:8px;padding:10px;background:#fffaf5;border-radius:8px;border:1px solid #f5c5a3;">
+          ${inputsMassa||'<p style="font-size:12px;color:#aaa;">Nenhum tipo de massa calculado para este dia.</p>'}
+          <button class="btn btn-rosa" style="margin-top:6px;padding:8px 16px;font-size:12px;"
+            onclick="salvarMassaDiario('${data}')">💾 Salvar</button>
+        </div>
+      </details>
+    </div>`;
+  }).join('') || '<p style="color:#aaa;font-size:13px;">Nenhum dia com pedidos no período.</p>';
+
+  div.innerHTML = `
+    <div class="massa-painel">
+      <h3>📊 Consolidado do Período</h3>
+      ${consolidado}
+      ${avisoSem}
+    </div>
+    <div class="massa-painel">
+      <h3>📅 Diário de Produção</h3>
+      ${diarioHtml}
+    </div>`;
+}
+function salvarMassaDiario(data) {
+  const { massas } = calcularPrevistoPorMassa(data, data);
+  const tipos = Object.keys(massas);
+  const producao = tipos.map(nome => {
+    const inputId = `massaInput_${data}_${nome.replace(/\s/g,'_')}`;
+    const el = document.getElementById(inputId);
+    const quantidade = parseFloat(el?.value||'0')||0;
+    return { tipo_id: massas[nome].tipo_id, nome, quantidade };
+  }).filter(r=>r.quantidade>0);
+
+  const existente = massasDiario.find(d=>d.data===data);
+  const novoId    = existente ? existente.id : gerarNovoId(massasDiario);
+  const registro  = { id: novoId, data, producao };
+  if (existente) { Object.assign(existente, registro); } else { massasDiario.push(registro); }
+  sbUpsert('massas_diario', [registro]);
+  renderMassasAgenda();
+}
+
 function atualizarTodasAsTelas() {
   popularSelectProduto(); renderProdutos(); renderPedidos(); atualizarAgenda();
   atualizarProducao(); renderInsumos(); renderizarClientes(); renderTiposInsumos();
-  gerenciarFiltrosAnoDashboard(); atualizarDashboard();
+  renderTiposMassa(); gerenciarFiltrosAnoDashboard(); atualizarDashboard();
 }
  
 /* bloco duplicado removido — carregarSistema já é chamado dentro de verificarLogin().then() */
