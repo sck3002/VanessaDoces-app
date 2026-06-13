@@ -960,13 +960,23 @@ async function sbListar(tabela) {
   return data || [];
 }
 async function sbUpsert(tabela, lista) {
-  if (!lista || lista.length === 0) return;
+  if (!lista || lista.length === 0) return true;
   const { error } = await sbClient.from(tabela).upsert(lista, { onConflict: 'id' });
-  if (error) console.error(`Erro ao salvar em ${tabela}:`, error.message);
+  if (error) {
+    const msg = `Erro ao salvar em "${tabela}":\n${error.message}`;
+    console.error(msg);
+    alert(msg);
+    return false;
+  }
+  return true;
 }
 async function sbDeletar(tabela, id) {
   const { error } = await sbClient.from(tabela).delete().eq('id', id);
-  if (error) console.error(`Erro ao deletar de ${tabela}:`, error.message);
+  if (error) {
+    const msg = `Erro ao excluir de "${tabela}":\n${error.message}`;
+    console.error(msg);
+    alert(msg);
+  }
 }
 
 /* ===== LOG ===== */
@@ -2522,16 +2532,18 @@ function renderTiposMassa() {
       <button class="btn btn-vermelho" style="padding:3px 8px;font-size:11px;" onclick="excluirTipoMassa(${t.id})">✕</button>
     </div>`).join('');
 }
-function salvarTipoMassa() {
+async function salvarTipoMassa() {
   const nome = (document.getElementById('nomeTipoMassa').value||'').trim();
   if (!nome) { alert('Informe o nome do tipo de massa.'); return; }
   if (tiposMassa.some(t=>t.nome.toLowerCase()===nome.toLowerCase())) { alert('Tipo já cadastrado.'); return; }
   const novo = { id: gerarNovoId(tiposMassa), nome };
+  const ok = await sbUpsert('tipos_massa', [novo]);
+  if (!ok) return;
   tiposMassa.push(novo);
-  sbUpsert('tipos_massa', [novo]);
   document.getElementById('nomeTipoMassa').value = '';
   renderTiposMassa();
   popularSelectTipoMassa();
+  alert(`✅ Tipo "${nome}" cadastrado com sucesso!`);
 }
 function excluirTipoMassa(id) {
   if (!confirm('Excluir este tipo de massa?')) return;
