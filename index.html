@@ -91,13 +91,31 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 .modal-box{background:white;border-radius:15px;padding:25px;width:850px;max-width:95vw;margin:30px auto;position:relative;box-shadow:0 5px 25px rgba(0,0,0,0.3);}
 @media(max-width:768px){.modal-box{margin:10px auto;padding:18px 14px;} .modal{padding-bottom:70px;}}
 /* Backdrop escurecido por baixo dos overlays */
-#navBackdrop{position:fixed;inset:0;bottom:58px;background:rgba(0,0,0,0);z-index:148;pointer-events:none;transition:background .25s ease;}
-#navBackdrop.active{background:rgba(0,0,0,0.38);pointer-events:auto;}
-/* Overlays de navegação em pilha */
-.nav-overlay{position:fixed;top:0;left:20px;right:0;bottom:58px;background:#f4f4f4;z-index:150;overflow-y:auto;-webkit-overflow-scrolling:touch;border-radius:14px 0 0 0;box-shadow:-6px 0 24px rgba(0,0,0,0.22);visibility:hidden;transform:translateX(102%);transition:transform .25s cubic-bezier(.4,0,.2,1),visibility 0s linear .25s;}
-.nav-overlay.active{visibility:visible;transform:translateX(0);transition:transform .25s cubic-bezier(.4,0,.2,1),visibility 0s linear 0s;}
-.nav-overlay-2{z-index:151;left:28px;}
-.nav-overlay-3{z-index:152;left:36px;}
+#navBackdrop{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:148;pointer-events:none;transition:background .22s ease;}
+#navBackdrop.active{background:rgba(0,0,0,0.52);pointer-events:auto;}
+/* Overlays de navegação — card flutuante centralizado */
+.nav-overlay{
+  position:fixed;
+  top:44px; left:10px; right:10px; bottom:68px;
+  background:#f4f4f4;
+  z-index:150;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  border-radius:18px;
+  box-shadow:0 12px 48px rgba(0,0,0,0.38);
+  visibility:hidden;
+  opacity:0;
+  transform:scale(0.93);
+  transition:opacity .2s ease, transform .2s ease, visibility 0s linear .2s;
+}
+.nav-overlay.active{
+  visibility:visible;
+  opacity:1;
+  transform:scale(1);
+  transition:opacity .2s ease, transform .2s ease, visibility 0s linear 0s;
+}
+.nav-overlay-2{z-index:151;top:54px;left:6px;right:6px;bottom:64px;}
+.nav-overlay-3{z-index:152;top:48px;left:8px;right:8px;bottom:66px;}
 .nav-header{position:sticky;top:0;background:linear-gradient(90deg,#6b3f20,#8a5a34);padding:10px 14px;display:flex;align-items:center;gap:10px;z-index:2;}
 .nav-back{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.35);color:white;padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap;}
 .nav-titulo{color:white;font-weight:700;font-size:15px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -324,10 +342,6 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 
   /* Subabas cadastros */
   .subabas button { padding: 10px 12px; font-size: 12px; }
-
-  /* Pedido item: empilha */
-  .pedido-item { flex-direction: column; align-items: flex-start; gap: 10px; }
-  .pedido-item > div:last-child { width: 100%; justify-content: flex-end; }
 
   /* Produto/insumo item */
   .produto-item, .insumo-item { flex-wrap: wrap; }
