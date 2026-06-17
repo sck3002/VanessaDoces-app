@@ -90,11 +90,14 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 .modal.active{display:block;}
 .modal-box{background:white;border-radius:15px;padding:25px;width:850px;max-width:95vw;margin:30px auto;position:relative;box-shadow:0 5px 25px rgba(0,0,0,0.3);}
 @media(max-width:768px){.modal-box{margin:10px auto;padding:18px 14px;} .modal{padding-bottom:70px;}}
+/* Backdrop escurecido por baixo dos overlays */
+#navBackdrop{position:fixed;inset:0;bottom:58px;background:rgba(0,0,0,0);z-index:148;pointer-events:none;transition:background .25s ease;}
+#navBackdrop.active{background:rgba(0,0,0,0.38);pointer-events:auto;}
 /* Overlays de navegação em pilha */
-.nav-overlay{position:fixed;top:0;left:0;right:0;bottom:58px;background:#f4f4f4;z-index:150;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.nav-overlay.active{display:block;}
-.nav-overlay-2{z-index:151;}
-.nav-overlay-3{z-index:152;}
+.nav-overlay{position:fixed;top:0;left:20px;right:0;bottom:58px;background:#f4f4f4;z-index:150;overflow-y:auto;-webkit-overflow-scrolling:touch;border-radius:14px 0 0 0;box-shadow:-6px 0 24px rgba(0,0,0,0.22);visibility:hidden;transform:translateX(102%);transition:transform .25s cubic-bezier(.4,0,.2,1),visibility 0s linear .25s;}
+.nav-overlay.active{visibility:visible;transform:translateX(0);transition:transform .25s cubic-bezier(.4,0,.2,1),visibility 0s linear 0s;}
+.nav-overlay-2{z-index:151;left:28px;}
+.nav-overlay-3{z-index:152;left:36px;}
 .nav-header{position:sticky;top:0;background:linear-gradient(90deg,#6b3f20,#8a5a34);padding:10px 14px;display:flex;align-items:center;gap:10px;z-index:2;}
 .nav-back{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.35);color:white;padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap;}
 .nav-titulo{color:white;font-weight:700;font-size:15px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -115,11 +118,11 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 .btn-acao-azul{background:#2563eb;color:white;}
 .btn-acao-marrom{background:#7c5c2e;color:white;}
 .btn-acao-vermelho{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;}
-/* Cards de lista */
-.pedido-item,.produto-item,.insumo-item{background:white;border-radius:10px;padding:8px 12px;margin-bottom:6px;box-shadow:0 1px 4px rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.pedido-info,.produto-info,.insumo-info{flex:1;}
-.pedido-info strong,.produto-info strong,.insumo-info strong{color:#8a5a34;}
-.pedido-info span,.produto-info span,.insumo-info span{display:block;color:#666;font-size:13px;}
+/* Cards de lista — compactos */
+.pedido-item,.produto-item,.insumo-item{background:white;border-radius:10px;padding:9px 12px;margin-bottom:6px;box-shadow:0 1px 5px rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.pedido-info,.produto-info,.insumo-info{flex:1;min-width:0;}
+.pedido-info strong,.produto-info strong,.insumo-info strong{color:#8a5a34;font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pedido-info span,.produto-info span,.insumo-info span{display:block;color:#666;font-size:11px;line-height:1.4;}
 /* Estrutura dos filtros */
 .filtros{display:flex;gap:8px;margin-bottom:16px;flex-direction:column;}
 .filtros-topo{display:flex;gap:8px;}
@@ -268,9 +271,9 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
   /* Cards */
   .card { padding: 12px; border-radius: 12px; margin-bottom: 10px; }
   .card h2 { font-size: 15px; margin-bottom: 10px; }
-  /* Pedido-item vira coluna no mobile */
-  .pedido-item{flex-direction:column;align-items:flex-start;gap:8px;}
-  .pedido-acoes{width:100%;justify-content:flex-end;}
+  /* Pedido-item permanece em linha no mobile — compacto */
+  .pedido-item{padding:8px 10px;margin-bottom:5px;align-items:center;}
+  .pedido-acoes{flex-direction:column;align-items:flex-end;gap:3px;min-width:fit-content;}
   /* Filtros: busca+status em grid 2 col */
   .filtros-topo{display:grid;grid-template-columns:1fr 1fr;}
 
@@ -699,6 +702,7 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
   <div class="a4" id="a4"></div>
 </div>
 <!-- ========== OVERLAYS DE NAVEGAÇÃO ========== -->
+<div id="navBackdrop" onclick="fecharDetalhePedido()"></div>
 
 <!-- OVERLAY 1: NOVO PEDIDO -->
 <div id="novoPedidoOverlay" class="nav-overlay">
@@ -1181,6 +1185,7 @@ function importarBancoCompleto() {
 function trocarAba(index) {
   ['novoPedidoOverlay','detalhePedidoOverlay','editClienteOverlay','editItensOverlay']
     .forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('active'); });
+  document.getElementById('navBackdrop')?.classList.remove('active');
   overlayDetalhePedidoId = null;
   document.querySelectorAll('.aba').forEach(a=>a.classList.remove('active'));
   document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
@@ -1211,10 +1216,15 @@ function trocarSubAbaAgenda(index) {
 function _ovAbrir(id) {
   const el = document.getElementById(id);
   if (el) { el.classList.add('active'); el.scrollTop = 0; }
+  document.getElementById('navBackdrop').classList.add('active');
 }
 function _ovFechar(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove('active');
+  /* Só remove backdrop se nenhum overlay de nível 1 estiver aberto */
+  const nivel1 = ['novoPedidoOverlay','detalhePedidoOverlay'];
+  const algumAberto = nivel1.some(x => document.getElementById(x)?.classList.contains('active'));
+  if (!algumAberto) document.getElementById('navBackdrop').classList.remove('active');
 }
 
 /* — Novo Pedido — */
@@ -1781,15 +1791,12 @@ function renderPedidos() {
     return `<div class="pedido-item" onclick="abrirDetalhePedido(${p.id})" style="cursor:pointer;">
       <div class="pedido-info">
         <strong>${cliente.toUpperCase()}</strong>
-        <span>📅 ${formatarData(p.data)} &nbsp;|&nbsp; 🍬 ${unTotal} un &nbsp;|&nbsp; 💰 R$ ${total.toFixed(2)}</span>
-        <span style="font-size:11px;color:#555;margin-top:2px;">
-          Entrada: R$ ${entrada.toFixed(2)} &nbsp;|&nbsp;
-          <span style="color:${saldo>0?'#ff9800':'#28a745'};">Saldo: R$ ${saldo.toFixed(2)}</span>
-        </span>
+        <span>📅 ${formatarData(p.data)} · 🍬 ${unTotal} un · R$ ${total.toFixed(2)}</span>
+        <span style="color:${saldo>0?'#ff9800':'#28a745'};">Saldo: R$ ${saldo.toFixed(2)}</span>
       </div>
       <div class="pedido-acoes">
-        <span class="badge badge-${status}">${status.toUpperCase()}</span>
-        <span style="font-size:22px;color:#ccc;padding-left:4px;">›</span>
+        <span class="badge badge-${status}" style="font-size:10px;padding:2px 8px;">${status.toUpperCase()}</span>
+        <span style="font-size:20px;color:#ccc;text-align:right;">›</span>
       </div>
     </div>`;
   }).join('');
