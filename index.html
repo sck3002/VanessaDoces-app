@@ -90,6 +90,21 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 .modal.active{display:block;}
 .modal-box{background:white;border-radius:15px;padding:25px;width:850px;max-width:95vw;margin:30px auto;position:relative;box-shadow:0 5px 25px rgba(0,0,0,0.3);}
 @media(max-width:768px){.modal-box{margin:10px auto;padding:18px 14px;} .modal{padding-bottom:70px;}}
+/* Overlays de navegação em pilha */
+.nav-overlay{position:fixed;top:0;left:0;right:0;bottom:58px;background:#f4f4f4;z-index:150;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.nav-overlay.active{display:block;}
+.nav-overlay-2{z-index:151;}
+.nav-overlay-3{z-index:152;}
+.nav-header{position:sticky;top:0;background:linear-gradient(90deg,#6b3f20,#8a5a34);padding:10px 14px;display:flex;align-items:center;gap:10px;z-index:2;}
+.nav-back{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.35);color:white;padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap;}
+.nav-titulo{color:white;font-weight:700;font-size:15px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.nav-body{padding:12px;padding-bottom:24px;}
+/* Detalhe do pedido */
+.detalhe-secao{background:white;border-radius:12px;padding:13px 14px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,0.07);}
+.detalhe-secao-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.detalhe-label{font-size:11px;font-weight:700;color:#8a5a34;text-transform:uppercase;letter-spacing:.5px;}
+.detalhe-item-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f5ede6;font-size:13px;}
+.detalhe-item-row:last-child{border-bottom:none;}
 .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
 .badge-pendente{background:#fff3cd;color:#856404;}
 .badge-pago{background:#d4edda;color:#155724;}
@@ -234,12 +249,11 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
     font-size: 18px;
     display: block;
   }
-  .menu button:nth-child(1)::before { content: '🛍️'; }
-  .menu button:nth-child(2)::before { content: '📋'; }
-  .menu button:nth-child(3)::before { content: '📅'; }
-  .menu button:nth-child(4)::before { content: '🛒'; }
-  .menu button:nth-child(5)::before { content: '📁'; }
-  .menu button:nth-child(6)::before { content: '📊'; }
+  .menu button:nth-child(1)::before { content: '📋'; }
+  .menu button:nth-child(2)::before { content: '📅'; }
+  .menu button:nth-child(3)::before { content: '🛒'; }
+  .menu button:nth-child(4)::before { content: '📁'; }
+  .menu button:nth-child(5)::before { content: '📊'; }
   .menu button.active { background: #fff0f5; color: #d94d7d; }
 
   /* Conteúdo com espaço para menu fixo embaixo */
@@ -356,94 +370,35 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 </div>
 <div class="menu">
   <button class="active" onclick="trocarAba(0)">Pedidos</button>
-  <button onclick="trocarAba(1)">Meus Pedidos</button>
-  <button onclick="trocarAba(2)">Agenda</button>
-  <button onclick="trocarAba(3)">Compras</button>
-  <button onclick="trocarAba(4)">Cadastros</button>
-  <button onclick="trocarAba(5)">Dashboard</button>
+  <button onclick="trocarAba(1)">Agenda</button>
+  <button onclick="trocarAba(2)">Compras</button>
+  <button onclick="trocarAba(3)">Cadastros</button>
+  <button onclick="trocarAba(4)">Dashboard</button>
 </div>
 <div class="conteudo">
 
 <!-- ABA 0: PEDIDOS -->
 <div class="aba active">
-  <div class="grid">
-    <div class="card">
-      <h2>Cliente</h2>
-      <label>Telefone</label>
-      <div style="display:flex;gap:8px;align-items:flex-start;">
-        <div class="autocomplete-wrapper" style="flex:1;">
-          <input type="text" id="telefone" placeholder="Digite o telefone..." oninput="buscarClientePorTelefone()">
-          <div class="autocomplete-lista" id="listaAutocompleteTelefone" style="display:none;"></div>
-        </div>
-        <button class="btn btn-cinza" style="padding:9px 12px;font-size:18px;white-space:nowrap;" onclick="importarContato()" title="Importar da agenda do celular">📱</button>
-      </div>
-      <label>Nome</label>
-      <input type="text" id="cliente">
-      <label>Endereço</label>
-      <input type="text" id="endereco">
-      <label>Data Entrega</label>
-      <input type="date" id="entrega">
-      <label>Valor de Entrada (R$)</label>
-      <input type="text" inputmode="decimal" id="valorEntrada" value="0.00" placeholder="0,00">
-      <label>Taxa de Entrega (R$) <span style="font-size:11px;color:#aaa;">deixe 0 se retirar no local</span></label>
-      <input type="text" inputmode="decimal" id="taxaEntrega" value="0.00" placeholder="0,00" oninput="atualizarTotalComEntrega()">
-      <label>Observações</label>
-      <textarea id="obs"></textarea>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+    <h2 style="color:#8a5a34;margin:0;font-size:18px;">Meus Pedidos</h2>
+    <button class="btn btn-rosa" style="padding:10px 18px;font-size:14px;" onclick="abrirNovoPedido()">➕ Novo Pedido</button>
+  </div>
+  <div class="filtros">
+    <div class="filtros-topo">
+      <input type="text" id="filtroBusca" placeholder="🔍 Buscar cliente..." oninput="renderPedidos()">
+      <select id="filtroStatus" onchange="renderPedidos()">
+        <option value="">Todos os status</option>
+        <option value="pendente">Pendente</option>
+        <option value="pago">Pago</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
     </div>
-    <div class="card">
-      <h2>Itens do Pedido</h2>
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:15px;align-items:end;">
-        <div><label>Produto / Sabor</label><select id="produto"></select></div>
-        <div><label>Qtd (Unidades)</label><input type="number" id="quantidade" min="1"></div>
-        <div><label>Valor Unit.</label><input type="number" id="valor" readonly></div>
-        <div><label>Total</label><input type="text" id="totalItem" readonly></div>
-        <div><button class="btn btn-rosa" onclick="adicionarItem()">+ Adicionar</button></div>
-      </div>
-      <table id="tabelaItens">
-        <thead><tr><th>Produto</th><th>Qtd (un)</th><th>Valor Unit.</th><th>Total</th><th>Ação</th></tr></thead>
-        <tbody></tbody>
-        <tfoot>
-          <tr>
-            <td colspan="3" style="text-align:right;font-weight:bold;">TOTAL PEDIDO</td>
-            <td colspan="2" id="rodapeTotalPedido" style="font-size:22px;color:#d94d7d;font-weight:bold;">R$ 0,00</td>
-          </tr>
-        </tfoot>
-      </table>
-      <div class="botoes">
-        <button class="btn btn-laranja" onclick="limparPedido()">Limpar</button>
-        <button class="btn btn-verde" onclick="finalizarPedido()">✔ Finalizar Pedido</button>
-      </div>
-    </div>
-    <div class="card">
-      <h2>Resumo</h2>
-      <div class="info"><h3>Total Itens (tipos)</h3><p id="totalItens">0</p></div>
-      <div class="info"><h3>Total Doces (Unidades)</h3><p id="quantidadeTotal">0</p></div>
-      <div class="info"><h3>Valor Total</h3><p id="valorTotal">R$ 0,00</p></div>
+    <div class="filtros-data">
+      <input type="date" id="filtroData" onchange="renderPedidos()">
+      <button class="btn-limpar" onclick="limparFiltros()">✕ Limpar</button>
     </div>
   </div>
-</div>
-
-<!-- ABA 1: MEUS PEDIDOS -->
-<div class="aba">
-  <div class="card">
-    <h2>Pedidos Finalizados</h2>
-    <div class="filtros">
-      <div class="filtros-topo">
-        <input type="text" id="filtroBusca" placeholder="🔍 Buscar cliente..." oninput="renderPedidos()">
-        <select id="filtroStatus" onchange="renderPedidos()">
-          <option value="">Todos os status</option>
-          <option value="pendente">Pendente</option>
-          <option value="pago">Pago</option>
-          <option value="cancelado">Cancelado</option>
-        </select>
-      </div>
-      <div class="filtros-data">
-        <input type="date" id="filtroData" onchange="renderPedidos()">
-        <button class="btn-limpar" onclick="limparFiltros()">✕ Limpar</button>
-      </div>
-    </div>
-    <div id="listaPedidos"></div>
-  </div>
+  <div id="listaPedidos"></div>
 </div>
 
 <!-- ABA 2: AGENDA -->
@@ -638,7 +593,7 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
         <div style="font-size:40px;margin-bottom:12px;">🛒</div>
         <h3 style="color:#8a5a34;margin-bottom:8px;text-align:center;">Para lançar compras</h3>
         <p style="color:#999;font-size:13px;text-align:center;line-height:1.6;">Acesse a aba <b style="color:#d94d7d;">Compras</b> no menu superior para registrar gastos e visualizar o histórico de compras.</p>
-        <button class="btn btn-rosa" style="margin-top:16px;" onclick="trocarAba(3)">Ir para Compras →</button>
+        <button class="btn btn-rosa" style="margin-top:16px;" onclick="trocarAba(2)">Ir para Compras →</button>
       </div>
     </div>
   </div>
@@ -743,77 +698,132 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
   <button onclick="fecharModal()">Fechar</button>
   <div class="a4" id="a4"></div>
 </div>
-<!-- MODAL EDITAR PEDIDO -->
-<div class="modal" id="modalEditarPedido">
-  <div class="modal-box" style="width:700px;">
+<!-- ========== OVERLAYS DE NAVEGAÇÃO ========== -->
 
-    <!-- Cabeçalho -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:2px solid #eee;padding-bottom:10px;">
-      <h2 style="color:#8a5a34;font-size:17px;">✏️ Editar Pedido</h2>
-      <button class="btn btn-cinza" style="padding:6px 14px;font-size:13px;" onclick="fecharModalEditar()">✕ Fechar</button>
+<!-- OVERLAY 1: NOVO PEDIDO -->
+<div id="novoPedidoOverlay" class="nav-overlay">
+  <div class="nav-header">
+    <button class="nav-back" onclick="fecharNovoPedido()">← Voltar</button>
+    <span class="nav-titulo">Novo Pedido</span>
+  </div>
+  <div class="nav-body">
+    <div class="card" style="margin-bottom:10px;">
+      <h2>Cliente</h2>
+      <label>Telefone</label>
+      <div style="display:flex;gap:8px;align-items:flex-start;">
+        <div class="autocomplete-wrapper" style="flex:1;">
+          <input type="text" id="telefone" placeholder="Digite o telefone..." oninput="buscarClientePorTelefone()">
+          <div class="autocomplete-lista" id="listaAutocompleteTelefone" style="display:none;"></div>
+        </div>
+        <button class="btn btn-cinza" style="padding:9px 12px;font-size:18px;" onclick="importarContato()" title="Importar da agenda">📱</button>
+      </div>
+      <label>Nome</label><input type="text" id="cliente">
+      <label>Endereço</label><input type="text" id="endereco">
+      <label>Data Entrega</label><input type="date" id="entrega">
+      <label>Valor de Entrada (R$)</label>
+      <input type="text" inputmode="decimal" id="valorEntrada" value="0.00" placeholder="0,00">
+      <label>Taxa de Entrega (R$) <span style="font-size:11px;color:#aaa;">0 = retirada</span></label>
+      <input type="text" inputmode="decimal" id="taxaEntrega" value="0.00" placeholder="0,00" oninput="atualizarTotalComEntrega()">
+      <label>Observações</label><textarea id="obs" style="height:60px;"></textarea>
     </div>
+    <div class="card" style="margin-bottom:10px;">
+      <h2>Itens do Pedido</h2>
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end;margin-bottom:10px;">
+        <div><label style="font-size:12px;">Produto / Sabor</label><select id="produto" onchange="atualizarValor()"></select></div>
+        <div><label style="font-size:12px;">Qtd</label><input type="number" id="quantidade" min="1" style="width:65px;" oninput="calcularTotalItem()"></div>
+        <button class="btn btn-rosa" style="padding:10px 14px;white-space:nowrap;" onclick="adicionarItem()">+ Add</button>
+      </div>
+      <input type="number" id="valor" style="display:none;" readonly>
+      <input type="text"   id="totalItem" style="display:none;" readonly>
+      <table id="tabelaItens">
+        <thead><tr><th>Produto</th><th>Qtd</th><th>Unit.</th><th>Total</th><th></th></tr></thead>
+        <tbody></tbody>
+        <tfoot><tr>
+          <td colspan="3" style="text-align:right;font-weight:bold;">TOTAL</td>
+          <td colspan="2" id="rodapeTotalPedido" style="font-size:18px;color:#d94d7d;font-weight:bold;">R$ 0,00</td>
+        </tr></tfoot>
+      </table>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-laranja" style="flex:1;" onclick="limparPedido()">🗑 Limpar</button>
+      <button class="btn btn-verde" style="flex:2;" onclick="finalizarPedido()">💾 Salvar Pedido</button>
+    </div>
+    <div class="card" style="margin-top:10px;padding:10px 14px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+        <div><div style="font-size:11px;color:#aaa;">Tipos</div><div id="totalItens" style="font-weight:700;color:#8a5a34;font-size:18px;">0</div></div>
+        <div><div style="font-size:11px;color:#aaa;">Unidades</div><div id="quantidadeTotal" style="font-weight:700;color:#8a5a34;font-size:18px;">0</div></div>
+        <div><div style="font-size:11px;color:#aaa;">Total</div><div id="valorTotal" style="font-weight:700;color:#d94d7d;font-size:16px;">R$ 0,00</div></div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <input type="hidden" id="editPedidoId">
+<!-- OVERLAY 2: DETALHE DO PEDIDO -->
+<div id="detalhePedidoOverlay" class="nav-overlay nav-overlay-2">
+  <div class="nav-header">
+    <button class="nav-back" onclick="fecharDetalhePedido()">← Voltar</button>
+    <span class="nav-titulo" id="detalheTitulo">Pedido</span>
+  </div>
+  <div class="nav-body" id="detalheConteudo"></div>
+</div>
 
-    <!-- DADOS DO CLIENTE -->
-    <div style="background:#f9f9f9;border-radius:12px;padding:14px;margin-bottom:14px;">
-      <p style="font-size:11px;font-weight:600;color:#8a5a34;text-transform:uppercase;margin-bottom:10px;">👤 Cliente</p>
+<!-- OVERLAY 3A: EDITAR CLIENTE DO PEDIDO -->
+<div id="editClienteOverlay" class="nav-overlay nav-overlay-3">
+  <div class="nav-header">
+    <button class="nav-back" onclick="fecharEditarCliente()">← Voltar</button>
+    <span class="nav-titulo">Editar Cliente</span>
+  </div>
+  <div class="nav-body">
+    <div class="card">
+      <label>Nome</label><input type="text" id="editCliente">
+      <label>Telefone</label><input type="text" id="editTelefone">
+      <label>Data de Entrega</label><input type="date" id="editEntrega">
+      <label>Status</label>
+      <select id="editStatus">
+        <option value="pendente">Pendente</option>
+        <option value="pago">Pago</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+      <label>Endereço</label><input type="text" id="editEndereco">
+      <label>Observações</label><textarea id="editObs" style="height:60px;"></textarea>
+      <button class="btn btn-verde" style="width:100%;margin-top:14px;" onclick="salvarClientePedido()">💾 Salvar Cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY 3B: EDITAR ITENS DO PEDIDO -->
+<div id="editItensOverlay" class="nav-overlay nav-overlay-3">
+  <div class="nav-header">
+    <button class="nav-back" onclick="fecharEditarItens()">← Voltar</button>
+    <span class="nav-titulo">Editar Itens</span>
+  </div>
+  <div class="nav-body">
+    <div class="card" style="background:#fbf6f0;border:1px dashed #8a5a34;margin-bottom:10px;">
+      <p style="font-size:11px;font-weight:700;color:#8a5a34;margin-bottom:10px;">💰 BALANÇO FINANCEIRO</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div><label style="font-size:12px;">Nome</label><input type="text" id="editCliente"></div>
-        <div><label style="font-size:12px;">Telefone</label><input type="text" id="editTelefone"></div>
-        <div><label style="font-size:12px;">Data de Entrega</label><input type="date" id="editEntrega"></div>
-        <div><label style="font-size:12px;">Status</label>
-          <select id="editStatus" onchange="verificarMudancaStatusModal()">
-            <option value="pendente">Pendente</option>
-            <option value="pago">Pago</option>
-            <option value="cancelado">Cancelado</option>
-          </select>
-        </div>
-        <div style="grid-column:1/-1;"><label style="font-size:12px;">Endereço</label><input type="text" id="editEndereco"></div>
-        <div style="grid-column:1/-1;"><label style="font-size:12px;">Observações</label><textarea id="editObs" style="height:60px;"></textarea></div>
+        <div><label style="font-size:12px;">Total (R$)</label>
+          <input type="text" id="editValorTotal" readonly style="background:#eee;font-weight:700;color:#d94d7d;font-size:16px;"></div>
+        <div><label style="font-size:12px;">Entrada / Pagamento (R$)</label>
+          <input type="text" inputmode="decimal" id="editValorEntrada" placeholder="0,00" oninput="calcularBalançoModalEditar()"></div>
+      </div>
+      <div style="margin-top:10px;text-align:right;border-top:1px solid #e8d5c0;padding-top:8px;">
+        <span style="font-size:11px;color:#555;">SALDO A PAGAR:</span>
+        <div id="editSaldoAPagar" style="font-size:22px;font-weight:700;color:#28a745;">R$ 0,00</div>
       </div>
     </div>
-
-    <!-- BALANÇO FINANCEIRO -->
-    <div style="background:#fbf6f0;border:1px dashed #8a5a34;border-radius:12px;padding:14px;margin-bottom:14px;">
-      <p style="font-size:11px;font-weight:600;color:#8a5a34;text-transform:uppercase;margin-bottom:10px;">💰 Balanço Financeiro</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;">
-        <div>
-          <label style="font-size:12px;">Valor Total (R$)</label>
-          <input type="text" id="editValorTotal" readonly style="background:#eee;font-weight:bold;color:#d94d7d;font-size:16px;">
-        </div>
-        <div>
-          <label style="font-size:12px;">Entrada / Pagamento (R$)</label>
-          <input type="text" inputmode="decimal" id="editValorEntrada" placeholder="0,00" oninput="calcularBalançoModalEditar()">
-        </div>
-      </div>
-      <div style="margin-top:12px;text-align:right;padding-top:10px;border-top:1px solid #e8d5c0;">
-        <span style="font-size:12px;color:#555;font-weight:500;">SALDO A PAGAR:</span>
-        <div id="editSaldoAPagar" style="font-size:24px;font-weight:bold;color:#28a745;">R$ 0,00</div>
-      </div>
-    </div>
-
-    <!-- ITENS DO PEDIDO -->
-    <div style="background:#f9f9f9;border-radius:12px;padding:14px;margin-bottom:14px;">
-      <p style="font-size:11px;font-weight:600;color:#8a5a34;text-transform:uppercase;margin-bottom:10px;">🍬 Doces da Encomenda</p>
+    <div class="card" style="margin-bottom:10px;">
+      <p style="font-size:11px;font-weight:700;color:#8a5a34;margin-bottom:10px;">🍬 DOCES DA ENCOMENDA</p>
       <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end;margin-bottom:10px;">
         <div><label style="font-size:12px;">Doce / Sabor</label><select id="editAdicionarDoceSelect" style="font-size:13px;"></select></div>
         <div><label style="font-size:12px;">Qtd</label><input type="number" id="editAdicionarDoceQtd" min="1" style="width:65px;"></div>
-        <div><button class="btn btn-rosa" style="padding:12px 14px;white-space:nowrap;" onclick="adicionarDoceNoPedidoEditado()">+ Add</button></div>
+        <button class="btn btn-rosa" style="padding:10px 14px;" onclick="adicionarDoceNoPedidoEditado()">+ Add</button>
       </div>
-      <div id="listaItensEditando" style="max-height:240px;overflow-y:auto;"></div>
+      <div id="listaItensEditando"></div>
     </div>
-
-    <!-- BOTÕES DE AÇÃO -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
-      <button class="btn btn-verde" style="font-size:14px;" onclick="salvarEdicaoPedido()">💾 Salvar</button>
-      <button class="btn btn-marrom" style="font-size:14px;" onclick="abrirContratoDoModal()">📄 Contrato</button>
-      <button class="btn btn-azul" style="font-size:14px;" onclick="compartilharPedido()">📤 Compartilhar</button>
-    </div>
-
+    <button class="btn btn-verde" style="width:100%;" onclick="salvarItensPedido()">💾 Salvar Itens</button>
   </div>
 </div>
- 
+
 <script>
 const SUPABASE_URL = 'https://stwqlmxymyixgbwxynxh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_jBjgD5yEzdHdGT1pEZ6Jkw_kj3lowPV';
@@ -1003,7 +1013,8 @@ let itensPedidoAtual = [], itensEditandoPedido = [];
 let totalItensAtual = 0, quantidadeTotalAtual = 0, valorTotalAtual = 0;
 let anoFiltroSelecionado = "Todos";
 let mesFiltroSelecionado = "Todos";
- 
+let overlayDetalhePedidoId = null;
+
 const NOMES_MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
  
 document.getElementById('dataAtual').innerText =
@@ -1168,16 +1179,19 @@ function importarBancoCompleto() {
  
 /* ===== ABAS ===== */
 function trocarAba(index) {
+  ['novoPedidoOverlay','detalhePedidoOverlay','editClienteOverlay','editItensOverlay']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('active'); });
+  overlayDetalhePedidoId = null;
   document.querySelectorAll('.aba').forEach(a=>a.classList.remove('active'));
   document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.aba')[index].classList.add('active');
   document.querySelectorAll('.menu button')[index].classList.add('active');
   fecharAutocompletes();
-  if(index === 1) renderPedidos();
-  if(index === 2) trocarSubAbaAgenda(0);
-  if(index === 3) { renderInsumos(); atualizarFiltroAnoInsumos(); }
-  if(index === 4) { renderizarClientes(); renderProdutos(); renderTiposInsumos(); }
-  if(index === 5) { gerenciarFiltrosAnoDashboard(); atualizarDashboard(); }
+  if(index === 0) renderPedidos();
+  if(index === 1) trocarSubAbaAgenda(0);
+  if(index === 2) { renderInsumos(); atualizarFiltroAnoInsumos(); }
+  if(index === 3) { renderizarClientes(); renderProdutos(); renderTiposInsumos(); }
+  if(index === 4) { gerenciarFiltrosAnoDashboard(); atualizarDashboard(); }
 }
 
 /* ===== SUBABAS AGENDA ===== */
@@ -1191,6 +1205,164 @@ function trocarSubAbaAgenda(index) {
   if (subabas[index]) subabas[index].classList.add('sub-active');
   if (botoes[index])  botoes[index].classList.add('sub-active');
   if (index === 0) atualizarAgenda();
+}
+
+/* ===== OVERLAYS DE NAVEGAÇÃO ===== */
+function _ovAbrir(id) {
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('active'); el.scrollTop = 0; }
+}
+function _ovFechar(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('active');
+}
+
+/* — Novo Pedido — */
+function abrirNovoPedido() {
+  limparPedido();
+  popularSelectProduto();
+  _ovAbrir('novoPedidoOverlay');
+}
+function fecharNovoPedido() {
+  _ovFechar('novoPedidoOverlay');
+  limparPedido();
+}
+
+/* — Detalhe do Pedido — */
+function abrirDetalhePedido(id) {
+  overlayDetalhePedidoId = id;
+  renderDetalhePedido(id);
+  _ovAbrir('detalhePedidoOverlay');
+}
+function fecharDetalhePedido() {
+  _ovFechar('detalhePedidoOverlay');
+  overlayDetalhePedidoId = null;
+}
+function renderDetalhePedido(id) {
+  const p = pedidos.find(x => x.id === id); if (!p) return;
+  const itens   = p.itens || [];
+  const total   = p.total || 0;
+  const entrada = p.entrada || 0;
+  const taxa    = p.taxaEntrega || 0;
+  const saldo   = Math.max(0, total - entrada);
+  const doces   = itens.filter(i=>(i.produto||'').trim().toLowerCase()!=='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
+  const bc      = itens.filter(i=>(i.produto||'').trim().toLowerCase()==='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
+  const stCls   = {'pendente':'badge-pendente','pago':'badge-pago','cancelado':'badge-cancelado'}[p.status||'pendente'];
+  const itensHtml = itens.map(i=>`
+    <div class="detalhe-item-row">
+      <span>🍬 ${i.produto} — ${i.qtd} un</span>
+      <span style="color:#d94d7d;font-weight:600;">R$ ${(i.total||0).toFixed(2)}</span>
+    </div>`).join('');
+  document.getElementById('detalheTitulo').textContent = (p.cliente||'Pedido').split(' ')[0];
+  document.getElementById('detalheConteudo').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <span class="badge ${stCls}" style="font-size:12px;">${(p.status||'pendente').toUpperCase()}</span>
+      <span style="font-size:13px;color:#666;">📅 ${formatarData(p.data)}</span>
+    </div>
+    <div class="detalhe-secao">
+      <div class="detalhe-secao-header">
+        <span class="detalhe-label">👤 Cliente</span>
+        <button class="btn-acao btn-acao-azul" onclick="abrirEditarCliente()">✏️ Editar</button>
+      </div>
+      <p style="font-size:15px;font-weight:700;color:#333;margin:0 0 4px;">${p.cliente||'—'}</p>
+      ${p.telefone?`<p style="font-size:13px;color:#555;margin:2px 0;">📱 ${p.telefone}</p>`:''}
+      ${p.endereco?`<p style="font-size:13px;color:#555;margin:2px 0;">📍 ${p.endereco}</p>`:''}
+      ${p.obs?`<p style="font-size:12px;color:#888;margin:6px 0 0;font-style:italic;">📝 ${p.obs}</p>`:''}
+    </div>
+    <div class="detalhe-secao">
+      <div class="detalhe-secao-header">
+        <span class="detalhe-label">🍬 Itens (${Math.round(doces)} un${bc?` + ${Math.round(bc)} BC`:''})</span>
+        <button class="btn-acao btn-acao-azul" onclick="abrirEditarItens()">✏️ Editar</button>
+      </div>
+      ${itensHtml||'<p style="color:#aaa;font-size:12px;">Sem itens</p>'}
+    </div>
+    <div class="detalhe-secao" style="background:#fbf6f0;border:1px dashed #8a5a34;">
+      <div class="detalhe-item-row"><span>Total</span><b style="color:#d94d7d;">R$ ${total.toFixed(2)}</b></div>
+      ${taxa>0?`<div class="detalhe-item-row"><span>Taxa entrega</span><span>R$ ${taxa.toFixed(2)}</span></div>`:''}
+      <div class="detalhe-item-row"><span>Entrada paga</span><span>R$ ${entrada.toFixed(2)}</span></div>
+      <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid #e8d5c0;font-size:15px;font-weight:700;">
+        <span>Saldo a pagar</span>
+        <span style="color:${saldo>0?'#ff9800':'#28a745'};">R$ ${saldo.toFixed(2)}</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+      <button class="btn btn-azul" onclick="compartilharPedido()">📱 Compartilhar</button>
+      <button class="btn btn-marrom" onclick="abrirContrato(${id})">📄 Contrato</button>
+      <button class="btn btn-vermelho" style="grid-column:1/-1;" onclick="excluirPedidoDetalhe(${id})">🗑 Excluir Pedido</button>
+    </div>`;
+}
+
+/* — Editar Cliente — */
+function abrirEditarCliente() {
+  const p = pedidos.find(x=>x.id===overlayDetalhePedidoId); if(!p) return;
+  document.getElementById('editCliente').value  = p.cliente  ||'';
+  document.getElementById('editTelefone').value = p.telefone ||'';
+  document.getElementById('editEntrega').value  = p.data     ||'';
+  document.getElementById('editEndereco').value = p.endereco ||'';
+  document.getElementById('editObs').value      = p.obs      ||'';
+  document.getElementById('editStatus').value   = p.status   ||'pendente';
+  _ovAbrir('editClienteOverlay');
+}
+function fecharEditarCliente() { _ovFechar('editClienteOverlay'); }
+async function salvarClientePedido() {
+  const id  = overlayDetalhePedidoId;
+  const idx = pedidos.findIndex(x=>x.id===id); if(idx===-1) return;
+  pedidos[idx].cliente  = document.getElementById('editCliente').value.trim();
+  pedidos[idx].telefone = document.getElementById('editTelefone').value;
+  pedidos[idx].data     = document.getElementById('editEntrega').value;
+  pedidos[idx].endereco = document.getElementById('editEndereco').value;
+  pedidos[idx].obs      = document.getElementById('editObs').value;
+  pedidos[idx].status   = document.getElementById('editStatus').value;
+  const ok = await sbUpsert('pedidos',[pedidos[idx]]);
+  if(!ok) return;
+  registrarLog('PEDIDO',`Cliente alterado — ${pedidos[idx].cliente}`);
+  fecharEditarCliente();
+  renderDetalhePedido(id);
+  renderPedidos();
+  alert('✅ Dados do cliente salvos!');
+}
+
+/* — Editar Itens — */
+function abrirEditarItens() {
+  const p = pedidos.find(x=>x.id===overlayDetalhePedidoId); if(!p) return;
+  itensEditandoPedido = JSON.parse(JSON.stringify(p.itens||[]));
+  atualizarItensTabelaModalEditar();
+  document.getElementById('editValorEntrada').value = (p.entrada||0).toFixed(2);
+  calcularBalançoModalEditar();
+  const sel = document.getElementById('editAdicionarDoceSelect');
+  sel.innerHTML = produtos.map(pr=>`<option value="${pr.id}">${pr.nome} (R$ ${(pr.preco||0).toFixed(2)}/un)</option>`).join('');
+  _ovAbrir('editItensOverlay');
+}
+function fecharEditarItens() { _ovFechar('editItensOverlay'); }
+async function salvarItensPedido() {
+  const id  = overlayDetalhePedidoId;
+  const idx = pedidos.findIndex(x=>x.id===id); if(idx===-1) return;
+  if(!itensEditandoPedido.length){ alert('O pedido não pode ficar vazio!'); return; }
+  const totalCalc = itensEditandoPedido.reduce((acc,i)=>acc+i.total,0);
+  const entrada   = parseFloat((document.getElementById('editValorEntrada').value||'0').replace(',','.'))||0;
+  const saldo     = totalCalc - entrada;
+  pedidos[idx].itens   = [...itensEditandoPedido];
+  pedidos[idx].total   = totalCalc;
+  pedidos[idx].entrada = entrada;
+  if(pedidos[idx].status!=='cancelado') pedidos[idx].status = saldo<=0?'pago':'pendente';
+  const ok = await sbUpsert('pedidos',[pedidos[idx]]);
+  if(!ok) return;
+  registrarLog('PEDIDO',`Itens alterados — ${pedidos[idx].cliente} | R$ ${totalCalc.toFixed(2)}`);
+  fecharEditarItens();
+  renderDetalhePedido(id);
+  renderPedidos();
+  alert('✅ Itens salvos!');
+}
+
+/* — Excluir do detalhe — */
+function excluirPedidoDetalhe(id) {
+  if(!confirm('Excluir este pedido permanentemente?')) return;
+  const p = pedidos.find(x=>x.id===id);
+  sbDeletar('pedidos',id);
+  pedidos = pedidos.filter(x=>x.id!==id);
+  registrarLog('PEDIDO',`Excluído — ${p?p.cliente:'?'}`);
+  fecharDetalhePedido();
+  renderPedidos();
 }
 
 /* ===== SUBABAS CADASTROS ===== */
@@ -1344,8 +1516,8 @@ function finalizarPedido() {
       registrarLog('CLIENTE', `Cliente cadastrado — ${cliente} | Tel: ${telefone}`);
     }
   } catch(e){ console.error('Erro ao salvar:', e); }
-  alert('Pedido salvo com sucesso!'); /* FIX: movido para antes do atualizarTodasAsTelas */
-  limparPedido();
+  alert('Pedido salvo com sucesso!');
+  fecharNovoPedido();
   try { atualizarTodasAsTelas(); } catch(e) { console.error('Erro ao atualizar telas:', e); }
 }
 function limparPedido() {
@@ -1373,9 +1545,8 @@ function abrirContrato(id) {
   document.getElementById('modalCpfContrato').classList.add('active');
 }
 function abrirContratoDoModal() {
-  const id = document.getElementById('editPedidoId').value;
-  if(!id) return;
-  abrirContrato(id);
+  if(!overlayDetalhePedidoId) return;
+  abrirContrato(overlayDetalhePedidoId);
 }
 function gerarContrato() {
   const cpf = document.getElementById('cpfContratante').value.trim();
@@ -1601,23 +1772,24 @@ function renderPedidos() {
   }).sort((a,b) => new Date(b.data) - new Date(a.data));
   lista.innerHTML = filtrados.map(p => {
     const entrada = p.entrada || 0;
-    const total   = p.total   || 0; /* FIX: guarda nulo */
-    const saldo   = total - entrada;
-    const itens   = p.itens   || []; /* FIX: guarda nulo */
-    const status  = p.status  || 'pendente'; /* FIX: guarda nulo */
-    const cliente = p.cliente || '—'; /* FIX: guarda nulo */
-    return `<div class="pedido-item">
+    const total   = p.total   || 0;
+    const saldo   = Math.max(0, total - entrada);
+    const itens   = p.itens   || [];
+    const status  = p.status  || 'pendente';
+    const cliente = p.cliente || '—';
+    const unTotal = Math.round(itens.reduce((s,i)=>s+(i.qtd||0),0));
+    return `<div class="pedido-item" onclick="abrirDetalhePedido(${p.id})" style="cursor:pointer;">
       <div class="pedido-info">
         <strong>${cliente.toUpperCase()}</strong>
-        <span>📅 ${formatarData(p.data)} &nbsp;|&nbsp; 🍬 ${Math.round(itens.reduce((s,i)=>s+(i.qtd||0),0))} un &nbsp;|&nbsp; 💰 Total: R$ ${total.toFixed(2)}</span>
-        <span style="font-size:12px;color:#555;margin-top:4px;">💰 Entrada Paga: <b>R$ ${entrada.toFixed(2)}</b> &nbsp;|&nbsp; <b style="color:${saldo>0?'#ff9800':'#28a745'};">Saldo: R$ ${(saldo<0?0:saldo).toFixed(2)}</b></span>
+        <span>📅 ${formatarData(p.data)} &nbsp;|&nbsp; 🍬 ${unTotal} un &nbsp;|&nbsp; 💰 R$ ${total.toFixed(2)}</span>
+        <span style="font-size:11px;color:#555;margin-top:2px;">
+          Entrada: R$ ${entrada.toFixed(2)} &nbsp;|&nbsp;
+          <span style="color:${saldo>0?'#ff9800':'#28a745'};">Saldo: R$ ${saldo.toFixed(2)}</span>
+        </span>
       </div>
       <div class="pedido-acoes">
         <span class="badge badge-${status}">${status.toUpperCase()}</span>
-        <div style="flex:1"></div>
-        <button class="btn-acao btn-acao-azul" onclick="abrirEditar(${p.id})">✏️ Editar</button>
-        <button class="btn-acao btn-acao-marrom" onclick="abrirContrato(${p.id})">📄 Contrato</button>
-        <button class="btn-acao btn-acao-vermelho" onclick="excluirPedido(${p.id})">🗑 Excluir</button>
+        <span style="font-size:22px;color:#ccc;padding-left:4px;">›</span>
       </div>
     </div>`;
   }).join('');
@@ -1625,8 +1797,8 @@ function renderPedidos() {
  
 /* ===== EDITAR PEDIDO ===== */
 function abrirEditar(id) {
+  abrirDetalhePedido(id); return;
   const p = pedidos.find(x=>x.id===id); if(!p) return;
-  document.getElementById('editPedidoId').value = id;
   document.getElementById('editCliente').value = p.cliente;
   document.getElementById('editEndereco').value = p.endereco||'';
   document.getElementById('editTelefone').value = p.telefone||'';
@@ -1702,7 +1874,7 @@ function calcularBalançoModalEditar() {
   divSaldo.style.color = saldo > 0 ? '#ff9800' : '#28a745';
 }
 function compartilharPedido() {
-  const id = parseInt(document.getElementById('editPedidoId').value);
+  const id = overlayDetalhePedidoId;
   const p  = pedidos.find(x => x.id === id); if (!p) return;
   const dataFmt = p.data ? p.data.split('-').reverse().join('/') : '—';
   const itens   = (p.itens||[]).map(i => `  • ${i.produto}: ${i.qtd} un — R$ ${(i.total||0).toFixed(2).replace('.',',')}`).join('\n');
@@ -1717,7 +1889,7 @@ function compartilharPedido() {
   }
 }
 function salvarEdicaoPedido() {
-  const id = parseInt(document.getElementById('editPedidoId').value);
+  const id = overlayDetalhePedidoId;
   const idx = pedidos.findIndex(x=>x.id===id); if(idx===-1) return;
   if(itensEditandoPedido.length === 0) { alert("O pedido não pode ficar vazio!"); return; }
   const totalCalculado = itensEditandoPedido.reduce((acc,i) => acc+i.total, 0);
@@ -1738,7 +1910,7 @@ function salvarEdicaoPedido() {
   registrarLog('PEDIDO', `Pedido alterado — Cliente: ${pedidos[idx].cliente} | Entrega: ${pedidos[idx].data} | Total: R$ ${pedidos[idx].total.toFixed(2)}`);
   atualizarTodasAsTelas(); fecharModalEditar();
 }
-function fecharModalEditar() { document.getElementById('modalEditarPedido').classList.remove('active'); }
+function fecharModalEditar() { fecharDetalhePedido(); }
 function excluirPedido(id) {
   if(confirm('Excluir este pedido permanentemente?')){ 
     const p = pedidos.find(x=>x.id===id);
