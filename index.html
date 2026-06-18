@@ -270,8 +270,8 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
     font-size: 18px;
     display: block;
   }
-  .menu button:nth-child(1)::before { content: '📋'; }
-  .menu button:nth-child(2)::before { content: '📅'; }
+  .menu button:nth-child(1)::before { content: '📅'; }
+  .menu button:nth-child(2)::before { content: '📋'; }
   .menu button:nth-child(3)::before { content: '🛒'; }
   .menu button:nth-child(4)::before { content: '📁'; }
   .menu button:nth-child(5)::before { content: '📊'; }
@@ -386,40 +386,16 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
   </div>
 </div>
 <div class="menu">
-  <button class="active" onclick="trocarAba(0)">Pedidos</button>
-  <button onclick="trocarAba(1)">Agenda</button>
+  <button class="active" onclick="trocarAba(0)">Agenda</button>
+  <button onclick="trocarAba(1)">Pedidos</button>
   <button onclick="trocarAba(2)">Compras</button>
   <button onclick="trocarAba(3)">Cadastros</button>
   <button onclick="trocarAba(4)">Dashboard</button>
 </div>
 <div class="conteudo">
 
-<!-- ABA 0: PEDIDOS -->
+<!-- ABA 0: AGENDA -->
 <div class="aba active">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-    <h2 style="color:#8a5a34;margin:0;font-size:18px;">Meus Pedidos</h2>
-    <button class="btn btn-rosa" style="padding:10px 18px;font-size:14px;" onclick="abrirNovoPedido()">➕ Novo Pedido</button>
-  </div>
-  <div class="filtros">
-    <div class="filtros-topo">
-      <input type="text" id="filtroBusca" placeholder="🔍 Buscar cliente..." oninput="renderPedidos()">
-      <select id="filtroStatus" onchange="renderPedidos()">
-        <option value="">Todos os status</option>
-        <option value="pendente">Pendente</option>
-        <option value="pago">Pago</option>
-        <option value="cancelado">Cancelado</option>
-      </select>
-    </div>
-    <div class="filtros-data">
-      <input type="date" id="filtroData" onchange="renderPedidos()">
-      <button class="btn-limpar" onclick="limparFiltros()">✕ Limpar</button>
-    </div>
-  </div>
-  <div id="listaPedidos"></div>
-</div>
-
-<!-- ABA 2: AGENDA -->
-<div class="aba">
   <div class="subabas">
     <button class="sub-active" onclick="trocarSubAbaAgenda(0)">📅 Encomendas</button>
     <button onclick="trocarSubAbaAgenda(1)">🍫 Produção</button>
@@ -429,15 +405,8 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
   <div class="subaba sub-active">
     <div class="card">
       <h2>Agenda de Encomendas</h2>
-      <p style="font-size:13px;color:#666;margin-bottom:20px;">Selecione o mês para abrir o calendário de entregas.</p>
+      <p style="font-size:13px;color:#666;margin-bottom:20px;">Selecione o mês para ver as entregas.</p>
       <div id="agendaAnosContainer"></div>
-      <div id="agendaDiasSecao" class="agenda-dias-container" style="display:none;">
-        <div class="agenda-dias-titulo">
-          <h3 id="agendaDiasTituloTexto">Dias com entregas</h3>
-          <button class="btn btn-cinza" style="padding:5px 12px;font-size:12px;" onclick="fecharSecaoDias()">✕ Fechar</button>
-        </div>
-        <div class="agenda-grid" id="agendaGridDias"></div>
-      </div>
     </div>
   </div>
 
@@ -458,6 +427,30 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
       <div id="massasResultado"></div>
     </div>
   </div>
+</div>
+
+<!-- ABA 1: PEDIDOS -->
+<div class="aba">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+    <h2 style="color:#8a5a34;margin:0;font-size:18px;">Meus Pedidos</h2>
+    <button class="btn btn-rosa" style="padding:10px 18px;font-size:14px;" onclick="abrirNovoPedido()">➕ Novo Pedido</button>
+  </div>
+  <div class="filtros">
+    <div class="filtros-topo">
+      <input type="text" id="filtroBusca" placeholder="🔍 Buscar cliente..." oninput="renderPedidos()">
+      <select id="filtroStatus" onchange="renderPedidos()">
+        <option value="">Todos os status</option>
+        <option value="pendente">Pendente</option>
+        <option value="pago">Pago</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+    </div>
+    <div class="filtros-data">
+      <input type="date" id="filtroData" onchange="renderPedidos()">
+      <button class="btn-limpar" onclick="limparFiltros()">✕ Limpar</button>
+    </div>
+  </div>
+  <div id="listaPedidos"></div>
 </div>
 
 <!-- ABA 3: COMPRAS -->
@@ -718,7 +711,23 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 <!-- ========== OVERLAYS DE NAVEGAÇÃO ========== -->
 <div id="navBackdrop" onclick="fecharDetalhePedido()"></div>
 
-<!-- OVERLAY 1: NOVO PEDIDO -->
+<!-- OVERLAY AGENDA: DIAS DO MÊS -->
+<div id="agendaMesOverlay" class="nav-overlay nav-overlay-2">
+  <div class="nav-header">
+    <button class="nav-back" onclick="fecharAgendaMes()">← Voltar</button>
+    <span class="nav-titulo" id="agendaMesTitulo">Mês</span>
+  </div>
+  <div class="nav-body" id="agendaMesConteudo"></div>
+</div>
+
+<!-- OVERLAY AGENDA: PEDIDOS DO DIA -->
+<div id="agendaDiaOverlay" class="nav-overlay nav-overlay-3">
+  <div class="nav-header">
+    <button class="nav-back" onclick="fecharAgendaDia()">← Voltar</button>
+    <span class="nav-titulo" id="agendaDiaTitulo">Dia</span>
+  </div>
+  <div class="nav-body" id="agendaDiaConteudo"></div>
+</div>
 <div id="novoPedidoOverlay" class="nav-overlay">
   <div class="nav-header">
     <button class="nav-back" onclick="fecharNovoPedido()">← Voltar</button>
@@ -974,7 +983,7 @@ verificarLogin().then(logado => {
     .then(() => {
       try { atualizarTodasAsTelas(); } catch(e) { console.error('Erro ao renderizar telas:', e); }
       try { atualizarFiltroAnoInsumos(); } catch(e) { console.error(e); }
-      try { renderizarClientes(); } catch(e) { console.error(e); }
+      try { trocarSubAbaAgenda(0); } catch(e) { console.error(e); }
     })
     .catch(err => {
       console.error('Erro ao carregar banco:', err);
@@ -1197,7 +1206,8 @@ function importarBancoCompleto() {
  
 /* ===== ABAS ===== */
 function trocarAba(index) {
-  ['novoPedidoOverlay','detalhePedidoOverlay','editClienteOverlay','editItensOverlay']
+  ['novoPedidoOverlay','detalhePedidoOverlay','editClienteOverlay','editItensOverlay',
+   'agendaMesOverlay','agendaDiaOverlay']
     .forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('active'); });
   document.getElementById('navBackdrop')?.classList.remove('active');
   overlayDetalhePedidoId = null;
@@ -1206,8 +1216,8 @@ function trocarAba(index) {
   document.querySelectorAll('.aba')[index].classList.add('active');
   document.querySelectorAll('.menu button')[index].classList.add('active');
   fecharAutocompletes();
-  if(index === 0) renderPedidos();
-  if(index === 1) trocarSubAbaAgenda(0);
+  if(index === 0) trocarSubAbaAgenda(0);
+  if(index === 1) renderPedidos();
   if(index === 2) { renderInsumos(); atualizarFiltroAnoInsumos(); }
   if(index === 3) { renderizarClientes(); renderProdutos(); renderTiposInsumos(); }
   if(index === 4) { gerenciarFiltrosAnoDashboard(); atualizarDashboard(); }
@@ -1235,8 +1245,7 @@ function _ovAbrir(id) {
 function _ovFechar(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove('active');
-  /* Só remove backdrop se nenhum overlay de nível 1 estiver aberto */
-  const nivel1 = ['novoPedidoOverlay','detalhePedidoOverlay'];
+  const nivel1 = ['novoPedidoOverlay','detalhePedidoOverlay','agendaMesOverlay'];
   const algumAberto = nivel1.some(x => document.getElementById(x)?.classList.contains('active'));
   if (!algumAberto) document.getElementById('navBackdrop').classList.remove('active');
 }
@@ -2021,25 +2030,86 @@ function atualizarAgenda() {
     containerAnos.appendChild(wrapper);
   }
 }
+let _agendaDiaData = null, _agendaDiaPedidos = null;
+
 function mostrarDiasDoMes(titulo, diasObjeto) {
-  const secaoDias = document.getElementById('agendaDiasSecao');
-  document.getElementById('agendaDiasTituloTexto').innerHTML = `Entregas programadas para: <b style="color:#d94d7d;">${titulo}</b>`;
-  const gridDias = document.getElementById('agendaGridDias'); gridDias.innerHTML = '';
+  document.getElementById('agendaMesTitulo').textContent = titulo;
+  const cont = document.getElementById('agendaMesConteudo');
+  const grid = document.createElement('div');
+  grid.className = 'agenda-meses-grid';
   Object.keys(diasObjeto).sort().forEach(data => {
-    const listaPedidosDia = diasObjeto[data];
-    const totalDocesDia = listaPedidosDia.reduce((acc,p)=>acc+p.itens.reduce((s,i)=>i.produto.trim().toLowerCase()==="bem casado"?s:s+i.qtd,0),0);
-    const totalBemCasadosDia = listaPedidosDia.reduce((acc,p)=>acc+p.itens.filter(i=>i.produto.trim().toLowerCase()==="bem casado").reduce((s,i)=>s+i.qtd,0),0);
-    const cardDia = document.createElement('div'); cardDia.className = 'dia-card';
-    cardDia.innerHTML = `<h3>📅 ${formatarData(data)}</h3>
-      <p style="font-size:12px;margin-top:5px;">Pedidos: <b>${listaPedidosDia.length}</b></p>
-      <p style="font-size:12px;">Doces: <b style="color:#8a5a34;">${Math.round(totalDocesDia)} un</b></p>
-      ${totalBemCasadosDia>0?`<p style="font-size:12px;">Bem Casados: <b style="color:#8a5a34;">${Math.round(totalBemCasadosDia)} un</b></p>`:''}`;
-    cardDia.onclick = () => abrirA4(data, listaPedidosDia);
-    gridDias.appendChild(cardDia);
+    const lista = diasObjeto[data];
+    const doces = lista.reduce((a,p)=>a+(p.itens||[]).reduce((s,i)=>i.produto.trim().toLowerCase()==='bem casado'?s:s+(i.qtd||0),0),0);
+    const bc    = lista.reduce((a,p)=>a+(p.itens||[]).filter(i=>i.produto.trim().toLowerCase()==='bem casado').reduce((s,i)=>s+(i.qtd||0),0),0);
+    const card  = document.createElement('div');
+    card.className = 'dia-card';
+    card.innerHTML = `<h3>📅 ${formatarData(data)}</h3>
+      <p style="font-size:12px;margin-top:5px;">Pedidos: <b>${lista.length}</b></p>
+      <p style="font-size:12px;">Doces: <b style="color:#8a5a34;">${Math.round(doces)} un</b></p>
+      ${bc>0?`<p style="font-size:12px;">Bem Casados: <b style="color:#8a5a34;">${Math.round(bc)} un</b></p>`:''}`;
+    card.onclick = () => mostrarPedidosDoDia(data, lista);
+    grid.appendChild(card);
   });
-  secaoDias.style.display = 'block'; secaoDias.scrollIntoView({behavior:'smooth'});
+  cont.innerHTML = '';
+  cont.appendChild(grid);
+  _ovAbrir('agendaMesOverlay');
 }
-function fecharSecaoDias() { document.getElementById('agendaDiasSecao').style.display = 'none'; }
+
+function fecharAgendaMes() {
+  _ovFechar('agendaMesOverlay');
+  _ovFechar('agendaDiaOverlay');
+}
+
+function mostrarPedidosDoDia(data, lista) {
+  _agendaDiaData    = data;
+  _agendaDiaPedidos = lista;
+  document.getElementById('agendaDiaTitulo').textContent = '📅 ' + formatarData(data);
+  const totalDoces = lista.reduce((a,p)=>a+(p.itens||[]).reduce((s,i)=>i.produto.trim().toLowerCase()==='bem casado'?s:s+(i.qtd||0),0),0);
+  const totalBC    = lista.reduce((a,p)=>a+(p.itens||[]).filter(i=>i.produto.trim().toLowerCase()==='bem casado').reduce((s,i)=>s+(i.qtd||0),0),0);
+  const totalVal   = lista.reduce((a,p)=>a+(p.total||0),0);
+
+  const pedidosHtml = lista.map(p => {
+    const it    = p.itens||[];
+    const doces = it.filter(i=>i.produto.trim().toLowerCase()!=='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
+    const bc    = it.filter(i=>i.produto.trim().toLowerCase()==='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
+    const st    = p.status||'pendente';
+    return `<div class="detalhe-secao" style="margin-bottom:8px;cursor:pointer;"
+        onclick="fecharAgendaDia();fecharAgendaMes();trocarAba(0);setTimeout(()=>abrirDetalhePedido(${p.id}),120)">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <strong style="font-size:13px;color:#8a5a34;">${(p.cliente||'').toUpperCase()}</strong>
+          <div style="font-size:11px;color:#666;margin-top:2px;">
+            🍬 ${Math.round(doces)} un${bc>0?` · 💍 ${Math.round(bc)} BC`:''}
+            &nbsp;·&nbsp; R$ ${(p.total||0).toFixed(2)}
+          </div>
+        </div>
+        <span class="badge badge-${st}" style="font-size:10px;padding:2px 8px;">${st.toUpperCase()}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('agendaDiaConteudo').innerHTML = `
+    ${pedidosHtml}
+    <div class="detalhe-secao" style="background:#fffaf5;border:1px dashed #8a5a34;margin-top:4px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+        <span>Total doces</span>
+        <b>${Math.round(totalDoces)} un${totalBC>0?` + ${Math.round(totalBC)} BC`:''}</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;">
+        <span>Valor do dia</span><b style="color:#d94d7d;">R$ ${totalVal.toFixed(2)}</b>
+      </div>
+    </div>
+    <button class="btn btn-marrom" style="width:100%;margin-top:12px;padding:13px;font-size:14px;"
+      onclick="abrirA4AtualDia()">🖨️ Imprimir Mapa do Dia (A4)</button>`;
+
+  _ovAbrir('agendaDiaOverlay');
+}
+
+function fecharAgendaDia() { _ovFechar('agendaDiaOverlay'); }
+function abrirA4AtualDia() {
+  if (_agendaDiaData && _agendaDiaPedidos) abrirA4(_agendaDiaData, _agendaDiaPedidos);
+}
+function fecharSecaoDias() { fecharAgendaMes(); }
 function fecharModal() {
   const modal = document.getElementById('modal');
   modal.classList.remove('active'); modal.style.display = 'none';
