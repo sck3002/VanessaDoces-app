@@ -514,30 +514,13 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 
   <!-- SUBABA 0: CLIENTES -->
   <div class="subaba sub-active">
-    <div class="card">
-      <h2>Cadastro de Clientes</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <input type="text" id="nomeCliente" placeholder="Nome Completo">
-        <input type="text" id="telCliente" placeholder="Telefone: 00-00000-0000">
-        <input type="text" id="rua" placeholder="Rua">
-        <input type="text" id="numero" placeholder="Número">
-        <input type="text" id="bairro" placeholder="Bairro">
-        <input type="text" id="referencia" placeholder="Ponto de Referência">
-      </div>
-      <button class="btn btn-rosa" style="margin-top:15px;" onclick="adicionarCliente()">Salvar Cliente</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h2 style="color:#8a5a34;margin:0;">Clientes</h2>
+      <button class="btn btn-rosa" style="padding:9px 16px;font-size:13px;" onclick="abrirFormCliente(null)">➕ Cadastrar</button>
     </div>
-    <div class="card">
-      <h2>Buscar Cliente</h2>
-      <div class="filtros">
-        <input type="text" id="filtroCliente" placeholder="Buscar por nome ou telefone...">
-        <button class="btn btn-rosa" onclick="renderizarClientes(document.getElementById('filtroCliente').value)">🔍 Buscar</button>
-        <button class="btn btn-cinza" onclick="document.getElementById('filtroCliente').value='';renderizarClientes('')">Limpar</button>
-      </div>
-      <table id="tabelaClientes">
-        <thead><tr><th>Nome</th><th>Telefone</th><th>Endereço</th><th>Ações</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <input type="text" id="filtroCliente" placeholder="🔍 Buscar por nome ou telefone..."
+      oninput="renderizarClientes()" style="width:100%;margin-bottom:10px;">
+    <div id="listaClientes"></div>
   </div>
 
   <!-- SUBABA 1: PRODUTOS -->
@@ -710,6 +693,41 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 </div>
 <!-- ========== OVERLAYS DE NAVEGAÇÃO ========== -->
 <div id="navBackdrop" onclick="fecharDetalhePedido()"></div>
+
+<!-- OVERLAY CLIENTE: DETALHE -->
+<div id="clienteDetalheOverlay" class="nav-overlay nav-overlay-2">
+  <div class="nav-header">
+    <button class="nav-back" onclick="fecharDetalheCliente()">← Voltar</button>
+    <span class="nav-titulo" id="clienteDetalheTitulo">Cliente</span>
+  </div>
+  <div class="nav-body" id="clienteDetalheConteudo"></div>
+</div>
+
+<!-- OVERLAY CLIENTE: FORMULÁRIO -->
+<div id="clienteFormOverlay" class="nav-overlay nav-overlay-3">
+  <div class="nav-header">
+    <button class="nav-back" onclick="fecharFormCliente()">← Voltar</button>
+    <span class="nav-titulo" id="clienteFormTitulo">Novo Cliente</span>
+  </div>
+  <div class="nav-body">
+    <div class="card">
+      <input type="hidden" id="clienteFormId">
+      <label>Nome Completo</label>
+      <input type="text" id="clienteFormNome" placeholder="Nome Completo">
+      <label>Telefone</label>
+      <input type="text" id="clienteFormTel" placeholder="00-00000-0000">
+      <label>Rua</label>
+      <input type="text" id="clienteFormRua" placeholder="Rua">
+      <label>Número</label>
+      <input type="text" id="clienteFormNumero" placeholder="Número">
+      <label>Bairro</label>
+      <input type="text" id="clienteFormBairro" placeholder="Bairro">
+      <label>Ponto de Referência</label>
+      <input type="text" id="clienteFormRef" placeholder="Referência">
+      <button class="btn btn-verde" style="width:100%;margin-top:14px;" onclick="salvarClienteForm()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
 
 <!-- OVERLAY AGENDA: DIAS DO MÊS -->
 <div id="agendaMesOverlay" class="nav-overlay nav-overlay-2">
@@ -1207,7 +1225,7 @@ function importarBancoCompleto() {
 /* ===== ABAS ===== */
 function trocarAba(index) {
   ['novoPedidoOverlay','detalhePedidoOverlay','editClienteOverlay','editItensOverlay',
-   'agendaMesOverlay','agendaDiaOverlay']
+   'agendaMesOverlay','agendaDiaOverlay','clienteDetalheOverlay','clienteFormOverlay']
     .forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('active'); });
   document.getElementById('navBackdrop')?.classList.remove('active');
   overlayDetalhePedidoId = null;
@@ -1245,7 +1263,7 @@ function _ovAbrir(id) {
 function _ovFechar(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove('active');
-  const nivel1 = ['novoPedidoOverlay','detalhePedidoOverlay','agendaMesOverlay'];
+  const nivel1 = ['novoPedidoOverlay','detalhePedidoOverlay','agendaMesOverlay','clienteDetalheOverlay'];
   const algumAberto = nivel1.some(x => document.getElementById(x)?.classList.contains('active'));
   if (!algumAberto) document.getElementById('navBackdrop').classList.remove('active');
 }
@@ -1409,8 +1427,7 @@ function trocarSubAba(index) {
   abaAtiva.querySelectorAll('.subaba')[index].classList.add('sub-active');
   abaAtiva.querySelectorAll('.subabas button')[index].classList.add('sub-active');
   if(index === 0) renderizarClientes();
-  if(index === 1) { renderProdutos(); fecharReceita(); }
-  if(index === 2) renderTiposInsumos();
+  if(index === 1) { renderProdutos(); fecharReceita(); }  if(index === 2) renderTiposInsumos();
   if(index === 3) renderTiposMassa();
   if(index === 4) carregarLogs();
 }
@@ -1749,45 +1766,109 @@ async function adicionarCliente() {
 }
  
 function renderizarClientes(filtroExterno) {
-  const campoFiltro = document.getElementById('filtroCliente');
-  const filtro = (filtroExterno !== undefined ? filtroExterno : (campoFiltro ? campoFiltro.value : '')).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-  const tbody = document.getElementById('tabelaClientes').getElementsByTagName('tbody')[0];
-  tbody.innerHTML = "";
+  const campo = document.getElementById('filtroCliente');
+  const filtro = ((filtroExterno !== undefined ? filtroExterno : (campo ? campo.value : '')) || '')
+    .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const cont = document.getElementById('listaClientes');
+  if (!cont) return;
   const lista = clientes.filter(c => {
     if (!filtro) return true;
-    const nome = (c.nome||'').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-    const tel = (c.tel||'').replace(/\D/g,'');
+    const nome = (c.nome||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const tel  = (c.tel||'').replace(/\D/g,'');
     return nome.includes(filtro) || tel.includes(filtro.replace(/\D/g,''));
-  });
-  lista.forEach(c => {
-    let row = tbody.insertRow();
-    row.innerHTML = `<td>${c.nome}</td><td>${c.tel}</td><td>${c.end||''}</td>
-      <td>
-        <button class="btn btn-azul" style="padding:6px 10px;font-size:12px;" onclick="carregarParaEditar('${c.id}')">Editar</button>
-        <button class="btn btn-vermelho" style="padding:6px 10px;font-size:12px;" onclick="excluirCliente('${c.id}')">Excluir</button>
-      </td>`;
-  });
-}
-function carregarParaEditar(id) {
-  const c = clientes.find(c => String(c.id) === String(id)); if(!c) return;
-  const partes = (c.end||'').split(/, | - | \(Ref: |\)/);
-  document.getElementById('nomeCliente').value = c.nome;
-  document.getElementById('telCliente').value = c.tel;
-  document.getElementById('rua').value = partes[0] || '';
-  document.getElementById('numero').value = partes[1] || '';
-  document.getElementById('bairro').value = partes[2] || '';
-  document.getElementById('referencia').value = partes[3] || '';
-  document.querySelector('.aba:nth-child(4) .card h2').scrollIntoView({behavior:'smooth'});
-}
-function excluirCliente(id) {
-  if(confirm('Tem certeza que deseja excluir este cliente?')) {
-    sbDeletar('clientes', id); clientes = clientes.filter(c => String(c.id) !== String(id)); renderizarClientes();
+  }).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+  if (!lista.length) {
+    cont.innerHTML = '<p style="color:#aaa;text-align:center;padding:24px;font-size:13px;">Nenhum cliente encontrado.</p>';
+    return;
   }
+  cont.innerHTML = lista.map(c => `
+    <div class="pedido-item" style="cursor:pointer;" onclick="abrirDetalheCliente('${c.id}')">
+      <div class="pedido-info">
+        <strong>${c.nome||'—'}</strong>
+        <span>📱 ${c.tel||'—'}</span>
+        ${c.end?`<span>📍 ${c.end}</span>`:''}
+      </div>
+      <span style="font-size:20px;color:#ccc;">›</span>
+    </div>`).join('');
 }
-function limparCamposCliente() {
-  ['nomeCliente','telCliente','rua','numero','bairro','referencia'].forEach(id => { document.getElementById(id).value = ""; });
+
+function abrirDetalheCliente(id) {
+  const c = clientes.find(x=>String(x.id)===String(id)); if(!c) return;
+  document.getElementById('clienteDetalheTitulo').textContent = c.nome;
+  document.getElementById('clienteDetalheConteudo').innerHTML = `
+    <div class="detalhe-secao">
+      <div class="detalhe-secao-header">
+        <span class="detalhe-label">👤 Dados</span>
+        <button class="btn-acao btn-acao-azul" onclick="abrirFormCliente('${c.id}')">✏️ Editar</button>
+      </div>
+      <p style="font-size:15px;font-weight:700;margin:0 0 6px;">${c.nome||'—'}</p>
+      <p style="font-size:13px;color:#555;margin:3px 0;">📱 ${c.tel||'—'}</p>
+      ${c.end?`<p style="font-size:13px;color:#555;margin:3px 0;">📍 ${c.end}</p>`:''}
+    </div>
+    <button class="btn btn-vermelho" style="width:100%;margin-top:12px;padding:11px;"
+      onclick="excluirClienteOverlay('${c.id}')">🗑 Excluir Cliente</button>`;
+  _ovAbrir('clienteDetalheOverlay');
 }
- 
+function fecharDetalheCliente() { _ovFechar('clienteDetalheOverlay'); }
+
+function abrirFormCliente(id) {
+  document.getElementById('clienteFormTitulo').textContent = id ? 'Editar Cliente' : 'Novo Cliente';
+  document.getElementById('clienteFormId').value = id||'';
+  if (id) {
+    const c = clientes.find(x=>String(x.id)===String(id));
+    if (c) {
+      const end = c.end||'';
+      const parteEnd = end.split(', ');
+      const rua    = parteEnd[0]||'';
+      const resto  = (parteEnd[1]||'').split(' - ');
+      const num    = resto[0]||'';
+      const bairRef = (resto[1]||'').split(' (Ref: ');
+      const bairro = bairRef[0]||'';
+      const ref    = (bairRef[1]||'').replace(')','');
+      document.getElementById('clienteFormNome').value   = c.nome||'';
+      document.getElementById('clienteFormTel').value    = c.tel||'';
+      document.getElementById('clienteFormRua').value    = rua;
+      document.getElementById('clienteFormNumero').value = num;
+      document.getElementById('clienteFormBairro').value = bairro;
+      document.getElementById('clienteFormRef').value    = ref;
+    }
+  } else {
+    ['clienteFormNome','clienteFormTel','clienteFormRua','clienteFormNumero','clienteFormBairro','clienteFormRef']
+      .forEach(f=>{ document.getElementById(f).value=''; });
+  }
+  _ovAbrir('clienteFormOverlay');
+}
+function fecharFormCliente() { _ovFechar('clienteFormOverlay'); }
+
+async function salvarClienteForm() {
+  const id     = document.getElementById('clienteFormId').value;
+  const nome   = document.getElementById('clienteFormNome').value.trim();
+  const tel    = document.getElementById('clienteFormTel').value.trim();
+  const rua    = document.getElementById('clienteFormRua').value.trim();
+  const num    = document.getElementById('clienteFormNumero').value.trim();
+  const bairro = document.getElementById('clienteFormBairro').value.trim();
+  const ref    = document.getElementById('clienteFormRef').value.trim();
+  if (!nome||!tel) { alert('Preencha nome e telefone!'); return; }
+  const end = `${rua}${num?', '+num:''}${bairro?' - '+bairro:''}${ref?' (Ref: '+ref+')':''}`;
+  const novoId = id || tel;
+  const novo   = { id: novoId, nome, tel, end };
+  const ok = await sbUpsert('clientes',[novo]);
+  if (!ok) return;
+  const idx = clientes.findIndex(c=>String(c.id)===String(novoId));
+  if (idx !== -1) clientes[idx]=novo; else clientes.push(novo);
+  fecharFormCliente();
+  if (id) abrirDetalheCliente(novoId);
+  renderizarClientes();
+  alert('✅ Cliente salvo!');
+}
+
+function excluirClienteOverlay(id) {
+  if (!confirm('Excluir este cliente permanentemente?')) return;
+  sbDeletar('clientes', id);
+  clientes = clientes.filter(c=>String(c.id)!==String(id));
+  fecharDetalheCliente();
+  renderizarClientes();
+}
 /* ===== PEDIDOS LIST ===== */
 function renderPedidos() {
   const busca  = document.getElementById('filtroBusca').value.toLowerCase();
