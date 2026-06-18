@@ -2047,7 +2047,7 @@ function mostrarDiasDoMes(titulo, diasObjeto) {
       <p style="font-size:12px;margin-top:5px;">Pedidos: <b>${lista.length}</b></p>
       <p style="font-size:12px;">Doces: <b style="color:#8a5a34;">${Math.round(doces)} un</b></p>
       ${bc>0?`<p style="font-size:12px;">Bem Casados: <b style="color:#8a5a34;">${Math.round(bc)} un</b></p>`:''}`;
-    card.onclick = () => mostrarPedidosDoDia(data, lista);
+    card.onclick = () => abrirA4(data, lista);
     grid.appendChild(card);
   });
   cont.innerHTML = '';
@@ -2055,60 +2055,7 @@ function mostrarDiasDoMes(titulo, diasObjeto) {
   _ovAbrir('agendaMesOverlay');
 }
 
-function fecharAgendaMes() {
-  _ovFechar('agendaMesOverlay');
-  _ovFechar('agendaDiaOverlay');
-}
-
-function mostrarPedidosDoDia(data, lista) {
-  _agendaDiaData    = data;
-  _agendaDiaPedidos = lista;
-  document.getElementById('agendaDiaTitulo').textContent = '📅 ' + formatarData(data);
-  const totalDoces = lista.reduce((a,p)=>a+(p.itens||[]).reduce((s,i)=>i.produto.trim().toLowerCase()==='bem casado'?s:s+(i.qtd||0),0),0);
-  const totalBC    = lista.reduce((a,p)=>a+(p.itens||[]).filter(i=>i.produto.trim().toLowerCase()==='bem casado').reduce((s,i)=>s+(i.qtd||0),0),0);
-  const totalVal   = lista.reduce((a,p)=>a+(p.total||0),0);
-
-  const pedidosHtml = lista.map(p => {
-    const it    = p.itens||[];
-    const doces = it.filter(i=>i.produto.trim().toLowerCase()!=='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
-    const bc    = it.filter(i=>i.produto.trim().toLowerCase()==='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
-    const st    = p.status||'pendente';
-    return `<div class="detalhe-secao" style="margin-bottom:8px;cursor:pointer;"
-        onclick="fecharAgendaDia();fecharAgendaMes();trocarAba(0);setTimeout(()=>abrirDetalhePedido(${p.id}),120)">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <strong style="font-size:13px;color:#8a5a34;">${(p.cliente||'').toUpperCase()}</strong>
-          <div style="font-size:11px;color:#666;margin-top:2px;">
-            🍬 ${Math.round(doces)} un${bc>0?` · 💍 ${Math.round(bc)} BC`:''}
-            &nbsp;·&nbsp; R$ ${(p.total||0).toFixed(2)}
-          </div>
-        </div>
-        <span class="badge badge-${st}" style="font-size:10px;padding:2px 8px;">${st.toUpperCase()}</span>
-      </div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('agendaDiaConteudo').innerHTML = `
-    ${pedidosHtml}
-    <div class="detalhe-secao" style="background:#fffaf5;border:1px dashed #8a5a34;margin-top:4px;">
-      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
-        <span>Total doces</span>
-        <b>${Math.round(totalDoces)} un${totalBC>0?` + ${Math.round(totalBC)} BC`:''}</b>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:13px;">
-        <span>Valor do dia</span><b style="color:#d94d7d;">R$ ${totalVal.toFixed(2)}</b>
-      </div>
-    </div>
-    <button class="btn btn-marrom" style="width:100%;margin-top:12px;padding:13px;font-size:14px;"
-      onclick="abrirA4AtualDia()">🖨️ Imprimir Mapa do Dia (A4)</button>`;
-
-  _ovAbrir('agendaDiaOverlay');
-}
-
-function fecharAgendaDia() { _ovFechar('agendaDiaOverlay'); }
-function abrirA4AtualDia() {
-  if (_agendaDiaData && _agendaDiaPedidos) abrirA4(_agendaDiaData, _agendaDiaPedidos);
-}
+function fecharAgendaMes() { _ovFechar('agendaMesOverlay'); }
 function fecharSecaoDias() { fecharAgendaMes(); }
 function fecharModal() {
   const modal = document.getElementById('modal');
