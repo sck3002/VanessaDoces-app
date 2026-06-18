@@ -1268,6 +1268,8 @@ function abrirDetalhePedido(id) {
   _ovAbrir('detalhePedidoOverlay');
 }
 function fecharDetalhePedido() {
+  const el = document.getElementById('detalhePedidoOverlay');
+  if (el) el.style.zIndex = ''; /* reseta z-index caso tenha sido elevado pela agenda */
   _ovFechar('detalhePedidoOverlay');
   overlayDetalhePedidoId = null;
 }
@@ -2055,10 +2057,7 @@ function mostrarDiasDoMes(titulo, diasObjeto) {
   _ovAbrir('agendaMesOverlay');
 }
 
-function fecharAgendaMes() {
-  _ovFechar('agendaMesOverlay');
-  _ovFechar('agendaDiaOverlay');
-}
+function fecharAgendaMes() { _ovFechar('agendaMesOverlay'); _ovFechar('agendaDiaOverlay'); }
 
 function mostrarPedidosDoDia(data, lista) {
   _agendaDiaData    = data;
@@ -2069,17 +2068,17 @@ function mostrarPedidosDoDia(data, lista) {
   const totalVal   = lista.reduce((a,p)=>a+(p.total||0),0);
 
   const pedidosHtml = lista.map(p => {
-    const it    = p.itens||[];
-    const doces = it.filter(i=>i.produto.trim().toLowerCase()!=='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
-    const bc    = it.filter(i=>i.produto.trim().toLowerCase()==='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
-    const st    = p.status||'pendente';
+    const it  = p.itens||[];
+    const doc = it.filter(i=>i.produto.trim().toLowerCase()!=='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
+    const bc  = it.filter(i=>i.produto.trim().toLowerCase()==='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
+    const st  = p.status||'pendente';
     return `<div class="detalhe-secao" style="margin-bottom:8px;cursor:pointer;"
-        onclick="fecharAgendaDia();fecharAgendaMes();trocarAba(0);setTimeout(()=>abrirDetalhePedido(${p.id}),120)">
+        onclick="abrirDetalhePedidoDeAgenda(${p.id})">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <div>
           <strong style="font-size:13px;color:#8a5a34;">${(p.cliente||'').toUpperCase()}</strong>
           <div style="font-size:11px;color:#666;margin-top:2px;">
-            🍬 ${Math.round(doces)} un${bc>0?` · 💍 ${Math.round(bc)} BC`:''}
+            🍬 ${Math.round(doc)} un${bc>0?` · 💍 ${Math.round(bc)} BC`:''}
             &nbsp;·&nbsp; R$ ${(p.total||0).toFixed(2)}
           </div>
         </div>
@@ -2089,6 +2088,8 @@ function mostrarPedidosDoDia(data, lista) {
   }).join('');
 
   document.getElementById('agendaDiaConteudo').innerHTML = `
+    <button class="btn btn-marrom" style="width:100%;margin-bottom:12px;padding:12px;font-size:14px;"
+      onclick="abrirA4(_agendaDiaData,_agendaDiaPedidos)">🖨️ Imprimir Mapa do Dia (A4)</button>
     ${pedidosHtml}
     <div class="detalhe-secao" style="background:#fffaf5;border:1px dashed #8a5a34;margin-top:4px;">
       <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
@@ -2098,17 +2099,19 @@ function mostrarPedidosDoDia(data, lista) {
       <div style="display:flex;justify-content:space-between;font-size:13px;">
         <span>Valor do dia</span><b style="color:#d94d7d;">R$ ${totalVal.toFixed(2)}</b>
       </div>
-    </div>
-    <button class="btn btn-marrom" style="width:100%;margin-top:12px;padding:13px;font-size:14px;"
-      onclick="abrirA4AtualDia()">🖨️ Imprimir Mapa do Dia (A4)</button>`;
+    </div>`;
 
   _ovAbrir('agendaDiaOverlay');
 }
 
-function fecharAgendaDia() { _ovFechar('agendaDiaOverlay'); }
-function abrirA4AtualDia() {
-  if (_agendaDiaData && _agendaDiaPedidos) abrirA4(_agendaDiaData, _agendaDiaPedidos);
+/* Abre detalhe do pedido por cima dos overlays de agenda (z-index maior) */
+function abrirDetalhePedidoDeAgenda(id) {
+  const el = document.getElementById('detalhePedidoOverlay');
+  if (el) el.style.zIndex = '160';
+  abrirDetalhePedido(id);
 }
+
+function fecharAgendaDia() { _ovFechar('agendaDiaOverlay'); }
 function fecharSecaoDias() { fecharAgendaMes(); }
 function fecharModal() {
   const modal = document.getElementById('modal');
