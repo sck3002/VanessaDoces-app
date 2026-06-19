@@ -762,7 +762,11 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
         </div>
         <button class="btn btn-cinza" style="padding:9px 12px;font-size:18px;" onclick="importarContato()" title="Importar da agenda">📱</button>
       </div>
-      <label>Nome</label><input type="text" id="cliente">
+      <label>Nome</label>
+      <div class="autocomplete-wrapper">
+        <input type="text" id="cliente" placeholder="Digite o nome..." oninput="buscarClientePorNome()">
+        <div class="autocomplete-lista" id="listaAutocompleteNome" style="display:none;"></div>
+      </div>
       <label>Endereço</label><input type="text" id="endereco">
       <label>Data Entrega</label><input type="date" id="entrega">
       <label>Valor de Entrada (R$)</label>
@@ -1433,13 +1437,40 @@ function trocarSubAba(index) {
 }
 
 function fecharAutocompletes() {
-  document.querySelectorAll('.autocomplete-lista').forEach(el => el.style.display = 'none');
+  ['listaAutocompleteTelefone','listaAutocompleteNome'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
 }
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.autocomplete-wrapper')) fecharAutocompletes();
 });
  
 /* ===== BUSCA POR TELEFONE (ABA PEDIDOS) ===== */
+function buscarClientePorNome() {
+  const campo = document.getElementById('cliente');
+  const lista = document.getElementById('listaAutocompleteNome');
+  const termo = (campo.value||'').trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+  if (!termo || termo.length < 2) { lista.style.display = 'none'; return; }
+
+  const encontrados = clientes.filter(c => {
+    const nome = (c.nome||'').toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    return nome.includes(termo);
+  });
+
+  if (!encontrados.length) { lista.style.display = 'none'; return; }
+
+  lista.innerHTML = encontrados.map(c => `
+    <div class="autocomplete-item" onclick="selecionarClientePorTelefone('${c.id}')">
+      <strong>${c.nome}</strong>
+      <span>${c.tel||''} — ${c.end||''}</span>
+    </div>`).join('');
+  lista.style.display = 'block';
+}
+
 function buscarClientePorTelefone() {
   const campo = document.getElementById('telefone');
   const lista = document.getElementById('listaAutocompleteTelefone');
@@ -1475,9 +1506,11 @@ function selecionarClientePorTelefone(id) {
   const c = clientes.find(x => String(x.id) === String(id));
   if (!c) return;
   document.getElementById('telefone').value = c.tel || '';
-  document.getElementById('cliente').value = c.nome || '';
-  document.getElementById('endereco').value = c.end || '';
+  document.getElementById('cliente').value  = c.nome || '';
+  document.getElementById('endereco').value = c.end  || '';
   document.getElementById('listaAutocompleteTelefone').style.display = 'none';
+  const ln = document.getElementById('listaAutocompleteNome');
+  if (ln) ln.style.display = 'none';
 }
  
 /* ===== PRODUTOS / SELECT ===== */
