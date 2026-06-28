@@ -90,87 +90,16 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 .modal.active{display:block;}
 .modal-box{background:white;border-radius:15px;padding:25px;width:850px;max-width:95vw;margin:30px auto;position:relative;box-shadow:0 5px 25px rgba(0,0,0,0.3);}
 @media(max-width:768px){.modal-box{margin:10px auto;padding:18px 14px;} .modal{padding-bottom:70px;}}
-/* Backdrop escurecido por baixo dos overlays */
-#navBackdrop{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:148;pointer-events:none;transition:background .22s ease;}
-#navBackdrop.active{background:rgba(0,0,0,0.52);pointer-events:auto;}
-/* Overlays de navegação — card flutuante centralizado */
-.nav-overlay{
-  position:fixed;
-  top:44px; left:10px; right:10px; bottom:68px;
-  background:#f4f4f4;
-  z-index:150;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-  border-radius:18px;
-  box-shadow:0 12px 48px rgba(0,0,0,0.38);
-  visibility:hidden;
-  opacity:0;
-  transform:scale(0.93);
-  transition:opacity .2s ease, transform .2s ease, visibility 0s linear .2s;
-}
-.nav-overlay.active{
-  visibility:visible;
-  opacity:1;
-  transform:scale(1);
-  transition:opacity .2s ease, transform .2s ease, visibility 0s linear 0s;
-}
-.nav-overlay-2{z-index:151;top:54px;left:6px;right:6px;bottom:64px;}
-.nav-overlay-3{z-index:152;top:48px;left:8px;right:8px;bottom:66px;}
-.nav-header{position:sticky;top:0;background:linear-gradient(90deg,#6b3f20,#8a5a34);padding:10px 14px;display:flex;align-items:center;gap:10px;z-index:2;}
-.nav-back{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.35);color:white;padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap;}
-.nav-titulo{color:white;font-weight:700;font-size:15px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.nav-body{padding:12px;padding-bottom:24px;}
-/* Detalhe do pedido */
-.detalhe-secao{background:white;border-radius:12px;padding:13px 14px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,0.07);}
-.detalhe-secao-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.detalhe-label{font-size:11px;font-weight:700;color:#8a5a34;text-transform:uppercase;letter-spacing:.5px;}
-.detalhe-item-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f5ede6;font-size:13px;}
-.detalhe-item-row:last-child{border-bottom:none;}
 .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
 .badge-pendente{background:#fff3cd;color:#856404;}
 .badge-pago{background:#d4edda;color:#155724;}
 .badge-cancelado{background:#f8d7da;color:#721c24;}
-/* Botões de ação dos pedidos — mesma altura do badge */
-.pedido-acoes{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;}
-.btn-acao{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;border:none;cursor:pointer;white-space:nowrap;line-height:1.6;}
-.btn-acao-azul{background:#2563eb;color:white;}
-.btn-acao-marrom{background:#7c5c2e;color:white;}
-.btn-acao-vermelho{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;}
-/* Cards de lista — compactos */
-.pedido-item,.produto-item,.insumo-item{background:white;border-radius:10px;padding:9px 12px;margin-bottom:6px;box-shadow:0 1px 5px rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.pedido-info,.produto-info,.insumo-info{flex:1;min-width:0;}
-.pedido-info strong,.produto-info strong,.insumo-info strong{color:#8a5a34;font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pedido-info span,.produto-info span,.insumo-info span{display:block;color:#666;font-size:11px;line-height:1.4;}
-/* Estrutura dos filtros */
-.filtros{display:flex;gap:8px;margin-bottom:16px;flex-direction:column;}
-.filtros-topo{display:flex;gap:8px;}
-.filtros-topo input,.filtros-topo select{flex:1;}
-.filtros-data{display:flex;gap:8px;align-items:center;}
-.filtros-data input[type="date"]{flex:1;}
-.btn-limpar{background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer;white-space:nowrap;}
-/* Módulo Massas */
-.massa-painel{background:#fffaf5;border:1px solid #f5c5a3;border-radius:12px;padding:14px;margin-bottom:14px;}
-.massa-painel h3{color:#8a5a34;font-size:14px;margin-bottom:10px;}
-.massa-tabela{width:100%;border-collapse:collapse;font-size:12px;}
-.massa-tabela th{background:#f5c5a3;color:#6b3f20;padding:5px 8px;text-align:left;font-size:11px;}
-.massa-tabela td{padding:5px 8px;border-bottom:1px solid #f0e0d0;font-size:12px;}
-.massa-tabela tr:last-child td{border-bottom:none;}
-.massa-saldo-neg{color:#28a745;font-weight:700;}
-.massa-saldo-pos{color:#ff9800;font-weight:700;}
-.dia-log-row{background:white;border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1px solid #f0e0d0;}
-.dia-log-row.lancado{border-color:#28a745;background:#f6fff9;}
-/* Receita do produto */
-.receita-linha{display:flex;align-items:center;gap:8px;background:#fff5f0;border-radius:8px;padding:6px 10px;margin-bottom:5px;font-size:12px;}
-.receita-linha span{flex:1;color:#6b3f20;font-weight:600;}
-/* Período de massas — mobile-first */
-.massa-periodo-form{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
-.massa-periodo-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.massa-date-input{width:100%;padding:9px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px;box-sizing:border-box;}
-.massa-btn-consultar{width:100%;padding:11px;font-size:14px;}
-/* Diário — linha de detalhe compacta */
-.massa-det-linha{display:grid;grid-template-columns:1fr auto auto auto;gap:4px 10px;font-size:11px;color:#555;padding:3px 0;align-items:center;}
-.massa-det-nome{color:#6b3f20;font-weight:600;}
-.massa-det-valor{text-align:right;white-space:nowrap;}
+.pedido-item, .produto-item, .insumo-item{background:white;border-radius:12px;padding:14px 18px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.pedido-info, .produto-info, .insumo-info{flex:1;}
+.pedido-info strong, .produto-info strong, .insumo-info strong{color:#8a5a34;}
+.pedido-info span, .produto-info span, .insumo-info span{display:block;color:#666;font-size:13px;}
+.filtros{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+.filtros input,.filtros select{width:auto;flex:1;min-width:140px;padding:10px 14px;}
 .rodape{height:45px;background:#6b3f20;color:white;display:flex;align-items:center;justify-content:center;}
  
 /* === DASHBOARD === */
@@ -270,11 +199,12 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
     font-size: 18px;
     display: block;
   }
-  .menu button:nth-child(1)::before { content: '📅'; }
+  .menu button:nth-child(1)::before { content: '🛍️'; }
   .menu button:nth-child(2)::before { content: '📋'; }
-  .menu button:nth-child(3)::before { content: '🛒'; }
-  .menu button:nth-child(4)::before { content: '📁'; }
-  .menu button:nth-child(5)::before { content: '📊'; }
+  .menu button:nth-child(3)::before { content: '📅'; }
+  .menu button:nth-child(4)::before { content: '🛒'; }
+  .menu button:nth-child(5)::before { content: '📁'; }
+  .menu button:nth-child(6)::before { content: '📊'; }
   .menu button.active { background: #fff0f5; color: #d94d7d; }
 
   /* Conteúdo com espaço para menu fixo embaixo */
@@ -287,13 +217,8 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
   .grid { grid-template-columns: 1fr !important; gap: 12px; }
 
   /* Cards */
-  .card { padding: 12px; border-radius: 12px; margin-bottom: 10px; }
-  .card h2 { font-size: 15px; margin-bottom: 10px; }
-  /* Pedido-item permanece em linha no mobile — compacto */
-  .pedido-item{padding:8px 10px;margin-bottom:5px;align-items:center;}
-  .pedido-acoes{align-items:center;gap:6px;}
-  /* Filtros: busca+status em grid 2 col */
-  .filtros-topo{display:grid;grid-template-columns:1fr 1fr;}
+  .card { padding: 14px; border-radius: 12px; margin-bottom: 12px; }
+  .card h2 { font-size: 16px; margin-bottom: 14px; }
 
   /* Grid itens do pedido → empilhado */
   .card > div[style*="grid-template-columns:2fr"] {
@@ -301,22 +226,17 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
     gap: 8px !important;
   }
 
-  /* Campos compactos porém tocáveis */
-  label {
-    margin-top: 8px;
-    margin-bottom: 2px;
-    font-size: 12px;
-  }
+  /* Inputs e selects com altura mínima de toque */
   input, select, textarea {
-    padding: 9px 11px;
-    font-size: 15px !important; /* ≥15px evita zoom automático no Chrome Android */
-    min-height: 42px;
-    border-radius: 8px;
+    padding: 14px 12px;
+    font-size: 16px !important; /* evita zoom automático no iOS */
+    min-height: 48px;
+    border-radius: 10px;
   }
-  textarea { height: 58px; font-size: 14px !important; }
+  textarea { height: 70px; font-size: 14px !important; }
 
-  /* Botões proporcionais ao novo tamanho */
-  .btn { padding: 11px 16px; font-size: 14px; min-height: 44px; }
+  /* Botões maiores para toque */
+  .btn { padding: 14px 16px; font-size: 14px; min-height: 48px; }
   .botoes { gap: 10px; }
   .botoes button { min-width: unset; }
 
@@ -343,6 +263,10 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
   /* Subabas cadastros */
   .subabas button { padding: 10px 12px; font-size: 12px; }
 
+  /* Pedido item: empilha */
+  .pedido-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .pedido-item > div:last-child { width: 100%; justify-content: flex-end; }
+
   /* Produto/insumo item */
   .produto-item, .insumo-item { flex-wrap: wrap; }
 
@@ -351,7 +275,7 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
   div[style*="grid-template-columns:340px"] { grid-template-columns: 1fr !important; }
 
   /* Modal: full screen no mobile */
-  .modal-box { width: 100% !important; max-width: 100vw !important; margin: 0 !important; border-radius: 0 !important; min-height: 100vh; padding-bottom: 90px !important; }
+  .modal-box { width: 100% !important; max-width: 100vw !important; margin: 0 !important; border-radius: 0 !important; min-height: 100vh; }
   .modal { padding: 0; }
 
   /* Rodapé escondido (menu substituiu) */
@@ -386,71 +310,104 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
   </div>
 </div>
 <div class="menu">
-  <button class="active" onclick="trocarAba(0)">Agenda</button>
-  <button onclick="trocarAba(1)">Pedidos</button>
-  <button onclick="trocarAba(2)">Compras</button>
-  <button onclick="trocarAba(3)">Cadastros</button>
-  <button onclick="trocarAba(4)">Dashboard</button>
+  <button class="active" onclick="trocarAba(0)">Pedidos</button>
+  <button onclick="trocarAba(1)">Meus Pedidos</button>
+  <button onclick="trocarAba(2)">Agenda</button>
+  <button onclick="trocarAba(3)">Compras</button>
+  <button onclick="trocarAba(4)">Cadastros</button>
+  <button onclick="trocarAba(5)">Dashboard</button>
 </div>
 <div class="conteudo">
 
-<!-- ABA 0: AGENDA -->
+<!-- ABA 0: PEDIDOS -->
 <div class="aba active">
-  <div class="subabas">
-    <button class="sub-active" onclick="trocarSubAbaAgenda(0)">📅 Encomendas</button>
-    <button onclick="trocarSubAbaAgenda(1)">🍫 Produção</button>
-  </div>
-
-  <!-- SUBABA 0: ENCOMENDAS -->
-  <div class="subaba sub-active">
+  <div class="grid">
     <div class="card">
-      <h2>Agenda de Encomendas</h2>
-      <p style="font-size:13px;color:#666;margin-bottom:20px;">Selecione o mês para ver as entregas.</p>
-      <div id="agendaAnosContainer"></div>
-    </div>
-  </div>
-
-  <!-- SUBABA 1: CONTROLE DE MASSAS -->
-  <div class="subaba">
-    <div class="card">
-      <h2>🍫 Controle de Massas</h2>
-      <p style="font-size:12px;color:#666;margin-bottom:12px;">Escolha o período para ver a previsão e lançar a produção diária.</p>
-      <div class="massa-periodo-form">
-        <div class="massa-periodo-inputs">
-          <div><label style="font-size:11px;display:block;margin-bottom:3px;">De</label>
-            <input type="date" id="massaDataInicio" class="massa-date-input"></div>
-          <div><label style="font-size:11px;display:block;margin-bottom:3px;">Até</label>
-            <input type="date" id="massaDataFim" class="massa-date-input"></div>
-        </div>
-        <button class="btn btn-rosa massa-btn-consultar" onclick="renderMassasAgenda()">🔍 Consultar</button>
+      <h2>Cliente</h2>
+      <label>Telefone</label>
+      <div class="autocomplete-wrapper">
+        <input type="text" id="telefone" placeholder="Digite o telefone..." oninput="buscarClientePorTelefone()">
+        <div class="autocomplete-lista" id="listaAutocompleteTelefone" style="display:none;"></div>
       </div>
-      <div id="massasResultado"></div>
+      <label>Nome</label>
+      <input type="text" id="cliente">
+      <label>Endereço</label>
+      <input type="text" id="endereco">
+      <label>Data Entrega</label>
+      <input type="date" id="entrega">
+      <label>Valor de Entrada (R$)</label>
+      <input type="text" inputmode="decimal" id="valorEntrada" value="0.00" placeholder="0,00">
+      <label>Taxa de Entrega (R$) <span style="font-size:11px;color:#aaa;">deixe 0 se retirar no local</span></label>
+      <input type="text" inputmode="decimal" id="taxaEntrega" value="0.00" placeholder="0,00" oninput="atualizarTotalComEntrega()">
+      <label>Observações</label>
+      <textarea id="obs"></textarea>
+    </div>
+    <div class="card">
+      <h2>Itens do Pedido</h2>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:15px;align-items:end;">
+        <div><label>Produto / Sabor</label><select id="produto"></select></div>
+        <div><label>Qtd (Unidades)</label><input type="number" id="quantidade" min="1"></div>
+        <div><label>Valor Unit.</label><input type="number" id="valor" readonly></div>
+        <div><label>Total</label><input type="text" id="totalItem" readonly></div>
+        <div><button class="btn btn-rosa" onclick="adicionarItem()">+ Adicionar</button></div>
+      </div>
+      <table id="tabelaItens">
+        <thead><tr><th>Produto</th><th>Qtd (un)</th><th>Valor Unit.</th><th>Total</th><th>Ação</th></tr></thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" style="text-align:right;font-weight:bold;">TOTAL PEDIDO</td>
+            <td colspan="2" id="rodapeTotalPedido" style="font-size:22px;color:#d94d7d;font-weight:bold;">R$ 0,00</td>
+          </tr>
+        </tfoot>
+      </table>
+      <div class="botoes">
+        <button class="btn btn-laranja" onclick="limparPedido()">Limpar</button>
+        <button class="btn btn-verde" onclick="finalizarPedido()">✔ Finalizar Pedido</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Resumo</h2>
+      <div class="info"><h3>Total Itens (tipos)</h3><p id="totalItens">0</p></div>
+      <div class="info"><h3>Total Doces (Unidades)</h3><p id="quantidadeTotal">0</p></div>
+      <div class="info"><h3>Valor Total</h3><p id="valorTotal">R$ 0,00</p></div>
     </div>
   </div>
 </div>
 
-<!-- ABA 1: PEDIDOS -->
+<!-- ABA 1: MEUS PEDIDOS -->
 <div class="aba">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-    <h2 style="color:#8a5a34;margin:0;font-size:18px;">Meus Pedidos</h2>
-    <button class="btn btn-rosa" style="padding:10px 18px;font-size:14px;" onclick="abrirNovoPedido()">➕ Novo Pedido</button>
-  </div>
-  <div class="filtros">
-    <div class="filtros-topo">
-      <input type="text" id="filtroBusca" placeholder="🔍 Buscar cliente..." oninput="renderPedidos()">
+  <div class="card">
+    <h2>Pedidos Finalizados</h2>
+    <div class="filtros">
+      <input type="text" id="filtroBusca" placeholder="Buscar cliente..." oninput="renderPedidos()">
       <select id="filtroStatus" onchange="renderPedidos()">
         <option value="">Todos os status</option>
         <option value="pendente">Pendente</option>
         <option value="pago">Pago</option>
         <option value="cancelado">Cancelado</option>
       </select>
-    </div>
-    <div class="filtros-data">
       <input type="date" id="filtroData" onchange="renderPedidos()">
-      <button class="btn-limpar" onclick="limparFiltros()">✕ Limpar</button>
+      <button class="btn btn-cinza" onclick="limparFiltros()">Limpar Filtros</button>
+    </div>
+    <div id="listaPedidos"></div>
+  </div>
+</div>
+
+<!-- ABA 2: AGENDA -->
+<div class="aba">
+  <div class="card">
+    <h2>Agenda de Encomendas</h2>
+    <p style="font-size:13px;color:#666;margin-bottom:20px;">Selecione o mês desejado para abrir o calendário de entregas e os relatórios diários de produção.</p>
+    <div id="agendaAnosContainer"></div>
+    <div id="agendaDiasSecao" class="agenda-dias-container" style="display:none;">
+      <div class="agenda-dias-titulo">
+        <h3 id="agendaDiasTituloTexto">Dias com entregas</h3>
+        <button class="btn btn-cinza" style="padding:5px 12px;font-size:12px;" onclick="fecharSecaoDias()">✕ Fechar Mês</button>
+      </div>
+      <div class="agenda-grid" id="agendaGridDias"></div>
     </div>
   </div>
-  <div id="listaPedidos"></div>
 </div>
 
 <!-- ABA 3: COMPRAS -->
@@ -508,19 +465,35 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
     <button class="sub-active" onclick="trocarSubAba(0)">👤 Clientes</button>
     <button onclick="trocarSubAba(1)">🍬 Produtos</button>
     <button onclick="trocarSubAba(2)">📦 Insumos</button>
-    <button onclick="trocarSubAba(3)">🍫 Massas</button>
-    <button onclick="trocarSubAba(4)">📋 Logs</button>
+    <button onclick="trocarSubAba(3)">📋 Logs</button>
   </div>
 
   <!-- SUBABA 0: CLIENTES -->
   <div class="subaba sub-active">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <h2 style="color:#8a5a34;margin:0;">Clientes</h2>
-      <button class="btn btn-rosa" style="padding:9px 16px;font-size:13px;" onclick="abrirFormCliente(null)">➕ Cadastrar</button>
+    <div class="card">
+      <h2>Cadastro de Clientes</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <input type="text" id="nomeCliente" placeholder="Nome Completo">
+        <input type="text" id="telCliente" placeholder="Telefone: 00-00000-0000">
+        <input type="text" id="rua" placeholder="Rua">
+        <input type="text" id="numero" placeholder="Número">
+        <input type="text" id="bairro" placeholder="Bairro">
+        <input type="text" id="referencia" placeholder="Ponto de Referência">
+      </div>
+      <button class="btn btn-rosa" style="margin-top:15px;" onclick="adicionarCliente()">Salvar Cliente</button>
     </div>
-    <input type="text" id="filtroCliente" placeholder="🔍 Buscar por nome ou telefone..."
-      oninput="renderizarClientes()" style="width:100%;margin-bottom:10px;">
-    <div id="listaClientes"></div>
+    <div class="card">
+      <h2>Buscar Cliente</h2>
+      <div class="filtros">
+        <input type="text" id="filtroCliente" placeholder="Buscar por nome ou telefone...">
+        <button class="btn btn-rosa" onclick="renderizarClientes(document.getElementById('filtroCliente').value)">🔍 Buscar</button>
+        <button class="btn btn-cinza" onclick="document.getElementById('filtroCliente').value='';renderizarClientes('')">Limpar</button>
+      </div>
+      <table id="tabelaClientes">
+        <thead><tr><th>Nome</th><th>Telefone</th><th>Endereço</th><th>Ações</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- SUBABA 1: PRODUTOS -->
@@ -530,32 +503,17 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
         <h2 id="tituloProdutoForm">Novo Produto</h2>
         <label>Nome do Produto</label><input type="text" id="nomeProduto">
         <label>Preço Unitário Real (R$)</label><input type="text" inputmode="decimal" id="precoProduto" placeholder="0,00">
+        <label>Categoria</label>
+        <select id="categoriaProduto">
+          <option value="Simples">Simples</option>
+          <option value="Especial">Especial</option>
+          <option value="Bombom">Bombom</option>
+          <option value="Copinho">Copinho</option>
+          <option value="Avulso">Avulso</option>
+        </select>
         <div class="botoes"><button class="btn btn-rosa" onclick="salvarProduto()">Salvar</button></div>
       </div>
-      <div class="card">
-        <h2>Produtos no Cardápio</h2>
-        <div id="listaProdutos"></div>
-      </div>
-    </div>
-    <!-- Painel de receita inline -->
-    <div id="receitaPanel" style="display:none;" class="card" style="margin-top:0;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <h2 style="margin:0;">🍫 Receita: <span id="receitaProdutoNome" style="color:#d94d7d;"></span></h2>
-        <button class="btn btn-cinza" style="padding:4px 12px;font-size:12px;" onclick="fecharReceita()">✕ Fechar</button>
-      </div>
-      <div id="receitaLinhas" style="margin-bottom:10px;min-height:30px;"></div>
-      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
-        <div style="flex:2;min-width:140px;">
-          <label style="font-size:11px;">Tipo de Massa</label>
-          <select id="receitaTipoSelect" style="padding:8px;font-size:12px;border-radius:8px;border:1px solid #ccc;width:100%;"></select>
-        </div>
-        <div style="flex:1;min-width:80px;">
-          <label style="font-size:11px;">Qtde por 100 un</label>
-          <input type="number" id="receitaPor100" step="0.1" min="0" placeholder="ex: 5.0" style="padding:8px;font-size:12px;border-radius:8px;border:1px solid #ccc;width:100%;">
-        </div>
-        <button class="btn btn-rosa" style="padding:8px 14px;font-size:12px;" onclick="adicionarLinhaReceita()">+ Adicionar</button>
-      </div>
-      <input type="hidden" id="receitaProdutoId">
+      <div class="card"><h2>Produtos no Cardápio (Preços Unitários)</h2><div id="listaProdutos"></div></div>
     </div>
   </div>
 
@@ -586,31 +544,11 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
         <div style="font-size:40px;margin-bottom:12px;">🛒</div>
         <h3 style="color:#8a5a34;margin-bottom:8px;text-align:center;">Para lançar compras</h3>
         <p style="color:#999;font-size:13px;text-align:center;line-height:1.6;">Acesse a aba <b style="color:#d94d7d;">Compras</b> no menu superior para registrar gastos e visualizar o histórico de compras.</p>
-        <button class="btn btn-rosa" style="margin-top:16px;" onclick="trocarAba(2)">Ir para Compras →</button>
+        <button class="btn btn-rosa" style="margin-top:16px;" onclick="trocarAba(3)">Ir para Compras →</button>
       </div>
     </div>
   </div>
-
-  <!-- SUBABA 3: TIPOS DE MASSA -->
-  <div class="subaba">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
-      <div class="card" style="padding:15px;">
-        <h2 style="font-size:16px;margin-bottom:10px;">🍫 Cadastrar Tipo de Massa</h2>
-        <p style="font-size:10px;color:#888;margin-bottom:10px;">Cadastre os tipos de massa usados nos seus produtos. Eles serão vinculados à receita de cada produto.</p>
-        <label style="font-size:11px;">Nome do Tipo de Massa</label>
-        <input type="text" id="nomeTipoMassa" placeholder="Ex: Massa Preta, Coco..." style="padding:9px;font-size:12px;border-radius:8px;">
-        <div class="botoes" style="margin-top:10px;">
-          <button class="btn btn-marrom" onclick="salvarTipoMassa()" style="padding:9px 14px;font-size:12px;border-radius:8px;">+ Cadastrar</button>
-        </div>
-      </div>
-      <div class="card" style="padding:15px;">
-        <h2 style="font-size:16px;margin-bottom:10px;">Tipos Cadastrados</h2>
-        <div id="listaTiposMassa" style="max-height:260px;overflow-y:auto;"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SUBABA 4: LOGS -->
+  <!-- SUBABA 3: LOGS -->
   <div class="subaba">
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
@@ -691,188 +629,77 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
   <button onclick="fecharModal()">Fechar</button>
   <div class="a4" id="a4"></div>
 </div>
-<!-- ========== OVERLAYS DE NAVEGAÇÃO ========== -->
-<div id="navBackdrop" onclick="fecharDetalhePedido()"></div>
+<!-- MODAL EDITAR PEDIDO -->
+<div class="modal" id="modalEditarPedido">
+  <div class="modal-box" style="width:700px;">
 
-<!-- OVERLAY CLIENTE: DETALHE -->
-<div id="clienteDetalheOverlay" class="nav-overlay nav-overlay-2">
-  <div class="nav-header">
-    <button class="nav-back" onclick="fecharDetalheCliente()">← Voltar</button>
-    <span class="nav-titulo" id="clienteDetalheTitulo">Cliente</span>
-  </div>
-  <div class="nav-body" id="clienteDetalheConteudo"></div>
-</div>
-
-<!-- OVERLAY CLIENTE: FORMULÁRIO -->
-<div id="clienteFormOverlay" class="nav-overlay nav-overlay-3">
-  <div class="nav-header">
-    <button class="nav-back" onclick="fecharFormCliente()">← Voltar</button>
-    <span class="nav-titulo" id="clienteFormTitulo">Novo Cliente</span>
-  </div>
-  <div class="nav-body">
-    <div class="card">
-      <input type="hidden" id="clienteFormId">
-      <label>Nome Completo</label>
-      <input type="text" id="clienteFormNome" placeholder="Nome Completo">
-      <label>Telefone</label>
-      <input type="text" id="clienteFormTel" placeholder="00-00000-0000">
-      <label>Rua</label>
-      <input type="text" id="clienteFormRua" placeholder="Rua">
-      <label>Número</label>
-      <input type="text" id="clienteFormNumero" placeholder="Número">
-      <label>Bairro</label>
-      <input type="text" id="clienteFormBairro" placeholder="Bairro">
-      <label>Ponto de Referência</label>
-      <input type="text" id="clienteFormRef" placeholder="Referência">
-      <button class="btn btn-verde" style="width:100%;margin-top:14px;" onclick="salvarClienteForm()">💾 Salvar</button>
+    <!-- Cabeçalho -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:2px solid #eee;padding-bottom:10px;">
+      <h2 style="color:#8a5a34;font-size:17px;">✏️ Editar Pedido</h2>
+      <button class="btn btn-cinza" style="padding:6px 14px;font-size:13px;" onclick="fecharModalEditar()">✕ Fechar</button>
     </div>
-  </div>
-</div>
 
-<!-- OVERLAY AGENDA: DIAS DO MÊS -->
-<div id="agendaMesOverlay" class="nav-overlay nav-overlay-2">
-  <div class="nav-header">
-    <button class="nav-back" onclick="fecharAgendaMes()">← Voltar</button>
-    <span class="nav-titulo" id="agendaMesTitulo">Mês</span>
-  </div>
-  <div class="nav-body" id="agendaMesConteudo"></div>
-</div>
+    <input type="hidden" id="editPedidoId">
 
-<!-- OVERLAY AGENDA: PEDIDOS DO DIA -->
-<div id="agendaDiaOverlay" class="nav-overlay nav-overlay-3">
-  <div class="nav-header">
-    <button class="nav-back" onclick="fecharAgendaDia()">← Voltar</button>
-    <span class="nav-titulo" id="agendaDiaTitulo">Dia</span>
-  </div>
-  <div class="nav-body" id="agendaDiaConteudo"></div>
-</div>
-<div id="novoPedidoOverlay" class="nav-overlay">
-  <div class="nav-header">
-    <button class="nav-back" onclick="fecharNovoPedido()">← Voltar</button>
-    <span class="nav-titulo">Novo Pedido</span>
-  </div>
-  <div class="nav-body">
-    <div class="card" style="margin-bottom:10px;">
-      <h2>Cliente</h2>
-      <label>Telefone</label>
-      <div style="display:flex;gap:8px;align-items:flex-start;">
-        <div class="autocomplete-wrapper" style="flex:1;">
-          <input type="text" id="telefone" placeholder="Digite o telefone..." oninput="buscarClientePorTelefone()">
-          <div class="autocomplete-lista" id="listaAutocompleteTelefone" style="display:none;"></div>
-        </div>
-        <button class="btn btn-cinza" style="padding:9px 12px;font-size:18px;" onclick="importarContato()" title="Importar da agenda">📱</button>
-      </div>
-      <label>Nome</label>
-      <div class="autocomplete-wrapper">
-        <input type="text" id="cliente" placeholder="Digite o nome..." oninput="buscarClientePorNome()">
-        <div class="autocomplete-lista" id="listaAutocompleteNome" style="display:none;"></div>
-      </div>
-      <label>Endereço</label><input type="text" id="endereco">
-      <label>Data Entrega</label><input type="date" id="entrega">
-      <label>Valor de Entrada (R$)</label>
-      <input type="text" inputmode="decimal" id="valorEntrada" value="0.00" placeholder="0,00">
-      <label>Taxa de Entrega (R$) <span style="font-size:11px;color:#aaa;">0 = retirada</span></label>
-      <input type="text" inputmode="decimal" id="taxaEntrega" value="0.00" placeholder="0,00" oninput="atualizarTotalComEntrega()">
-      <label>Observações</label><textarea id="obs" style="height:60px;"></textarea>
-    </div>
-    <div class="card" style="margin-bottom:10px;">
-      <h2>Itens do Pedido</h2>
-      <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end;margin-bottom:10px;">
-        <div><label style="font-size:12px;">Produto / Sabor</label><select id="produto" onchange="atualizarValor()"></select></div>
-        <div><label style="font-size:12px;">Qtd</label><input type="number" id="quantidade" min="1" style="width:65px;" oninput="calcularTotalItem()"></div>
-        <button class="btn btn-rosa" style="padding:10px 14px;white-space:nowrap;" onclick="adicionarItem()">+ Add</button>
-      </div>
-      <input type="number" id="valor" style="display:none;" readonly>
-      <input type="text"   id="totalItem" style="display:none;" readonly>
-      <table id="tabelaItens">
-        <thead><tr><th>Produto</th><th>Qtd</th><th>Unit.</th><th>Total</th><th></th></tr></thead>
-        <tbody></tbody>
-        <tfoot><tr>
-          <td colspan="3" style="text-align:right;font-weight:bold;">TOTAL</td>
-          <td colspan="2" id="rodapeTotalPedido" style="font-size:18px;color:#d94d7d;font-weight:bold;">R$ 0,00</td>
-        </tr></tfoot>
-      </table>
-    </div>
-    <div style="display:flex;gap:10px;">
-      <button class="btn btn-laranja" style="flex:1;" onclick="limparPedido()">🗑 Limpar</button>
-      <button class="btn btn-verde" style="flex:2;" onclick="finalizarPedido()">💾 Salvar Pedido</button>
-    </div>
-    <div class="card" style="margin-top:10px;padding:10px 14px;">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
-        <div><div style="font-size:11px;color:#aaa;">Tipos</div><div id="totalItens" style="font-weight:700;color:#8a5a34;font-size:18px;">0</div></div>
-        <div><div style="font-size:11px;color:#aaa;">Unidades</div><div id="quantidadeTotal" style="font-weight:700;color:#8a5a34;font-size:18px;">0</div></div>
-        <div><div style="font-size:11px;color:#aaa;">Total</div><div id="valorTotal" style="font-weight:700;color:#d94d7d;font-size:16px;">R$ 0,00</div></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- OVERLAY 2: DETALHE DO PEDIDO -->
-<div id="detalhePedidoOverlay" class="nav-overlay nav-overlay-2">
-  <div class="nav-header">
-    <button class="nav-back" onclick="fecharDetalhePedido()">← Voltar</button>
-    <span class="nav-titulo" id="detalheTitulo">Pedido</span>
-  </div>
-  <div class="nav-body" id="detalheConteudo"></div>
-</div>
-
-<!-- OVERLAY 3A: EDITAR CLIENTE DO PEDIDO -->
-<div id="editClienteOverlay" class="nav-overlay nav-overlay-3">
-  <div class="nav-header">
-    <button class="nav-back" onclick="fecharEditarCliente()">← Voltar</button>
-    <span class="nav-titulo">Editar Cliente</span>
-  </div>
-  <div class="nav-body">
-    <div class="card">
-      <label>Nome</label><input type="text" id="editCliente">
-      <label>Telefone</label><input type="text" id="editTelefone">
-      <label>Data de Entrega</label><input type="date" id="editEntrega">
-      <label>Status</label>
-      <select id="editStatus">
-        <option value="pendente">Pendente</option>
-        <option value="pago">Pago</option>
-        <option value="cancelado">Cancelado</option>
-      </select>
-      <label>Endereço</label><input type="text" id="editEndereco">
-      <label>Observações</label><textarea id="editObs" style="height:60px;"></textarea>
-      <button class="btn btn-verde" style="width:100%;margin-top:14px;" onclick="salvarClientePedido()">💾 Salvar Cliente</button>
-    </div>
-  </div>
-</div>
-
-<!-- OVERLAY 3B: EDITAR ITENS DO PEDIDO -->
-<div id="editItensOverlay" class="nav-overlay nav-overlay-3">
-  <div class="nav-header">
-    <button class="nav-back" onclick="fecharEditarItens()">← Voltar</button>
-    <span class="nav-titulo">Editar Itens</span>
-  </div>
-  <div class="nav-body">
-    <div class="card" style="background:#fbf6f0;border:1px dashed #8a5a34;margin-bottom:10px;">
-      <p style="font-size:11px;font-weight:700;color:#8a5a34;margin-bottom:10px;">💰 BALANÇO FINANCEIRO</p>
+    <!-- DADOS DO CLIENTE -->
+    <div style="background:#f9f9f9;border-radius:12px;padding:14px;margin-bottom:14px;">
+      <p style="font-size:11px;font-weight:600;color:#8a5a34;text-transform:uppercase;margin-bottom:10px;">👤 Cliente</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div><label style="font-size:12px;">Total (R$)</label>
-          <input type="text" id="editValorTotal" readonly style="background:#eee;font-weight:700;color:#d94d7d;font-size:16px;"></div>
-        <div><label style="font-size:12px;">Entrada / Pagamento (R$)</label>
-          <input type="text" inputmode="decimal" id="editValorEntrada" placeholder="0,00" oninput="calcularBalançoModalEditar()"></div>
-      </div>
-      <div style="margin-top:10px;text-align:right;border-top:1px solid #e8d5c0;padding-top:8px;">
-        <span style="font-size:11px;color:#555;">SALDO A PAGAR:</span>
-        <div id="editSaldoAPagar" style="font-size:22px;font-weight:700;color:#28a745;">R$ 0,00</div>
+        <div><label style="font-size:12px;">Nome</label><input type="text" id="editCliente"></div>
+        <div><label style="font-size:12px;">Telefone</label><input type="text" id="editTelefone"></div>
+        <div><label style="font-size:12px;">Data de Entrega</label><input type="date" id="editEntrega"></div>
+        <div><label style="font-size:12px;">Status</label>
+          <select id="editStatus" onchange="verificarMudancaStatusModal()">
+            <option value="pendente">Pendente</option>
+            <option value="pago">Pago</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1;"><label style="font-size:12px;">Endereço</label><input type="text" id="editEndereco"></div>
+        <div style="grid-column:1/-1;"><label style="font-size:12px;">Observações</label><textarea id="editObs" style="height:60px;"></textarea></div>
       </div>
     </div>
-    <div class="card" style="margin-bottom:10px;">
-      <p style="font-size:11px;font-weight:700;color:#8a5a34;margin-bottom:10px;">🍬 DOCES DA ENCOMENDA</p>
+
+    <!-- BALANÇO FINANCEIRO -->
+    <div style="background:#fbf6f0;border:1px dashed #8a5a34;border-radius:12px;padding:14px;margin-bottom:14px;">
+      <p style="font-size:11px;font-weight:600;color:#8a5a34;text-transform:uppercase;margin-bottom:10px;">💰 Balanço Financeiro</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;">
+        <div>
+          <label style="font-size:12px;">Valor Total (R$)</label>
+          <input type="text" id="editValorTotal" readonly style="background:#eee;font-weight:bold;color:#d94d7d;font-size:16px;">
+        </div>
+        <div>
+          <label style="font-size:12px;">Entrada / Pagamento (R$)</label>
+          <input type="text" inputmode="decimal" id="editValorEntrada" placeholder="0,00" oninput="calcularBalançoModalEditar()">
+        </div>
+      </div>
+      <div style="margin-top:12px;text-align:right;padding-top:10px;border-top:1px solid #e8d5c0;">
+        <span style="font-size:12px;color:#555;font-weight:500;">SALDO A PAGAR:</span>
+        <div id="editSaldoAPagar" style="font-size:24px;font-weight:bold;color:#28a745;">R$ 0,00</div>
+      </div>
+    </div>
+
+    <!-- ITENS DO PEDIDO -->
+    <div style="background:#f9f9f9;border-radius:12px;padding:14px;margin-bottom:14px;">
+      <p style="font-size:11px;font-weight:600;color:#8a5a34;text-transform:uppercase;margin-bottom:10px;">🍬 Doces da Encomenda</p>
       <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end;margin-bottom:10px;">
         <div><label style="font-size:12px;">Doce / Sabor</label><select id="editAdicionarDoceSelect" style="font-size:13px;"></select></div>
         <div><label style="font-size:12px;">Qtd</label><input type="number" id="editAdicionarDoceQtd" min="1" style="width:65px;"></div>
-        <button class="btn btn-rosa" style="padding:10px 14px;" onclick="adicionarDoceNoPedidoEditado()">+ Add</button>
+        <div><button class="btn btn-rosa" style="padding:12px 14px;white-space:nowrap;" onclick="adicionarDoceNoPedidoEditado()">+ Add</button></div>
       </div>
-      <div id="listaItensEditando"></div>
+      <div id="listaItensEditando" style="max-height:240px;overflow-y:auto;"></div>
     </div>
-    <button class="btn btn-verde" style="width:100%;" onclick="salvarItensPedido()">💾 Salvar Itens</button>
+
+    <!-- BOTÕES DE AÇÃO -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+      <button class="btn btn-verde" style="font-size:14px;" onclick="salvarEdicaoPedido()">💾 Salvar</button>
+      <button class="btn btn-marrom" style="font-size:14px;" onclick="abrirContratoDoModal()">📄 Contrato</button>
+      <button class="btn btn-azul" style="font-size:14px;" onclick="compartilharPedido()">📤 Compartilhar</button>
+    </div>
+
   </div>
 </div>
-
+ 
 <script>
 const SUPABASE_URL = 'https://stwqlmxymyixgbwxynxh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_jBjgD5yEzdHdGT1pEZ6Jkw_kj3lowPV';
@@ -965,10 +792,8 @@ async function verificarLogin(){
 
     `;
 
-    return false; /* FIX: sinaliza "não autenticado" para o .then() */
   }
 
-  return true; /* FIX: sinaliza "autenticado" */
 }
 
 async function fazerLogin(){
@@ -999,18 +824,15 @@ async function fazerLogin(){
 
 }
 
-verificarLogin().then(logado => {
-  if (!logado) return;
-  carregarSistema()
-    .then(() => {
-      try { atualizarTodasAsTelas(); } catch(e) { console.error('Erro ao renderizar telas:', e); }
-      try { atualizarFiltroAnoInsumos(); } catch(e) { console.error(e); }
-      try { trocarSubAbaAgenda(0); } catch(e) { console.error(e); }
-    })
-    .catch(err => {
-      console.error('Erro ao carregar banco:', err);
-      alert('Erro ao carregar o banco de dados. Verifique o console.');
-    });
+verificarLogin().then(() => {
+  carregarSistema().then(() => {
+    atualizarTodasAsTelas();
+    atualizarFiltroAnoInsumos();
+    renderizarClientes();
+  }).catch(err => {
+    console.error('Erro ao iniciar banco:', err);
+    alert('Erro ao carregar o banco de dados. Verifique o console.');
+  });
 });
  
 async function sbListar(tabela) {
@@ -1019,23 +841,13 @@ async function sbListar(tabela) {
   return data || [];
 }
 async function sbUpsert(tabela, lista) {
-  if (!lista || lista.length === 0) return true;
+  if (!lista || lista.length === 0) return;
   const { error } = await sbClient.from(tabela).upsert(lista, { onConflict: 'id' });
-  if (error) {
-    const msg = `Erro ao salvar em "${tabela}":\n${error.message}`;
-    console.error(msg);
-    alert(msg);
-    return false;
-  }
-  return true;
+  if (error) console.error(`Erro ao salvar em ${tabela}:`, error.message);
 }
 async function sbDeletar(tabela, id) {
   const { error } = await sbClient.from(tabela).delete().eq('id', id);
-  if (error) {
-    const msg = `Erro ao excluir de "${tabela}":\n${error.message}`;
-    console.error(msg);
-    alert(msg);
-  }
+  if (error) console.error(`Erro ao deletar de ${tabela}:`, error.message);
 }
 
 /* ===== LOG ===== */
@@ -1057,13 +869,11 @@ function salvarLS() {
 }
  
 let pedidos = [], produtos = [], insumos = [], clientes = [], tiposInsumos = [];
-let tiposMassa = [], massasDiario = [];
 let itensPedidoAtual = [], itensEditandoPedido = [];
 let totalItensAtual = 0, quantidadeTotalAtual = 0, valorTotalAtual = 0;
 let anoFiltroSelecionado = "Todos";
 let mesFiltroSelecionado = "Todos";
-let overlayDetalhePedidoId = null;
-
+ 
 const NOMES_MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
  
 document.getElementById('dataAtual').innerText =
@@ -1197,21 +1007,19 @@ function importarBackup(input) {
  
 /* ===== CARREGAR SISTEMA ===== */
 async function carregarSistema() {
-  const [p, pr, ins, cli, ti, tm, md] = await Promise.all([
+  const [p, pr, ins, cli, ti] = await Promise.all([
     sbListar('pedidos'), sbListar('produtos'), sbListar('insumos'),
-    sbListar('clientes'), sbListar('tipos_insumos'),
-    sbListar('tipos_massa'), sbListar('massas_diario')
+    sbListar('clientes'), sbListar('tipos_insumos')
   ]);
   if (p.length === 0 && pr.length === 0 && ins.length === 0) {
     pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
     produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
     insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
-    clientes = []; tiposInsumos = []; tiposMassa = []; massasDiario = [];
+    clientes = []; tiposInsumos = [];
     await Promise.all([sbUpsert('pedidos',pedidos),sbUpsert('produtos',produtos),sbUpsert('insumos',insumos)]);
   } else {
     pedidos = p || []; produtos = pr || []; insumos = ins || [];
     clientes = cli || []; tiposInsumos = ti || [];
-    tiposMassa = tm || []; massasDiario = md || [];
   }
 }
  
@@ -1228,198 +1036,16 @@ function importarBancoCompleto() {
  
 /* ===== ABAS ===== */
 function trocarAba(index) {
-  ['novoPedidoOverlay','detalhePedidoOverlay','editClienteOverlay','editItensOverlay',
-   'agendaMesOverlay','agendaDiaOverlay','clienteDetalheOverlay','clienteFormOverlay']
-    .forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('active'); });
-  document.getElementById('navBackdrop')?.classList.remove('active');
-  overlayDetalhePedidoId = null;
   document.querySelectorAll('.aba').forEach(a=>a.classList.remove('active'));
   document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.aba')[index].classList.add('active');
   document.querySelectorAll('.menu button')[index].classList.add('active');
   fecharAutocompletes();
-  if(index === 0) trocarSubAbaAgenda(0);
   if(index === 1) renderPedidos();
-  if(index === 2) { renderInsumos(); atualizarFiltroAnoInsumos(); }
-  if(index === 3) { renderizarClientes(); renderProdutos(); renderTiposInsumos(); }
-  if(index === 4) { gerenciarFiltrosAnoDashboard(); atualizarDashboard(); }
-}
-
-/* ===== SUBABAS AGENDA ===== */
-function trocarSubAbaAgenda(index) {
-  const abaAtiva = document.querySelector('.aba.active');
-  if (!abaAtiva) return;
-  abaAtiva.querySelectorAll('.subaba').forEach(s=>s.classList.remove('sub-active'));
-  abaAtiva.querySelectorAll('.subabas button').forEach(b=>b.classList.remove('sub-active'));
-  const subabas = abaAtiva.querySelectorAll('.subaba');
-  const botoes  = abaAtiva.querySelectorAll('.subabas button');
-  if (subabas[index]) subabas[index].classList.add('sub-active');
-  if (botoes[index])  botoes[index].classList.add('sub-active');
-  if (index === 0) atualizarAgenda();
-}
-
-/* ===== OVERLAYS DE NAVEGAÇÃO ===== */
-function _ovAbrir(id) {
-  const el = document.getElementById(id);
-  if (el) { el.classList.add('active'); el.scrollTop = 0; }
-  document.getElementById('navBackdrop').classList.add('active');
-}
-function _ovFechar(id) {
-  const el = document.getElementById(id);
-  if (el) el.classList.remove('active');
-  const nivel1 = ['novoPedidoOverlay','detalhePedidoOverlay','agendaMesOverlay','clienteDetalheOverlay'];
-  const algumAberto = nivel1.some(x => document.getElementById(x)?.classList.contains('active'));
-  if (!algumAberto) document.getElementById('navBackdrop').classList.remove('active');
-}
-
-/* — Novo Pedido — */
-function abrirNovoPedido() {
-  limparPedido();
-  popularSelectProduto();
-  _ovAbrir('novoPedidoOverlay');
-}
-function fecharNovoPedido() {
-  _ovFechar('novoPedidoOverlay');
-  limparPedido();
-}
-
-/* — Detalhe do Pedido — */
-function abrirDetalhePedido(id) {
-  overlayDetalhePedidoId = id;
-  renderDetalhePedido(id);
-  _ovAbrir('detalhePedidoOverlay');
-}
-function fecharDetalhePedido() {
-  const el = document.getElementById('detalhePedidoOverlay');
-  if (el) el.style.zIndex = ''; /* reseta z-index caso tenha sido elevado pela agenda */
-  _ovFechar('detalhePedidoOverlay');
-  overlayDetalhePedidoId = null;
-}
-function renderDetalhePedido(id) {
-  const p = pedidos.find(x => x.id === id); if (!p) return;
-  const itens   = p.itens || [];
-  const total   = p.total || 0;
-  const entrada = p.entrada || 0;
-  const taxa    = p.taxaEntrega || 0;
-  const saldo   = Math.max(0, total - entrada);
-  const doces   = itens.filter(i=>(i.produto||'').trim().toLowerCase()!=='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
-  const bc      = itens.filter(i=>(i.produto||'').trim().toLowerCase()==='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
-  const stCls   = {'pendente':'badge-pendente','pago':'badge-pago','cancelado':'badge-cancelado'}[p.status||'pendente'];
-  const itensHtml = itens.map(i=>`
-    <div class="detalhe-item-row">
-      <span>🍬 ${i.produto} — ${i.qtd} un</span>
-      <span style="color:#d94d7d;font-weight:600;">R$ ${(i.total||0).toFixed(2)}</span>
-    </div>`).join('');
-  document.getElementById('detalheTitulo').textContent = (p.cliente||'Pedido').split(' ')[0];
-  document.getElementById('detalheConteudo').innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <span class="badge ${stCls}" style="font-size:12px;">${(p.status||'pendente').toUpperCase()}</span>
-      <span style="font-size:13px;color:#666;">📅 ${formatarData(p.data)}</span>
-    </div>
-    <div class="detalhe-secao">
-      <div class="detalhe-secao-header">
-        <span class="detalhe-label">👤 Cliente</span>
-        <button class="btn-acao btn-acao-azul" onclick="abrirEditarCliente()">✏️ Editar</button>
-      </div>
-      <p style="font-size:15px;font-weight:700;color:#333;margin:0 0 4px;">${p.cliente||'—'}</p>
-      ${p.telefone?`<p style="font-size:13px;color:#555;margin:2px 0;">📱 ${p.telefone}</p>`:''}
-      ${p.endereco?`<p style="font-size:13px;color:#555;margin:2px 0;">📍 ${p.endereco}</p>`:''}
-      ${p.obs?`<p style="font-size:12px;color:#888;margin:6px 0 0;font-style:italic;">📝 ${p.obs}</p>`:''}
-    </div>
-    <div class="detalhe-secao">
-      <div class="detalhe-secao-header">
-        <span class="detalhe-label">🍬 Itens (${Math.round(doces)} un${bc?` + ${Math.round(bc)} BC`:''})</span>
-        <button class="btn-acao btn-acao-azul" onclick="abrirEditarItens()">✏️ Editar</button>
-      </div>
-      ${itensHtml||'<p style="color:#aaa;font-size:12px;">Sem itens</p>'}
-    </div>
-    <div class="detalhe-secao" style="background:#fbf6f0;border:1px dashed #8a5a34;">
-      <div class="detalhe-item-row"><span>Total</span><b style="color:#d94d7d;">R$ ${total.toFixed(2)}</b></div>
-      ${taxa>0?`<div class="detalhe-item-row"><span>Taxa entrega</span><span>R$ ${taxa.toFixed(2)}</span></div>`:''}
-      <div class="detalhe-item-row"><span>Entrada paga</span><span>R$ ${entrada.toFixed(2)}</span></div>
-      <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid #e8d5c0;font-size:15px;font-weight:700;">
-        <span>Saldo a pagar</span>
-        <span style="color:${saldo>0?'#ff9800':'#28a745'};">R$ ${saldo.toFixed(2)}</span>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
-      <button class="btn btn-azul" onclick="compartilharPedido()">📱 Compartilhar</button>
-      <button class="btn btn-marrom" onclick="abrirContrato(${id})">📄 Contrato</button>
-      <button class="btn btn-vermelho" style="grid-column:1/-1;" onclick="excluirPedidoDetalhe(${id})">🗑 Excluir Pedido</button>
-    </div>`;
-}
-
-/* — Editar Cliente — */
-function abrirEditarCliente() {
-  const p = pedidos.find(x=>x.id===overlayDetalhePedidoId); if(!p) return;
-  document.getElementById('editCliente').value  = p.cliente  ||'';
-  document.getElementById('editTelefone').value = p.telefone ||'';
-  document.getElementById('editEntrega').value  = p.data     ||'';
-  document.getElementById('editEndereco').value = p.endereco ||'';
-  document.getElementById('editObs').value      = p.obs      ||'';
-  document.getElementById('editStatus').value   = p.status   ||'pendente';
-  _ovAbrir('editClienteOverlay');
-}
-function fecharEditarCliente() { _ovFechar('editClienteOverlay'); }
-async function salvarClientePedido() {
-  const id  = overlayDetalhePedidoId;
-  const idx = pedidos.findIndex(x=>x.id===id); if(idx===-1) return;
-  pedidos[idx].cliente  = document.getElementById('editCliente').value.trim();
-  pedidos[idx].telefone = document.getElementById('editTelefone').value;
-  pedidos[idx].data     = document.getElementById('editEntrega').value;
-  pedidos[idx].endereco = document.getElementById('editEndereco').value;
-  pedidos[idx].obs      = document.getElementById('editObs').value;
-  pedidos[idx].status   = document.getElementById('editStatus').value;
-  const ok = await sbUpsert('pedidos',[pedidos[idx]]);
-  if(!ok) return;
-  registrarLog('PEDIDO',`Cliente alterado — ${pedidos[idx].cliente}`);
-  fecharEditarCliente();
-  renderDetalhePedido(id);
-  renderPedidos();
-  alert('✅ Dados do cliente salvos!');
-}
-
-/* — Editar Itens — */
-function abrirEditarItens() {
-  const p = pedidos.find(x=>x.id===overlayDetalhePedidoId); if(!p) return;
-  itensEditandoPedido = JSON.parse(JSON.stringify(p.itens||[]));
-  atualizarItensTabelaModalEditar();
-  document.getElementById('editValorEntrada').value = (p.entrada||0).toFixed(2);
-  calcularBalançoModalEditar();
-  const sel = document.getElementById('editAdicionarDoceSelect');
-  sel.innerHTML = produtos.map(pr=>`<option value="${pr.id}">${pr.nome} (R$ ${(pr.preco||0).toFixed(2)}/un)</option>`).join('');
-  _ovAbrir('editItensOverlay');
-}
-function fecharEditarItens() { _ovFechar('editItensOverlay'); }
-async function salvarItensPedido() {
-  const id  = overlayDetalhePedidoId;
-  const idx = pedidos.findIndex(x=>x.id===id); if(idx===-1) return;
-  if(!itensEditandoPedido.length){ alert('O pedido não pode ficar vazio!'); return; }
-  const totalCalc = itensEditandoPedido.reduce((acc,i)=>acc+i.total,0);
-  const entrada   = parseFloat((document.getElementById('editValorEntrada').value||'0').replace(',','.'))||0;
-  const saldo     = totalCalc - entrada;
-  pedidos[idx].itens   = [...itensEditandoPedido];
-  pedidos[idx].total   = totalCalc;
-  pedidos[idx].entrada = entrada;
-  if(pedidos[idx].status!=='cancelado') pedidos[idx].status = saldo<=0?'pago':'pendente';
-  const ok = await sbUpsert('pedidos',[pedidos[idx]]);
-  if(!ok) return;
-  registrarLog('PEDIDO',`Itens alterados — ${pedidos[idx].cliente} | R$ ${totalCalc.toFixed(2)}`);
-  fecharEditarItens();
-  renderDetalhePedido(id);
-  renderPedidos();
-  alert('✅ Itens salvos!');
-}
-
-/* — Excluir do detalhe — */
-function excluirPedidoDetalhe(id) {
-  if(!confirm('Excluir este pedido permanentemente?')) return;
-  const p = pedidos.find(x=>x.id===id);
-  sbDeletar('pedidos',id);
-  pedidos = pedidos.filter(x=>x.id!==id);
-  registrarLog('PEDIDO',`Excluído — ${p?p.cliente:'?'}`);
-  fecharDetalhePedido();
-  renderPedidos();
+  if(index === 2) atualizarAgenda();
+  if(index === 3) { renderInsumos(); atualizarFiltroAnoInsumos(); }
+  if(index === 4) { renderizarClientes(); renderProdutos(); renderTiposInsumos(); }
+  if(index === 5) { gerenciarFiltrosAnoDashboard(); atualizarDashboard(); }
 }
 
 /* ===== SUBABAS CADASTROS ===== */
@@ -1431,46 +1057,19 @@ function trocarSubAba(index) {
   abaAtiva.querySelectorAll('.subaba')[index].classList.add('sub-active');
   abaAtiva.querySelectorAll('.subabas button')[index].classList.add('sub-active');
   if(index === 0) renderizarClientes();
-  if(index === 1) { renderProdutos(); fecharReceita(); }  if(index === 2) renderTiposInsumos();
-  if(index === 3) renderTiposMassa();
-  if(index === 4) carregarLogs();
+  if(index === 1) renderProdutos();
+  if(index === 2) renderTiposInsumos();
+  if(index === 3) carregarLogs();
 }
 
 function fecharAutocompletes() {
-  ['listaAutocompleteTelefone','listaAutocompleteNome'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
-  });
+  document.querySelectorAll('.autocomplete-lista').forEach(el => el.style.display = 'none');
 }
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.autocomplete-wrapper')) fecharAutocompletes();
 });
  
 /* ===== BUSCA POR TELEFONE (ABA PEDIDOS) ===== */
-function buscarClientePorNome() {
-  const campo = document.getElementById('cliente');
-  const lista = document.getElementById('listaAutocompleteNome');
-  const termo = (campo.value||'').trim().toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-
-  if (!termo || termo.length < 2) { lista.style.display = 'none'; return; }
-
-  const encontrados = clientes.filter(c => {
-    const nome = (c.nome||'').toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    return nome.includes(termo);
-  });
-
-  if (!encontrados.length) { lista.style.display = 'none'; return; }
-
-  lista.innerHTML = encontrados.map(c => `
-    <div class="autocomplete-item" onclick="selecionarClientePorTelefone('${c.id}')">
-      <strong>${c.nome}</strong>
-      <span>${c.tel||''} — ${c.end||''}</span>
-    </div>`).join('');
-  lista.style.display = 'block';
-}
-
 function buscarClientePorTelefone() {
   const campo = document.getElementById('telefone');
   const lista = document.getElementById('listaAutocompleteTelefone');
@@ -1506,28 +1105,57 @@ function selecionarClientePorTelefone(id) {
   const c = clientes.find(x => String(x.id) === String(id));
   if (!c) return;
   document.getElementById('telefone').value = c.tel || '';
-  document.getElementById('cliente').value  = c.nome || '';
-  document.getElementById('endereco').value = c.end  || '';
+  document.getElementById('cliente').value = c.nome || '';
+  document.getElementById('endereco').value = c.end || '';
   document.getElementById('listaAutocompleteTelefone').style.display = 'none';
-  const ln = document.getElementById('listaAutocompleteNome');
-  if (ln) ln.style.display = 'none';
 }
  
 /* ===== PRODUTOS / SELECT ===== */
+const ORDEM_CATEGORIAS = ['Simples','Especial','Bombom','Copinho','Avulso'];
+const COR_CATEGORIA = {
+  'Simples' :'#d4edda;color:#155724',
+  'Especial':'#fff3cd;color:#856404',
+  'Bombom'  :'#cce5ff;color:#004085',
+  'Copinho' :'#f8d7da;color:#721c24',
+  'Avulso'  :'#e2e3e5;color:#383d41'
+};
+
 function popularSelectProduto() {
-  const sel = document.getElementById('produto');
+  const sel     = document.getElementById('produto');
   const selEdit = document.getElementById('editAdicionarDoceSelect');
-  sel.innerHTML = ''; selEdit.innerHTML = '';
+  if (!sel) return;
+
+  const agrupado = {};
+  ORDEM_CATEGORIAS.forEach(c => agrupado[c] = []);
   produtos.forEach(p => {
-    const opt = document.createElement('option'); opt.value = p.id; opt.textContent = `${p.nome} (R$ ${(p.preco || 0).toFixed(2)}/un)`;
-    sel.appendChild(opt); selEdit.appendChild(opt.cloneNode(true));
+    const cat = p.categoria || 'Simples';
+    if (!agrupado[cat]) agrupado[cat] = [];
+    agrupado[cat].push(p);
+  });
+  ORDEM_CATEGORIAS.forEach(c => agrupado[c].sort((a,b)=>(a.nome||'').localeCompare(b.nome||'')));
+
+  [sel, selEdit].forEach(s => {
+    if (!s) return;
+    s.innerHTML = '';
+    ORDEM_CATEGORIAS.forEach(cat => {
+      const lista = agrupado[cat]; if (!lista.length) return;
+      const grp = document.createElement('optgroup');
+      grp.label = cat;
+      lista.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.nome} (R$ ${(p.preco||0).toFixed(2)}/un)`;
+        grp.appendChild(opt);
+      });
+      s.appendChild(grp);
+    });
   });
   atualizarValor();
 }
 function atualizarValor() {
   const selectElem = document.getElementById('produto'); if(!selectElem.value) return;
   const prod = produtos.find(p=>p.id===parseInt(selectElem.value)); if(!prod) return;
-  document.getElementById('valor').value = (prod.preco || 0).toFixed(2);
+  document.getElementById('valor').value = prod.preco.toFixed(2);
   calcularTotalItem();
 }
 function calcularTotalItem() {
@@ -1601,9 +1229,9 @@ function finalizarPedido() {
       registrarLog('CLIENTE', `Cliente cadastrado — ${cliente} | Tel: ${telefone}`);
     }
   } catch(e){ console.error('Erro ao salvar:', e); }
+  atualizarTodasAsTelas();
   alert('Pedido salvo com sucesso!');
-  fecharNovoPedido();
-  try { atualizarTodasAsTelas(); } catch(e) { console.error('Erro ao atualizar telas:', e); }
+  limparPedido();
 }
 function limparPedido() {
   ['cliente','telefone','endereco','entrega','obs','valorEntrada','taxaEntrega'].forEach(id => {
@@ -1630,8 +1258,9 @@ function abrirContrato(id) {
   document.getElementById('modalCpfContrato').classList.add('active');
 }
 function abrirContratoDoModal() {
-  if(!overlayDetalhePedidoId) return;
-  abrirContrato(overlayDetalhePedidoId);
+  const id = document.getElementById('editPedidoId').value;
+  if(!id) return;
+  abrirContrato(id);
 }
 function gerarContrato() {
   const cpf = document.getElementById('cpfContratante').value.trim();
@@ -1799,143 +1428,69 @@ async function adicionarCliente() {
 }
  
 function renderizarClientes(filtroExterno) {
-  const campo = document.getElementById('filtroCliente');
-  const filtro = ((filtroExterno !== undefined ? filtroExterno : (campo ? campo.value : '')) || '')
-    .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  const cont = document.getElementById('listaClientes');
-  if (!cont) return;
+  const campoFiltro = document.getElementById('filtroCliente');
+  const filtro = (filtroExterno !== undefined ? filtroExterno : (campoFiltro ? campoFiltro.value : '')).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  const tbody = document.getElementById('tabelaClientes').getElementsByTagName('tbody')[0];
+  tbody.innerHTML = "";
   const lista = clientes.filter(c => {
     if (!filtro) return true;
-    const nome = (c.nome||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    const tel  = (c.tel||'').replace(/\D/g,'');
+    const nome = (c.nome||'').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+    const tel = (c.tel||'').replace(/\D/g,'');
     return nome.includes(filtro) || tel.includes(filtro.replace(/\D/g,''));
-  }).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
-  if (!lista.length) {
-    cont.innerHTML = '<p style="color:#aaa;text-align:center;padding:24px;font-size:13px;">Nenhum cliente encontrado.</p>';
-    return;
+  });
+  lista.forEach(c => {
+    let row = tbody.insertRow();
+    row.innerHTML = `<td>${c.nome}</td><td>${c.tel}</td><td>${c.end||''}</td>
+      <td>
+        <button class="btn btn-azul" style="padding:6px 10px;font-size:12px;" onclick="carregarParaEditar('${c.id}')">Editar</button>
+        <button class="btn btn-vermelho" style="padding:6px 10px;font-size:12px;" onclick="excluirCliente('${c.id}')">Excluir</button>
+      </td>`;
+  });
+}
+function carregarParaEditar(id) {
+  const c = clientes.find(c => String(c.id) === String(id)); if(!c) return;
+  const partes = (c.end||'').split(/, | - | \(Ref: |\)/);
+  document.getElementById('nomeCliente').value = c.nome;
+  document.getElementById('telCliente').value = c.tel;
+  document.getElementById('rua').value = partes[0] || '';
+  document.getElementById('numero').value = partes[1] || '';
+  document.getElementById('bairro').value = partes[2] || '';
+  document.getElementById('referencia').value = partes[3] || '';
+  document.querySelector('.aba:nth-child(4) .card h2').scrollIntoView({behavior:'smooth'});
+}
+function excluirCliente(id) {
+  if(confirm('Tem certeza que deseja excluir este cliente?')) {
+    sbDeletar('clientes', id); clientes = clientes.filter(c => String(c.id) !== String(id)); renderizarClientes();
   }
-  cont.innerHTML = lista.map(c => `
-    <div class="pedido-item" style="cursor:pointer;" onclick="abrirDetalheCliente('${c.id}')">
-      <div class="pedido-info">
-        <strong>${c.nome||'—'}</strong>
-        <span>📱 ${c.tel||'—'}</span>
-        ${c.end?`<span>📍 ${c.end}</span>`:''}
-      </div>
-      <span style="font-size:20px;color:#ccc;">›</span>
-    </div>`).join('');
 }
-
-function abrirDetalheCliente(id) {
-  const c = clientes.find(x=>String(x.id)===String(id)); if(!c) return;
-  document.getElementById('clienteDetalheTitulo').textContent = c.nome;
-  document.getElementById('clienteDetalheConteudo').innerHTML = `
-    <div class="detalhe-secao">
-      <div class="detalhe-secao-header">
-        <span class="detalhe-label">👤 Dados</span>
-        <button class="btn-acao btn-acao-azul" onclick="abrirFormCliente('${c.id}')">✏️ Editar</button>
-      </div>
-      <p style="font-size:15px;font-weight:700;margin:0 0 6px;">${c.nome||'—'}</p>
-      <p style="font-size:13px;color:#555;margin:3px 0;">📱 ${c.tel||'—'}</p>
-      ${c.end?`<p style="font-size:13px;color:#555;margin:3px 0;">📍 ${c.end}</p>`:''}
-    </div>
-    <button class="btn btn-vermelho" style="width:100%;margin-top:12px;padding:11px;"
-      onclick="excluirClienteOverlay('${c.id}')">🗑 Excluir Cliente</button>`;
-  _ovAbrir('clienteDetalheOverlay');
+function limparCamposCliente() {
+  ['nomeCliente','telCliente','rua','numero','bairro','referencia'].forEach(id => { document.getElementById(id).value = ""; });
 }
-function fecharDetalheCliente() { _ovFechar('clienteDetalheOverlay'); }
-
-function abrirFormCliente(id) {
-  document.getElementById('clienteFormTitulo').textContent = id ? 'Editar Cliente' : 'Novo Cliente';
-  document.getElementById('clienteFormId').value = id||'';
-  if (id) {
-    const c = clientes.find(x=>String(x.id)===String(id));
-    if (c) {
-      const end = c.end||'';
-      const parteEnd = end.split(', ');
-      const rua    = parteEnd[0]||'';
-      const resto  = (parteEnd[1]||'').split(' - ');
-      const num    = resto[0]||'';
-      const bairRef = (resto[1]||'').split(' (Ref: ');
-      const bairro = bairRef[0]||'';
-      const ref    = (bairRef[1]||'').replace(')','');
-      document.getElementById('clienteFormNome').value   = c.nome||'';
-      document.getElementById('clienteFormTel').value    = c.tel||'';
-      document.getElementById('clienteFormRua').value    = rua;
-      document.getElementById('clienteFormNumero').value = num;
-      document.getElementById('clienteFormBairro').value = bairro;
-      document.getElementById('clienteFormRef').value    = ref;
-    }
-  } else {
-    ['clienteFormNome','clienteFormTel','clienteFormRua','clienteFormNumero','clienteFormBairro','clienteFormRef']
-      .forEach(f=>{ document.getElementById(f).value=''; });
-  }
-  _ovAbrir('clienteFormOverlay');
-}
-function fecharFormCliente() { _ovFechar('clienteFormOverlay'); }
-
-async function salvarClienteForm() {
-  const id     = document.getElementById('clienteFormId').value;
-  const nome   = document.getElementById('clienteFormNome').value.trim();
-  const tel    = document.getElementById('clienteFormTel').value.trim();
-  const rua    = document.getElementById('clienteFormRua').value.trim();
-  const num    = document.getElementById('clienteFormNumero').value.trim();
-  const bairro = document.getElementById('clienteFormBairro').value.trim();
-  const ref    = document.getElementById('clienteFormRef').value.trim();
-  if (!nome||!tel) { alert('Preencha nome e telefone!'); return; }
-  const end = `${rua}${num?', '+num:''}${bairro?' - '+bairro:''}${ref?' (Ref: '+ref+')':''}`;
-  const novoId = id || tel;
-  const novo   = { id: novoId, nome, tel, end };
-  const ok = await sbUpsert('clientes',[novo]);
-  if (!ok) return;
-  const idx = clientes.findIndex(c=>String(c.id)===String(novoId));
-  if (idx !== -1) clientes[idx]=novo; else clientes.push(novo);
-  fecharFormCliente();
-  if (id) abrirDetalheCliente(novoId);
-  renderizarClientes();
-  alert('✅ Cliente salvo!');
-}
-
-function excluirClienteOverlay(id) {
-  if (!confirm('Excluir este cliente permanentemente?')) return;
-  sbDeletar('clientes', id);
-  clientes = clientes.filter(c=>String(c.id)!==String(id));
-  fecharDetalheCliente();
-  renderizarClientes();
-}
+ 
 /* ===== PEDIDOS LIST ===== */
 function renderPedidos() {
   const busca  = document.getElementById('filtroBusca').value.toLowerCase();
   const status = document.getElementById('filtroStatus').value;
   const data   = document.getElementById('filtroData').value;
   const lista  = document.getElementById('listaPedidos');
-  let filtrados = pedidos.filter(p => {
-    const nome = (p.cliente || '').toLowerCase();
-    const tel  = (p.telefone || '').replace(/\D/g,'');
-    const buscaTel = busca.replace(/\D/g,'');
-    const matchBusca = !busca ||
-      nome.includes(busca) ||
-      (buscaTel && tel.includes(buscaTel));
-    return matchBusca &&
-      (!status || p.status === status) &&
-      (!data   || p.data   === data);
-  }).sort((a,b) => new Date(b.data) - new Date(a.data));
+  let filtrados = pedidos.filter(p =>
+    (!busca || p.cliente.toLowerCase().includes(busca)) &&
+    (!status || p.status === status) &&
+    (!data || p.data === data)
+  ).sort((a,b) => new Date(b.data) - new Date(a.data));
   lista.innerHTML = filtrados.map(p => {
-    const entrada = p.entrada || 0;
-    const total   = p.total   || 0;
-    const saldo   = Math.max(0, total - entrada);
-    const itens   = p.itens   || [];
-    const status  = p.status  || 'pendente';
-    const cliente = p.cliente || '—';
-    const unTotal = Math.round(itens.reduce((s,i)=>s+(i.qtd||0),0));
-    return `<div class="pedido-item" onclick="abrirDetalhePedido(${p.id})" style="cursor:pointer;">
+    const entrada = p.entrada || 0; const saldo = p.total - entrada;
+    return `<div class="pedido-item">
       <div class="pedido-info">
-        <strong>${cliente.toUpperCase()}</strong>
-        <span>📅 ${formatarData(p.data)} · 🍬 ${unTotal} un · R$ ${total.toFixed(2)}</span>
-        <span style="color:${saldo>0?'#ff9800':'#28a745'};">Saldo: R$ ${saldo.toFixed(2)}</span>
+        <strong>${p.cliente.toUpperCase()}</strong>
+        <span>📅 ${formatarData(p.data)} &nbsp;|&nbsp; 🍬 ${Math.round(p.itens.reduce((s,i)=>s+i.qtd,0))} un &nbsp;|&nbsp; 💰 Total: R$ ${p.total.toFixed(2)}</span>
+        <span style="font-size:12px;color:#555;margin-top:4px;">💰 Entrada Paga: <b>R$ ${entrada.toFixed(2)}</b> &nbsp;|&nbsp; <b style="color:${saldo>0?'#ff9800':'#28a745'};">Saldo: R$ ${saldo.toFixed(2)}</b></span>
       </div>
-      <div class="pedido-acoes">
-        <span class="badge badge-${status}" style="font-size:10px;padding:2px 8px;">${status.toUpperCase()}</span>
-        <span style="font-size:20px;color:#ccc;text-align:right;">›</span>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span class="badge badge-${p.status}">${p.status.toUpperCase()}</span>
+        <button class="btn btn-azul" style="padding:6px 12px;" onclick="abrirEditar(${p.id})">✏️ Ver / Alterar</button>
+        <button class="btn btn-marrom" style="padding:6px 12px;" onclick="abrirContrato(${p.id})">📄 Contrato</button>
+        <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirPedido(${p.id})">🗑</button>
       </div>
     </div>`;
   }).join('');
@@ -1943,8 +1498,8 @@ function renderPedidos() {
  
 /* ===== EDITAR PEDIDO ===== */
 function abrirEditar(id) {
-  abrirDetalhePedido(id); return;
   const p = pedidos.find(x=>x.id===id); if(!p) return;
+  document.getElementById('editPedidoId').value = id;
   document.getElementById('editCliente').value = p.cliente;
   document.getElementById('editEndereco').value = p.endereco||'';
   document.getElementById('editTelefone').value = p.telefone||'';
@@ -2020,7 +1575,7 @@ function calcularBalançoModalEditar() {
   divSaldo.style.color = saldo > 0 ? '#ff9800' : '#28a745';
 }
 function compartilharPedido() {
-  const id = overlayDetalhePedidoId;
+  const id = parseInt(document.getElementById('editPedidoId').value);
   const p  = pedidos.find(x => x.id === id); if (!p) return;
   const dataFmt = p.data ? p.data.split('-').reverse().join('/') : '—';
   const itens   = (p.itens||[]).map(i => `  • ${i.produto}: ${i.qtd} un — R$ ${(i.total||0).toFixed(2).replace('.',',')}`).join('\n');
@@ -2035,7 +1590,7 @@ function compartilharPedido() {
   }
 }
 function salvarEdicaoPedido() {
-  const id = overlayDetalhePedidoId;
+  const id = parseInt(document.getElementById('editPedidoId').value);
   const idx = pedidos.findIndex(x=>x.id===id); if(idx===-1) return;
   if(itensEditandoPedido.length === 0) { alert("O pedido não pode ficar vazio!"); return; }
   const totalCalculado = itensEditandoPedido.reduce((acc,i) => acc+i.total, 0);
@@ -2056,7 +1611,7 @@ function salvarEdicaoPedido() {
   registrarLog('PEDIDO', `Pedido alterado — Cliente: ${pedidos[idx].cliente} | Entrega: ${pedidos[idx].data} | Total: R$ ${pedidos[idx].total.toFixed(2)}`);
   atualizarTodasAsTelas(); fecharModalEditar();
 }
-function fecharModalEditar() { fecharDetalhePedido(); }
+function fecharModalEditar() { document.getElementById('modalEditarPedido').classList.remove('active'); }
 function excluirPedido(id) {
   if(confirm('Excluir este pedido permanentemente?')){ 
     const p = pedidos.find(x=>x.id===id);
@@ -2083,150 +1638,41 @@ function atualizarAgenda() {
     mapaCronologico[ano][mes].totalDoces += p.itens.reduce((s,i) => i.produto.trim().toLowerCase()==="bem casado"?s:s+i.qtd, 0);
     mapaCronologico[ano][mes].totalBemCasados += p.itens.filter(i=>i.produto.trim().toLowerCase()==="bem casado").reduce((s,i)=>s+i.qtd,0);
   });
-
-  const agora = new Date();
-  const anoAtual = agora.getFullYear();
-  const mesAtual = agora.getMonth()+1; // 1-12
-
-  const containerAtuais   = document.createElement('div');
-  const containerAnterior = document.createElement('div');
-  let temAnterior = false;
-
   Object.keys(mapaCronologico).sort((a,b)=>b-a).forEach(ano => {
-    const gridAtuais = document.createElement('div'); gridAtuais.className = 'agenda-meses-grid';
-    const gridAnteriores = document.createElement('div'); gridAnteriores.className = 'agenda-meses-grid';
-    let temMesAtual = false, temMesAnterior = false;
-
+    const secaoAno = document.createElement('div'); secaoAno.className = 'agenda-secao';
+    secaoAno.innerHTML = `<div class="agenda-ano-titulo"><b>Ano Letivo Operacional: ${ano}</b></div>`;
+    const gridMeses = document.createElement('div'); gridMeses.className = 'agenda-meses-grid';
     Object.keys(mapaCronologico[ano]).sort((a,b)=>a-b).forEach(mes => {
       const dadosMes = mapaCronologico[ano][mes];
-      const ehPassado = (parseInt(ano) < anoAtual) || (parseInt(ano) === anoAtual && parseInt(mes) < mesAtual);
       const cardMes = document.createElement('div'); cardMes.className = 'mes-card';
       cardMes.innerHTML = `<h4><b>${NOMES_MESES[parseInt(mes)-1]}</b></h4>
         <p style="font-size:13px;">📋 Encomendas: <b>${dadosMes.totalPedidos}</b></p>
         <p style="font-size:13px;">🍬 Doces: <b>${Math.round(dadosMes.totalDoces)} un</b>${dadosMes.totalBemCasados>0?`</p><p style="font-size:13px;">💍 Bem Casados: <b>${Math.round(dadosMes.totalBemCasados)} un</b>`:''}</p>`;
       cardMes.onclick = () => mostrarDiasDoMes(`${NOMES_MESES[parseInt(mes)-1]} de ${ano}`, dadosMes.dias);
-      if (ehPassado) { gridAnteriores.appendChild(cardMes); temMesAnterior = true; temAnterior = true; }
-      else { gridAtuais.appendChild(cardMes); temMesAtual = true; }
+      gridMeses.appendChild(cardMes);
     });
-
-    if (temMesAtual) {
-      const secaoAno = document.createElement('div'); secaoAno.className = 'agenda-secao';
-      secaoAno.innerHTML = `<div class="agenda-ano-titulo"><b>Ano Letivo Operacional: ${ano}</b></div>`;
-      secaoAno.appendChild(gridAtuais);
-      containerAtuais.appendChild(secaoAno);
-    }
-    if (temMesAnterior) {
-      const secaoAno = document.createElement('div'); secaoAno.className = 'agenda-secao';
-      secaoAno.innerHTML = `<div class="agenda-ano-titulo"><b>Ano Letivo Operacional: ${ano}</b></div>`;
-      secaoAno.appendChild(gridAnteriores);
-      containerAnterior.appendChild(secaoAno);
-    }
+    secaoAno.appendChild(gridMeses); containerAnos.appendChild(secaoAno);
   });
-
-  containerAnos.appendChild(containerAtuais);
-
-  if (temAnterior) {
-    const wrapper = document.createElement('div');
-    wrapper.style.marginTop = '15px';
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-cinza';
-    btn.style.cssText = 'width:100%;padding:10px;font-size:13px;';
-    btn.textContent = '📦 Ver meses anteriores';
-    const corpo = document.createElement('div');
-    corpo.style.display = 'none';
-    corpo.style.marginTop = '12px';
-    corpo.appendChild(containerAnterior);
-    btn.onclick = () => {
-      const aberto = corpo.style.display === 'block';
-      corpo.style.display = aberto ? 'none' : 'block';
-      btn.textContent = aberto ? '📦 Ver meses anteriores' : '📦 Ocultar meses anteriores';
-    };
-    wrapper.appendChild(btn);
-    wrapper.appendChild(corpo);
-    containerAnos.appendChild(wrapper);
-  }
 }
-let _agendaDiaData = null, _agendaDiaPedidos = null;
-
 function mostrarDiasDoMes(titulo, diasObjeto) {
-  document.getElementById('agendaMesTitulo').textContent = titulo;
-  const cont = document.getElementById('agendaMesConteudo');
-  const grid = document.createElement('div');
-  grid.className = 'agenda-meses-grid';
+  const secaoDias = document.getElementById('agendaDiasSecao');
+  document.getElementById('agendaDiasTituloTexto').innerHTML = `Entregas programadas para: <b style="color:#d94d7d;">${titulo}</b>`;
+  const gridDias = document.getElementById('agendaGridDias'); gridDias.innerHTML = '';
   Object.keys(diasObjeto).sort().forEach(data => {
-    const lista = diasObjeto[data];
-    const doces = lista.reduce((a,p)=>a+(p.itens||[]).reduce((s,i)=>i.produto.trim().toLowerCase()==='bem casado'?s:s+(i.qtd||0),0),0);
-    const bc    = lista.reduce((a,p)=>a+(p.itens||[]).filter(i=>i.produto.trim().toLowerCase()==='bem casado').reduce((s,i)=>s+(i.qtd||0),0),0);
-    const card  = document.createElement('div');
-    card.className = 'dia-card';
-    card.innerHTML = `<h3>📅 ${formatarData(data)}</h3>
-      <p style="font-size:12px;margin-top:5px;">Pedidos: <b>${lista.length}</b></p>
-      <p style="font-size:12px;">Doces: <b style="color:#8a5a34;">${Math.round(doces)} un</b></p>
-      ${bc>0?`<p style="font-size:12px;">Bem Casados: <b style="color:#8a5a34;">${Math.round(bc)} un</b></p>`:''}`;
-    card.onclick = () => mostrarPedidosDoDia(data, lista);
-    grid.appendChild(card);
+    const listaPedidosDia = diasObjeto[data];
+    const totalDocesDia = listaPedidosDia.reduce((acc,p)=>acc+p.itens.reduce((s,i)=>i.produto.trim().toLowerCase()==="bem casado"?s:s+i.qtd,0),0);
+    const totalBemCasadosDia = listaPedidosDia.reduce((acc,p)=>acc+p.itens.filter(i=>i.produto.trim().toLowerCase()==="bem casado").reduce((s,i)=>s+i.qtd,0),0);
+    const cardDia = document.createElement('div'); cardDia.className = 'dia-card';
+    cardDia.innerHTML = `<h3>📅 ${formatarData(data)}</h3>
+      <p style="font-size:12px;margin-top:5px;">Pedidos: <b>${listaPedidosDia.length}</b></p>
+      <p style="font-size:12px;">Doces: <b style="color:#8a5a34;">${Math.round(totalDocesDia)} un</b></p>
+      ${totalBemCasadosDia>0?`<p style="font-size:12px;">Bem Casados: <b style="color:#8a5a34;">${Math.round(totalBemCasadosDia)} un</b></p>`:''}`;
+    cardDia.onclick = () => abrirA4(data, listaPedidosDia);
+    gridDias.appendChild(cardDia);
   });
-  cont.innerHTML = '';
-  cont.appendChild(grid);
-  _ovAbrir('agendaMesOverlay');
+  secaoDias.style.display = 'block'; secaoDias.scrollIntoView({behavior:'smooth'});
 }
-
-function fecharAgendaMes() { _ovFechar('agendaMesOverlay'); _ovFechar('agendaDiaOverlay'); }
-
-function mostrarPedidosDoDia(data, lista) {
-  _agendaDiaData    = data;
-  _agendaDiaPedidos = lista;
-  document.getElementById('agendaDiaTitulo').textContent = '📅 ' + formatarData(data);
-  const totalDoces = lista.reduce((a,p)=>a+(p.itens||[]).reduce((s,i)=>i.produto.trim().toLowerCase()==='bem casado'?s:s+(i.qtd||0),0),0);
-  const totalBC    = lista.reduce((a,p)=>a+(p.itens||[]).filter(i=>i.produto.trim().toLowerCase()==='bem casado').reduce((s,i)=>s+(i.qtd||0),0),0);
-  const totalVal   = lista.reduce((a,p)=>a+(p.total||0),0);
-
-  const pedidosHtml = lista.map(p => {
-    const it  = p.itens||[];
-    const doc = it.filter(i=>i.produto.trim().toLowerCase()!=='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
-    const bc  = it.filter(i=>i.produto.trim().toLowerCase()==='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
-    const st  = p.status||'pendente';
-    return `<div class="detalhe-secao" style="margin-bottom:8px;cursor:pointer;"
-        onclick="abrirDetalhePedidoDeAgenda(${p.id})">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <strong style="font-size:13px;color:#8a5a34;">${(p.cliente||'').toUpperCase()}</strong>
-          <div style="font-size:11px;color:#666;margin-top:2px;">
-            🍬 ${Math.round(doc)} un${bc>0?` · 💍 ${Math.round(bc)} BC`:''}
-            &nbsp;·&nbsp; R$ ${(p.total||0).toFixed(2)}
-          </div>
-        </div>
-        <span class="badge badge-${st}" style="font-size:10px;padding:2px 8px;">${st.toUpperCase()}</span>
-      </div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('agendaDiaConteudo').innerHTML = `
-    <button class="btn btn-marrom" style="width:100%;margin-bottom:12px;padding:12px;font-size:14px;"
-      onclick="abrirA4(_agendaDiaData,_agendaDiaPedidos)">🖨️ Imprimir Mapa do Dia (A4)</button>
-    ${pedidosHtml}
-    <div class="detalhe-secao" style="background:#fffaf5;border:1px dashed #8a5a34;margin-top:4px;">
-      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
-        <span>Total doces</span>
-        <b>${Math.round(totalDoces)} un${totalBC>0?` + ${Math.round(totalBC)} BC`:''}</b>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:13px;">
-        <span>Valor do dia</span><b style="color:#d94d7d;">R$ ${totalVal.toFixed(2)}</b>
-      </div>
-    </div>`;
-
-  _ovAbrir('agendaDiaOverlay');
-}
-
-/* Abre detalhe do pedido por cima dos overlays de agenda (z-index maior) */
-function abrirDetalhePedidoDeAgenda(id) {
-  const el = document.getElementById('detalhePedidoOverlay');
-  if (el) el.style.zIndex = '160';
-  abrirDetalhePedido(id);
-}
-
-function fecharAgendaDia() { _ovFechar('agendaDiaOverlay'); }
-function fecharSecaoDias() { fecharAgendaMes(); }
+function fecharSecaoDias() { document.getElementById('agendaDiasSecao').style.display = 'none'; }
 function fecharModal() {
   const modal = document.getElementById('modal');
   modal.classList.remove('active'); modal.style.display = 'none';
@@ -2235,10 +1681,19 @@ function fecharModal() {
 /* ===== IMPRESSÃO A4 ===== */
 function abrirA4(data, pedidosDia) {
   const consolidadoDocesDia = {};
-  /* Inicializa massas com os tipos cadastrados — sem hardcode */
-  const totaisMassas = {};
-  tiposMassa.forEach(t => { totaisMassas[t.nome] = 0; });
-  const semReceita = new Set();
+  const totaisMassas = {"Massa Branca":0,"Massa Preta":0,"Coco":0,"Café":0,"Amendoim":0,"Os Copinhos":0,"Abacaxi":0,"Ninho":0};
+  const fatores = {"Massa Branca":0.05,"Massa Preta":0.05,"Coco":0.04,"Café":0.04,"Ninho":0.04,"Amendoim":0.04,"Os Copinhos":0.03,"Abacaxi":0.03};
+  const mapeamento = {
+    "brigadeiro":"Massa Preta","cajuzinho":"Amendoim","ninho com nutella":"Ninho","casadinho":"Meio a Meio",
+    "brigadeiro de churros":"Massa Branca","beijinho":"Coco","chocobol":"Massa Preta","camafeu":"Massa Preta",
+    "camafeu de nozes":"Massa Preta","olho de sogra":"Coco","brigadeiro de cafe":"Café","brigadeiro de café":"Café",
+    "ferrero":"Massa Preta","uva":"Massa Branca","bombom de uva":"Massa Branca","coco":"Coco","bombom de coco":"Coco",
+    "nozes":"Massa Preta","bombom de nozes":"Massa Preta","flocos":"Massa Branca","bombom de flocos":"Massa Branca",
+    "cereja":"Massa Branca","bombom de cereja":"Massa Branca","ouriço":"Massa Branca","bombom ouriço":"Massa Branca",
+    "bombom de brigadeiro":"Massa Preta","bombom de amendoim":"Amendoim","coco com damasco":"Coco","abacaxi com coco":"Abacaxi",
+    "copinho de limao":"Os Copinhos","copinho de limão":"Os Copinhos","copinho de maracuja":"Os Copinhos","copinho de maracujá":"Os Copinhos",
+    "gotas de paçoca":"Amendoim","damasco recheado":"Massa Branca","copinho de cereja":"Os Copinhos","copinho de morango":"Os Copinhos","bolinho":"Massa Branca"
+  };
 
   let totalGeral = 0, totalBemCasados = 0;
   pedidosDia.forEach(p => {
@@ -2250,12 +1705,13 @@ function abrirA4(data, pedidosDia) {
       const nomeChave = i.produto.trim().toLowerCase();
       if(nomeChave==="bem casado") return;
       consolidadoDocesDia[nomeChave] = (consolidadoDocesDia[nomeChave]||0)+i.qtd;
-      const prod = produtos.find(pr => pr.nome.trim().toLowerCase() === nomeChave);
-      if (!prod || !(prod.receita||[]).length) { semReceita.add(i.produto); return; }
-      (prod.receita||[]).forEach(comp => {
-        if (!(comp.nome in totaisMassas)) totaisMassas[comp.nome] = 0;
-        totaisMassas[comp.nome] += (i.qtd / 100) * comp.por100;
-      });
+      const tipo = mapeamento[nomeChave]||"Massa Branca";
+      if(tipo==="Meio a Meio"){
+        totaisMassas["Massa Branca"]+=(i.qtd/2)*0.05;
+        totaisMassas["Massa Preta"]+=(i.qtd/2)*0.05;
+      } else {
+        totaisMassas[tipo]+=i.qtd*(fatores[tipo]||0.05);
+      }
     });
   });
 
@@ -2401,10 +1857,18 @@ function abrirA4(data, pedidosDia) {
         </h3>
 
         ${Object.entries(totaisMassas).map(([k,v]) =>
-          v > 0 ? `<div>${k}: <b>${v.toFixed(2)} UN</b></div>` : ''
+
+          v > 0
+
+            ? `
+              <div>
+                ${k}: <b>${v.toFixed(2)}</b>
+              </div>
+            `
+
+            : ''
+
         ).join('')}
-        ${!Object.values(totaisMassas).some(v=>v>0) ? '<div style="color:#aaa;font-size:10px;">Configure a receita nos produtos</div>' : ''}
-        ${semReceita.size > 0 ? `<div style="color:#c07000;font-size:9px;margin-top:4px;">⚠️ Sem receita: ${[...semReceita].join(', ')}</div>` : ''}
 
       </div>
 
@@ -2583,7 +2047,7 @@ function renderInsumos() {
     <div class="insumo-item">
       <div class="insumo-info">
         <strong>${i.nome}</strong>
-        <span>📅 ${formatarData(i.data||defaultDateInput)} &nbsp;|&nbsp; Qtde: ${i.estoque||0} (${i.unidade||'?'}) &nbsp;|&nbsp; Unit: R$ ${(i.preco||0).toFixed(2)} &nbsp;|&nbsp; <b>Total: R$ ${((i.estoque||0)*(i.preco||0)).toFixed(2)}</b></span>
+        <span>📅 ${formatarData(i.data||defaultDateInput)} &nbsp;|&nbsp; Qtde: ${i.estoque} (${i.unidade}) &nbsp;|&nbsp; Unit: R$ ${i.preco.toFixed(2)} &nbsp;|&nbsp; <b>Total: R$ ${(i.estoque*i.preco).toFixed(2)}</b></span>
       </div>
       <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirInsumo(${i.id})">🗑</button>
     </div>`).join('');
@@ -2624,94 +2088,93 @@ function excluirInsumo(id) {
 /* ===== PRODUTOS ===== */
 
 function salvarProduto() {
-
-  const nome =
-    document.getElementById('nomeProduto').value.trim();
-
-  const preco =
-    parseFloat(
-      (document.getElementById('precoProduto').value||'').replace(',','.')
-    );
-
-  if (!nome || isNaN(preco)) return;
-
-  const novo = {
-    id: Date.now(),
-    nome,
-    preco
-  };
-
+  const nome      = document.getElementById('nomeProduto').value.trim();
+  const preco     = parseFloat((document.getElementById('precoProduto').value||'').replace(',','.'));
+  const categoria = document.getElementById('categoriaProduto').value || 'Simples';
+  if (!nome || isNaN(preco)) { alert('Preencha nome e preço.'); return; }
+  const novo = { id: Date.now(), nome, preco, categoria };
   produtos.push(novo);
   sbUpsert('produtos', [novo]);
-  registrarLog('PRODUTO', `Produto cadastrado — ${nome} | Preço: R$ ${preco.toFixed(2)}`);
-
+  registrarLog('PRODUTO', `Produto cadastrado — ${nome} | R$ ${preco.toFixed(2)} | ${categoria}`);
   renderProdutos();
-
   popularSelectProduto();
-
-  document.getElementById('nomeProduto').value = '';
-  document.getElementById('precoProduto').value = '';
-
+  document.getElementById('nomeProduto').value    = '';
+  document.getElementById('precoProduto').value   = '';
+  document.getElementById('categoriaProduto').value = 'Simples';
 }
 
 
 /* ===== ALTERAR VALOR ===== */
 
 function alterarValorProduto(id) {
-
-  const produto =
-    produtos.find(p => p.id === id);
-
-  if (!produto) return;
-
+  const produto = produtos.find(p => p.id === id); if (!produto) return;
   const novoPreco = prompt(
-    `Alterar valor de "${produto.nome}"\n\nValor atual: R$ ${produto.preco.toFixed(2)}\n\nDigite o novo valor:`,
+    `Alterar valor de "${produto.nome}"\nValor atual: R$ ${(produto.preco||0).toFixed(2)}\nDigite o novo valor:`,
     produto.preco
   );
-
   if (novoPreco === null) return;
-
-  const precoFormatado =
-    parseFloat(
-      novoPreco.toString().replace(',', '.')
-    );
-
-  if (isNaN(precoFormatado) || precoFormatado < 0) {
-    alert('Valor inválido');
-    return;
-  }
-
+  const precoFormatado = parseFloat(novoPreco.toString().replace(',','.'));
+  if (isNaN(precoFormatado) || precoFormatado < 0) { alert('Valor inválido'); return; }
   produto.preco = precoFormatado;
-
   sbUpsert('produtos', [produto]);
-
   renderProdutos();
+  popularSelectProduto();
+  alert('Valor atualizado!');
+}
 
-  alert('Valor atualizado com sucesso!');
-
+function alterarCategoriaProduto(id) {
+  const produto = produtos.find(p => p.id === id); if (!produto) return;
+  const cats = ['Simples','Especial','Bombom','Copinho','Avulso'];
+  const atual = cats.indexOf(produto.categoria||'Simples');
+  const nova = prompt(
+    `Categoria de "${produto.nome}"\nOpções: ${cats.join(', ')}\nAtual: ${produto.categoria||'Simples'}\n\nDigite a nova categoria:`,
+    produto.categoria||'Simples'
+  );
+  if (!nova || !cats.includes(nova)) { if(nova!==null) alert('Categoria inválida. Use: '+cats.join(', ')); return; }
+  produto.categoria = nova;
+  sbUpsert('produtos', [produto]);
+  renderProdutos();
+  popularSelectProduto();
 }
 
 
-/* ===== LISTAR PRODUTOS ===== */
 function renderProdutos() {
-  document.getElementById('listaProdutos').innerHTML = produtos.map(p => {
-    const rec = p.receita || [];
-    const recLabel = rec.length
-      ? rec.map(r=>`${r.nome} ${r.por100}UN`).join(' · ')
-      : '<span style="color:#ccc;">sem receita</span>';
-    return `<div class="produto-item">
-      <div class="produto-info">
-        <strong>${p.nome}</strong>
-        <span>R$ ${(p.preco||0).toFixed(2)} un</span>
-        <span style="font-size:11px;color:#8a5a34;">🍫 ${recLabel}</span>
-      </div>
-      <div style="display:flex;gap:6px;">
-        <button class="btn-acao btn-acao-marrom" onclick="abrirReceita(${p.id})">🍫 Receita</button>
-        <button class="btn" style="padding:6px 10px;" onclick="alterarValorProduto(${p.id})">✏️</button>
-        <button class="btn btn-vermelho" style="padding:6px 10px;" onclick="excluirProduto(${p.id})">🗑</button>
-      </div>
-    </div>`;
-  }).join('');
+  const agrupado = {};
+  ORDEM_CATEGORIAS.forEach(c => agrupado[c] = []);
+  produtos.forEach(p => {
+    const cat = p.categoria || 'Simples';
+    if (!agrupado[cat]) agrupado[cat] = [];
+    agrupado[cat].push(p);
+  });
+  ORDEM_CATEGORIAS.forEach(c => agrupado[c].sort((a,b)=>(a.nome||'').localeCompare(b.nome||'')));
+
+  let html = '';
+  ORDEM_CATEGORIAS.forEach(cat => {
+    const lista = agrupado[cat]; if (!lista.length) return;
+    const estilo = COR_CATEGORIA[cat]||'#e2e3e5;color:#383d41';
+    html += `<div style="font-size:11px;font-weight:700;color:#8a5a34;text-transform:uppercase;
+      letter-spacing:.5px;margin:12px 0 6px;padding-left:4px;">${cat}</div>`;
+    html += lista.map(p => `
+      <div class="produto-item">
+        <div class="produto-info">
+          <strong>${p.nome}</strong>
+          <span>R$ ${(p.preco||0).toFixed(2)} un &nbsp;·&nbsp;
+            <span style="background:${estilo};padding:1px 7px;border-radius:10px;font-size:10px;">
+              ${cat}
+            </span>
+          </span>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn" style="padding:5px 9px;font-size:12px;" title="Mudar categoria"
+            onclick="alterarCategoriaProduto(${p.id})">🏷️</button>
+          <button class="btn" style="padding:5px 9px;font-size:12px;"
+            onclick="alterarValorProduto(${p.id})">✏️</button>
+          <button class="btn btn-vermelho" style="padding:5px 9px;font-size:12px;"
+            onclick="excluirProduto(${p.id})">🗑</button>
+        </div>
+      </div>`).join('');
+  });
+  document.getElementById('listaProdutos').innerHTML = html || '<p style="color:#aaa;text-align:center;padding:20px;">Nenhum produto cadastrado.</p>';
 }
 
 
@@ -2925,289 +2388,25 @@ function renderLogs() {
   }).join('');
 }
 function formatarData(d){ if(!d) return ''; const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
-function gerarNovoId(arr){ return arr.length===0 ? 1 : Math.max(...arr.map(x=>x.id||0))+1; }
 function limparFiltros(){ document.getElementById('filtroBusca').value=''; document.getElementById('filtroStatus').value=''; document.getElementById('filtroData').value=''; renderPedidos(); }
  
 document.getElementById('produto').addEventListener('change', atualizarValor);
 document.getElementById('quantidade').addEventListener('input', calcularTotalItem);
  
-/* ===== IMPORTAR CONTATO DO CELULAR ===== */
-async function importarContato() {
-  if (!('contacts' in navigator && 'ContactsManager' in window)) {
-    alert('Seu navegador não suporta importação de contatos.\nUse o Chrome no Android.'); return;
-  }
-  try {
-    const lista = await navigator.contacts.select(['name','tel'],{multiple:false});
-    if (!lista.length) return;
-    const c = lista[0];
-    if (c.name?.[0])  document.getElementById('cliente').value  = c.name[0];
-    if (c.tel?.[0])   document.getElementById('telefone').value = c.tel[0].replace(/\D/g,'');
-    buscarClientePorTelefone();
-  } catch(e) { console.warn('Contato cancelado ou erro:', e); }
-}
-
-/* ===== TIPOS DE MASSA ===== */
-function renderTiposMassa() {
-  const cont = document.getElementById('listaTiposMassa');
-  if (!cont) return;
-  if (!tiposMassa.length) {
-    cont.innerHTML = '<p style="color:#aaa;font-size:12px;text-align:center;padding:10px;">Nenhum tipo cadastrado.</p>'; return;
-  }
-  cont.innerHTML = tiposMassa.map(t => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#fff5f0;border-radius:8px;margin-bottom:5px;font-size:13px;">
-      <span><b style="color:#8a5a34;">🍫 ${t.nome}</b></span>
-      <button class="btn btn-vermelho" style="padding:3px 8px;font-size:11px;" onclick="excluirTipoMassa(${t.id})">✕</button>
-    </div>`).join('');
-}
-async function salvarTipoMassa() {
-  const nome = (document.getElementById('nomeTipoMassa').value||'').trim();
-  if (!nome) { alert('Informe o nome do tipo de massa.'); return; }
-  if (tiposMassa.some(t=>t.nome.toLowerCase()===nome.toLowerCase())) { alert('Tipo já cadastrado.'); return; }
-  const novo = { id: gerarNovoId(tiposMassa), nome };
-  const ok = await sbUpsert('tipos_massa', [novo]);
-  if (!ok) return;
-  tiposMassa.push(novo);
-  document.getElementById('nomeTipoMassa').value = '';
-  renderTiposMassa();
-  popularSelectTipoMassa();
-  alert(`✅ Tipo "${nome}" cadastrado com sucesso!`);
-}
-function excluirTipoMassa(id) {
-  if (!confirm('Excluir este tipo de massa?')) return;
-  sbDeletar('tipos_massa', id);
-  tiposMassa = tiposMassa.filter(t=>t.id!==id);
-  renderTiposMassa();
-  popularSelectTipoMassa();
-}
-
-/* ===== RECEITA DOS PRODUTOS ===== */
-function popularSelectTipoMassa() {
-  const sel = document.getElementById('receitaTipoSelect');
-  if (!sel) return;
-  sel.innerHTML = tiposMassa.map(t=>`<option value="${t.id}">${t.nome}</option>`).join('');
-}
-function abrirReceita(prodId) {
-  const p = produtos.find(x=>x.id===prodId); if(!p) return;
-  document.getElementById('receitaProdutoId').value   = prodId;
-  document.getElementById('receitaProdutoNome').textContent = p.nome;
-  popularSelectTipoMassa();
-  renderReceitaLinhas(prodId);
-  document.getElementById('receitaPanel').style.display = 'block';
-  document.getElementById('receitaPanel').scrollIntoView({behavior:'smooth'});
-}
-function fecharReceita() {
-  const p = document.getElementById('receitaPanel');
-  if (p) p.style.display = 'none';
-}
-function renderReceitaLinhas(prodId) {
-  const p   = produtos.find(x=>x.id===prodId); if(!p) return;
-  const rec = p.receita || [];
-  const div = document.getElementById('receitaLinhas');
-  if (!rec.length) { div.innerHTML='<p style="color:#aaa;font-size:12px;">Nenhuma massa configurada.</p>'; return; }
-  div.innerHTML = rec.map((r,i)=>`
-    <div class="receita-linha">
-      <span>🍫 ${r.nome}</span>
-      <span style="color:#666;font-size:12px;">${r.por100} UN / 100 un</span>
-      <button class="btn btn-vermelho" style="padding:2px 8px;font-size:11px;" onclick="removerLinhaReceita(${prodId},${i})">✕</button>
-    </div>`).join('');
-}
-function adicionarLinhaReceita() {
-  const prodId = parseInt(document.getElementById('receitaProdutoId').value);
-  const tipoId = parseInt(document.getElementById('receitaTipoSelect').value);
-  const por100 = parseFloat(document.getElementById('receitaPor100').value);
-  if (!tipoId || isNaN(por100) || por100 <= 0) { alert('Selecione o tipo e informe a quantidade.'); return; }
-  const tipo = tiposMassa.find(t=>t.id===tipoId); if(!tipo) return;
-  const p    = produtos.find(x=>x.id===prodId);   if(!p)    return;
-  if (!p.receita) p.receita = [];
-  if (p.receita.some(r=>r.tipo_id===tipoId)) { alert('Este tipo já está na receita.'); return; }
-  p.receita.push({ tipo_id: tipoId, nome: tipo.nome, por100 });
-  sbUpsert('produtos',[p]);
-  document.getElementById('receitaPor100').value = '';
-  renderReceitaLinhas(prodId);
-  renderProdutos();
-}
-function removerLinhaReceita(prodId, idx) {
-  const p = produtos.find(x=>x.id===prodId); if(!p) return;
-  p.receita.splice(idx,1);
-  sbUpsert('produtos',[p]);
-  renderReceitaLinhas(prodId);
-  renderProdutos();
-}
-
-/* ===== CONTROLE DE MASSAS — AGENDA ===== */
-function calcularPrevistoPorMassa(inicio, fim) {
-  /* Retorna { tipo_nome: { previsto_un, previsto_total_un } } */
-  const resultado = {};
-  let totalUnidades = 0;
-  const semReceita = new Set();
-  pedidos.filter(p => p.data >= inicio && p.data <= fim && p.status !== 'cancelado')
-    .forEach(ped => {
-      (ped.itens||[]).forEach(item => {
-        const nomeLower = (item.produto||'').trim().toLowerCase();
-        if (nomeLower === 'bem casado') return;
-        totalUnidades += (item.qtd||0);
-        const prod = produtos.find(pr => pr.nome.trim().toLowerCase() === nomeLower);
-        if (!prod || !(prod.receita||[]).length) { semReceita.add(item.produto); return; }
-        prod.receita.forEach(r => {
-          if (!resultado[r.nome]) resultado[r.nome] = { tipo_id: r.tipo_id, previsto: 0 };
-          resultado[r.nome].previsto += (item.qtd / 100) * r.por100;
-        });
-      });
-    });
-  return { massas: resultado, totalUnidades, semReceita: [...semReceita] };
-}
-function calcularRealizadoPorMassa(inicio, fim) {
-  const result = {};
-  massasDiario.filter(d => d.data >= inicio && d.data <= fim)
-    .forEach(d => {
-      (d.producao||[]).forEach(r => {
-        result[r.nome] = (result[r.nome]||0) + (r.quantidade||0);
-      });
-    });
-  return result;
-}
-function renderMassasAgenda() {
-  const inicio = document.getElementById('massaDataInicio').value;
-  const fim    = document.getElementById('massaDataFim').value;
-  const div    = document.getElementById('massasResultado');
-  if (!inicio || !fim || inicio > fim) { div.innerHTML='<p style="color:#c00;font-size:13px;">Selecione um período válido.</p>'; return; }
-
-  const { massas, totalUnidades, semReceita } = calcularPrevistoPorMassa(inicio, fim);
-  const realizado = calcularRealizadoPorMassa(inicio, fim);
-  const tipos = Object.keys(massas);
-
-  /* ── Painel consolidado ── */
-  let consolidado = '';
-  if (!tipos.length) {
-    consolidado = '<p style="color:#aaa;font-size:13px;">Nenhuma massa calculada. Verifique as receitas dos produtos.</p>';
-  } else {
-    const linhas = tipos.map(nome => {
-      const prev = massas[nome].previsto;
-      const real = realizado[nome] || 0;
-      const saldo = prev - real;
-      const cls   = saldo <= 0 ? 'massa-saldo-neg' : 'massa-saldo-pos';
-      return `<tr>
-        <td><b style="color:#6b3f20;">🍫 ${nome}</b></td>
-        <td style="text-align:right;">${prev.toFixed(1)} UN</td>
-        <td style="text-align:right;">${real.toFixed(1)} UN</td>
-        <td style="text-align:right;" class="${cls}">${saldo.toFixed(1)} UN</td>
-      </tr>`;
-    }).join('');
-    consolidado = `<table class="massa-tabela">
-      <thead><tr><th>Tipo</th><th>Previsto</th><th>Realizado</th><th>Saldo</th></tr></thead>
-      <tbody>${linhas}</tbody>
-    </table>`;
-  }
-
-  /* ── Aviso produtos sem receita ── */
-  const avisoSem = semReceita.length
-    ? `<p style="font-size:11px;color:#c07000;margin-top:8px;">⚠️ Sem receita configurada: ${semReceita.join(', ')}</p>` : '';
-
-  /* ── Diário por dia ── */
-  const dias = {};
-  pedidos.filter(p=>p.data>=inicio&&p.data<=fim&&p.status!=='cancelado').forEach(p=>{
-    if(!dias[p.data]) dias[p.data]=0;
-    (p.itens||[]).forEach(i=>{ if((i.produto||'').trim().toLowerCase()!=='bem casado') dias[p.data]+=(i.qtd||0); });
-  });
-  /* Incluir também dias com lançamento mas sem pedido */
-  massasDiario.filter(d=>d.data>=inicio&&d.data<=fim).forEach(d=>{ if(!dias[d.data]) dias[d.data]=0; });
-
-  const datasOrdenadas = Object.keys(dias).sort();
-  const diarioHtml = datasOrdenadas.map(data => {
-    const log    = massasDiario.find(d=>d.data===data);
-    const prod   = log ? (log.producao||[]) : [];
-    const lancado = prod.length > 0;
-    const { massas: prevDia } = calcularPrevistoPorMassa(data, data);
-    const realDia  = {};
-    prod.forEach(r=>{ realDia[r.nome]=r.quantidade; });
-
-    const linhasDetalhe = Object.keys(prevDia).map(nome=>{
-      const pv = prevDia[nome].previsto;
-      const rl = realDia[nome]||0;
-      const sd = pv - rl;
-      const cls = sd<=0?'massa-saldo-neg':'massa-saldo-pos';
-      return `<div class="massa-det-linha">
-        <span class="massa-det-nome">🍫 ${nome}</span>
-        <span class="massa-det-valor" style="color:#555;">prev <b>${pv.toFixed(1)}</b></span>
-        <span class="massa-det-valor" style="color:#333;">prod <b>${rl.toFixed(1)}</b></span>
-        <span class="massa-det-valor ${cls}">saldo <b>${sd.toFixed(1)}</b></span>
-      </div>`;
-    }).join('');
-
-    /* Formulário de lançamento — sempre mostra todos os tipos cadastrados */
-    const tiposForm = tiposMassa.length ? tiposMassa.map(t=>t.nome) : tipos;
-    const inputsMassa = tiposForm.map(nome=>`
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-        <label style="flex:1;font-size:12px;color:#6b3f20;">🍫 ${nome}</label>
-        <input type="number" step="0.1" min="0" placeholder="0.0"
-          id="massaInput_${data}_${nome.replace(/\s/g,'_')}"
-          style="width:80px;padding:6px;border-radius:8px;border:1px solid #ccc;font-size:12px;"
-          value="${realDia[nome]||''}">
-        <span style="font-size:11px;color:#aaa;">UN${prevDia[nome]?` (prev:${prevDia[nome].previsto.toFixed(1)})`:''}
-        </span>
-      </div>`).join('');
-
-    return `<div class="dia-log-row ${lancado?'lancado':''}">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <b style="font-size:13px;">${formatarData(data)}</b>
-        <span style="font-size:11px;color:${lancado?'#28a745':'#aaa'};">${lancado?'✅ Lançado':'⏳ Pendente'}</span>
-      </div>
-      ${linhasDetalhe}
-      <details style="margin-top:8px;">
-        <summary style="font-size:12px;color:#d94d7d;cursor:pointer;">${lancado?'✏️ Editar lançamento':'+ Lançar produção do dia'}</summary>
-        <div style="margin-top:8px;padding:10px;background:#fffaf5;border-radius:8px;border:1px solid #f5c5a3;">
-          ${inputsMassa||'<p style="font-size:12px;color:#aaa;">Nenhum tipo de massa calculado para este dia.</p>'}
-          <button class="btn btn-rosa" style="margin-top:6px;padding:8px 16px;font-size:12px;"
-            onclick="salvarMassaDiario('${data}')">💾 Salvar</button>
-        </div>
-      </details>
-    </div>`;
-  }).join('') || '<p style="color:#aaa;font-size:13px;">Nenhum dia com pedidos no período.</p>';
-
-  div.innerHTML = `
-    <div class="massa-painel">
-      <h3>📊 Consolidado do Período</h3>
-      ${consolidado}
-      ${avisoSem}
-    </div>
-    <div class="massa-painel">
-      <h3>📅 Diário de Produção</h3>
-      ${diarioHtml}
-    </div>`;
-}
-async function salvarMassaDiario(data) {
-  /* Busca os inputs pelo prefixo do ID — robusto independente de tiposMassa */
-  const prefixo = `massaInput_${data}_`;
-  const producao = [];
-  document.querySelectorAll(`input[id^="${prefixo}"]`).forEach(el => {
-    const qtd = parseFloat((el.value||'0').replace(',','.')) || 0;
-    if (!qtd) return;
-    const nomeRaw = el.id.slice(prefixo.length).replace(/_/g,' ');
-    const tipo = tiposMassa.find(t => t.nome === nomeRaw);
-    producao.push({ tipo_id: tipo ? tipo.id : 0, nome: nomeRaw, quantidade: qtd });
-  });
-
-  if (!producao.length) {
-    alert('Informe pelo menos uma quantidade antes de salvar.');
-    return;
-  }
-
-  const existente = massasDiario.find(d => d.data === data);
-  const novoId    = existente ? existente.id : gerarNovoId(massasDiario);
-  const registro  = { id: novoId, data, producao };
-  if (existente) { Object.assign(existente, registro); } else { massasDiario.push(registro); }
-  await sbUpsert('massas_diario', [registro]);
-  alert(`✅ Produção de ${formatarData(data)} salva com sucesso!`);
-  renderMassasAgenda();
-}
-
 function atualizarTodasAsTelas() {
   popularSelectProduto(); renderProdutos(); renderPedidos(); atualizarAgenda();
   atualizarProducao(); renderInsumos(); renderizarClientes(); renderTiposInsumos();
-  renderTiposMassa(); gerenciarFiltrosAnoDashboard(); atualizarDashboard();
+  gerenciarFiltrosAnoDashboard(); atualizarDashboard();
 }
  
-/* bloco duplicado removido — carregarSistema já é chamado dentro de verificarLogin().then() */
+carregarSistema().then(() => {
+  atualizarTodasAsTelas();
+  atualizarFiltroAnoInsumos();
+  renderizarClientes();
+}).catch(err => {
+  console.error('Erro ao iniciar banco:', err);
+  alert('Erro ao carregar o banco de dados. Verifique o console.');
+});
 </script>
 
 <!-- MODAL CPF CONTRATO -->
