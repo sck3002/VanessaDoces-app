@@ -530,6 +530,14 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
         <h2 id="tituloProdutoForm">Novo Produto</h2>
         <label>Nome do Produto</label><input type="text" id="nomeProduto">
         <label>Preço Unitário Real (R$)</label><input type="text" inputmode="decimal" id="precoProduto" placeholder="0,00">
+        <label>Categoria</label>
+        <select id="categoriaProduto">
+          <option value="Simples">Simples</option>
+          <option value="Bombom">Bombom</option>
+          <option value="Copinho">Copinho</option>
+          <option value="Especial">Especial</option>
+          <option value="Avulso">Avulso</option>
+        </select>
         <div class="botoes"><button class="btn btn-rosa" onclick="salvarProduto()">Salvar</button></div>
       </div>
       <div class="card">
@@ -1514,13 +1522,38 @@ function selecionarClientePorTelefone(id) {
 }
  
 /* ===== PRODUTOS / SELECT ===== */
+const ORDEM_CAT = ['Simples','Bombom','Copinho','Especial','Avulso'];
+
 function popularSelectProduto() {
-  const sel = document.getElementById('produto');
+  const sel     = document.getElementById('produto');
   const selEdit = document.getElementById('editAdicionarDoceSelect');
-  sel.innerHTML = ''; selEdit.innerHTML = '';
+  if (!sel) return;
+
+  /* Agrupar e ordenar alfabeticamente dentro de cada categoria */
+  const grupos = {};
+  ORDEM_CAT.forEach(c => grupos[c] = []);
   produtos.forEach(p => {
-    const opt = document.createElement('option'); opt.value = p.id; opt.textContent = `${p.nome} (R$ ${(p.preco || 0).toFixed(2)}/un)`;
-    sel.appendChild(opt); selEdit.appendChild(opt.cloneNode(true));
+    const cat = p.categoria || 'Simples';
+    if (!grupos[cat]) grupos[cat] = [];
+    grupos[cat].push(p);
+  });
+  ORDEM_CAT.forEach(c => grupos[c].sort((a,b)=>(a.nome||'').localeCompare(b.nome||'')));
+
+  [sel, selEdit].forEach(s => {
+    if (!s) return;
+    s.innerHTML = '';
+    ORDEM_CAT.forEach(cat => {
+      const lista = grupos[cat]; if (!lista.length) return;
+      const grp = document.createElement('optgroup');
+      grp.label = `— ${cat} —`;
+      lista.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.nome} (R$ ${(p.preco||0).toFixed(2)}/un)`;
+        grp.appendChild(opt);
+      });
+      s.appendChild(grp);
+    });
   });
   atualizarValor();
 }
@@ -2624,34 +2657,19 @@ function excluirInsumo(id) {
 /* ===== PRODUTOS ===== */
 
 function salvarProduto() {
-
-  const nome =
-    document.getElementById('nomeProduto').value.trim();
-
-  const preco =
-    parseFloat(
-      (document.getElementById('precoProduto').value||'').replace(',','.')
-    );
-
-  if (!nome || isNaN(preco)) return;
-
-  const novo = {
-    id: Date.now(),
-    nome,
-    preco
-  };
-
+  const nome      = document.getElementById('nomeProduto').value.trim();
+  const preco     = parseFloat((document.getElementById('precoProduto').value||'').replace(',','.'));
+  const categoria = document.getElementById('categoriaProduto').value || 'Simples';
+  if (!nome || isNaN(preco)) { alert('Preencha nome e preço.'); return; }
+  const novo = { id: Date.now(), nome, preco, categoria };
   produtos.push(novo);
   sbUpsert('produtos', [novo]);
-  registrarLog('PRODUTO', `Produto cadastrado — ${nome} | Preço: R$ ${preco.toFixed(2)}`);
-
+  registrarLog('PRODUTO', `Produto cadastrado — ${nome} | R$ ${preco.toFixed(2)} | ${categoria}`);
   renderProdutos();
-
   popularSelectProduto();
-
-  document.getElementById('nomeProduto').value = '';
-  document.getElementById('precoProduto').value = '';
-
+  document.getElementById('nomeProduto').value      = '';
+  document.getElementById('precoProduto').value     = '';
+  document.getElementById('categoriaProduto').value = 'Simples';
 }
 
 
@@ -2693,25 +2711,70 @@ function alterarValorProduto(id) {
 
 
 /* ===== LISTAR PRODUTOS ===== */
+const COR_CAT = {
+  'Simples' : 'background:#d4edda;color:#155724',
+  'Bombom'  : 'background:#cce5ff;color:#004085',
+  'Copinho' : 'background:#f8d7da;color:#721c24',
+  'Especial': 'background:#fff3cd;color:#856404',
+  'Avulso'  : 'background:#e2e3e5;color:#383d41'
+};
+
 function renderProdutos() {
-  document.getElementById('listaProdutos').innerHTML = produtos.map(p => {
-    const rec = p.receita || [];
-    const recLabel = rec.length
-      ? rec.map(r=>`${r.nome} ${r.por100}UN`).join(' · ')
-      : '<span style="color:#ccc;">sem receita</span>';
-    return `<div class="produto-item">
-      <div class="produto-info">
-        <strong>${p.nome}</strong>
-        <span>R$ ${(p.preco||0).toFixed(2)} un</span>
-        <span style="font-size:11px;color:#8a5a34;">🍫 ${recLabel}</span>
-      </div>
-      <div style="display:flex;gap:6px;">
-        <button class="btn-acao btn-acao-marrom" onclick="abrirReceita(${p.id})">🍫 Receita</button>
-        <button class="btn" style="padding:6px 10px;" onclick="alterarValorProduto(${p.id})">✏️</button>
-        <button class="btn btn-vermelho" style="padding:6px 10px;" onclick="excluirProduto(${p.id})">🗑</button>
-      </div>
-    </div>`;
-  }).join('');
+  const grupos = {};
+  ORDEM_CAT.forEach(c => grupos[c] = []);
+  produtos.forEach(p => {
+    const cat = p.categoria || 'Simples';
+    if (!grupos[cat]) grupos[cat] = [];
+    grupos[cat].push(p);
+  });
+  ORDEM_CAT.forEach(c => grupos[c].sort((a,b)=>(a.nome||'').localeCompare(b.nome||'')));
+
+  let html = '';
+  ORDEM_CAT.forEach(cat => {
+    const lista = grupos[cat]; if (!lista.length) return;
+    const estilo = COR_CAT[cat] || 'background:#eee;color:#333';
+    html += `<div style="font-size:11px;font-weight:700;color:#8a5a34;text-transform:uppercase;
+      letter-spacing:.5px;margin:14px 0 6px;padding-left:2px;">${cat}</div>`;
+    html += lista.map(p => {
+      const rec = p.receita || [];
+      const recLabel = rec.length
+        ? rec.map(r=>`${r.nome} ${r.por100}UN`).join(' · ')
+        : '<span style="color:#ccc;">sem receita</span>';
+      return `<div class="produto-item">
+        <div class="produto-info">
+          <strong>${p.nome}</strong>
+          <span>R$ ${(p.preco||0).toFixed(2)} un &nbsp;
+            <span style="${estilo};padding:1px 8px;border-radius:10px;font-size:10px;">${cat}</span>
+          </span>
+          <span style="font-size:11px;color:#8a5a34;">🍫 ${recLabel}</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="btn-acao btn-acao-marrom" onclick="abrirReceita(${p.id})">🍫 Receita</button>
+          <button class="btn" style="padding:5px 8px;font-size:11px;" title="Mudar categoria"
+            onclick="mudarCategoriaProduto(${p.id})">🏷️</button>
+          <button class="btn" style="padding:5px 8px;" onclick="alterarValorProduto(${p.id})">✏️</button>
+          <button class="btn btn-vermelho" style="padding:5px 8px;" onclick="excluirProduto(${p.id})">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+  });
+  document.getElementById('listaProdutos').innerHTML = html ||
+    '<p style="color:#aaa;text-align:center;padding:20px;">Nenhum produto cadastrado.</p>';
+}
+
+function mudarCategoriaProduto(id) {
+  const p = produtos.find(x => x.id === id); if (!p) return;
+  const nova = prompt(
+    `Categoria de "${p.nome}"\nOpções: ${ORDEM_CAT.join(', ')}\nAtual: ${p.categoria||'Simples'}\n\nDigite a nova categoria:`,
+    p.categoria || 'Simples'
+  );
+  if (!nova) return;
+  const norm = ORDEM_CAT.find(c => c.toLowerCase() === nova.trim().toLowerCase());
+  if (!norm) { alert('Categoria inválida. Use: ' + ORDEM_CAT.join(', ')); return; }
+  p.categoria = norm;
+  sbUpsert('produtos', [p]);
+  renderProdutos();
+  popularSelectProduto();
 }
 
 
