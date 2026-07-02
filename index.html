@@ -3168,28 +3168,51 @@ function renderMassasAgenda() {
   const avisoSem = semReceita.length
     ? `<p style="font-size:11px;color:#c07000;margin-top:8px;">⚠️ Sem receita configurada: ${semReceita.join(', ')}</p>` : '';
 
-  /* ── Diário por dia ── */
-  const dias = {};
-  pedidos.filter(p=>p.data>=inicio&&p.data<=fim&&p.status!=='cancelado').forEach(p=>{
-    if(!dias[p.data]) dias[p.data]=0;
-    (p.itens||[]).forEach(i=>{ if((i.produto||'').trim().toLowerCase()!=='bem casado') dias[p.data]+=(i.qtd||0); });
-  });
-  /* Incluir também dias com lançamento mas sem pedido */
-  massasDiario.filter(d=>d.data>=inicio&&d.data<=fim).forEach(d=>{ if(!dias[d.data]) dias[d.data]=0; });
+  /* ── Diário por dia — todos os dias do período ── */
 
-  const datasOrdenadas = Object.keys(dias).sort();
-  const diarioHtml = datasOrdenadas.map(data => {
-    const log    = massasDiario.find(d=>d.data===data);
-    const prod   = log ? (log.producao||[]) : [];
+  /* Monta mapa de unidades previstas por dia (só dias com pedidos) */
+  const unsPorDia = {};
+  pedidos.filter(p=>p.data>=inicio&&p.data<=fim&&p.status!=='cancelado').forEach(p=>{
+    if(!unsPorDia[p.data]) unsPorDia[p.data]=0;
+    (p.itens||[]).forEach(i=>{ if((i.produto||'').trim().toLowerCase()!=='bem casado') unsPorDia[p.data]+=(i.qtd||0); });
+  });
+
+  /* Gera TODOS os dias do intervalo */
+  const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const todasAsDatas = [];
+  const cur = new Date(inicio + 'T00:00:00');
+  const end = new Date(fim    + 'T00:00:00');
+  while (cur <= end) {
+    todasAsDatas.push(cur.toISOString().split('T')[0]);
+    cur.setDate(cur.getDate() + 1);
+  }
+
+  const diarioHtml = todasAsDatas.map(data => {
+    const log     = massasDiario.find(d=>d.data===data);
+    const prod    = log ? (log.producao||[]) : [];
     const lancado = prod.length > 0;
+    const temPedido = !!unsPorDia[data];
     const { massas: prevDia } = calcularPrevistoPorMassa(data, data);
-    const realDia  = {};
+    const temMassa = Object.keys(prevDia).length > 0;
+    const realDia = {};
     prod.forEach(r=>{ realDia[r.nome]=r.quantidade; });
 
-    const linhasDetalhe = Object.keys(prevDia).map(nome=>{
-      const pv = prevDia[nome].previsto;
-      const rl = realDia[nome]||0;
-      const sd = pv - rl;
+    const diaSemana = DIAS_SEMANA[new Date(data + 'T00:00:00').getDay()];
+
+    /* Header do dia */
+    let headerExtra = '';
+    if (temPedido) {
+      headerExtra = `<span style="font-size:11px;background:#fff3cd;color:#856404;padding:2px 8px;border-radius:10px;">
+        📦 ${Math.round(unsPorDia[data])} un para entregar</span>`;
+    } else {
+      headerExtra = `<span style="font-size:11px;color:#aaa;">Sem entregas</span>`;
+    }
+
+    /* Linhas de detalhe — só se tiver previsto para o dia */
+    const linhasDetalhe = temMassa ? Object.keys(prevDia).map(nome=>{
+      const pv  = prevDia[nome].previsto;
+      const rl  = realDia[nome]||0;
+      const sd  = pv - rl;
       const cls = sd<=0?'massa-saldo-neg':'massa-saldo-pos';
       return `<div class="massa-det-linha">
         <span class="massa-det-nome">🍫 ${nome}</span>
@@ -3197,9 +3220,16 @@ function renderMassasAgenda() {
         <span class="massa-det-valor" style="color:#333;">prod <b>${rl.toFixed(1)}</b></span>
         <span class="massa-det-valor ${cls}">saldo <b>${sd.toFixed(1)}</b></span>
       </div>`;
-    }).join('');
+    }).join('') : '';
 
-    /* Formulário de lançamento — sempre mostra todos os tipos cadastrados */
+    /* Linhas lançadas mesmo sem previsto (dias de produção pura) */
+    const linhasProd = !temMassa && lancado ? prod.map(r=>`
+      <div class="massa-det-linha">
+        <span class="massa-det-nome">🍫 ${r.nome}</span>
+        <span class="massa-det-valor" style="color:#28a745;">prod <b>${(r.quantidade||0).toFixed(1)}</b></span>
+      </div>`).join('') : '';
+
+    /* Formulário */
     const tiposForm = tiposMassa.length ? tiposMassa.map(t=>t.nome) : tipos;
     const inputsMassa = tiposForm.map(nome=>`
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
@@ -3213,21 +3243,24 @@ function renderMassasAgenda() {
       </div>`).join('');
 
     return `<div class="dia-log-row ${lancado?'lancado':''}">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <b style="font-size:13px;">${formatarData(data)}</b>
-        <span style="font-size:11px;color:${lancado?'#28a745':'#aaa'};">${lancado?'✅ Lançado':'⏳ Pendente'}</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;flex-wrap:wrap;">
+        <b style="font-size:13px;">${diaSemana}, ${formatarData(data)}</b>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          ${headerExtra}
+          <span style="font-size:11px;color:${lancado?'#28a745':'#bbb'};">${lancado?'✅ Produção lançada':'⏳ Sem lançamento'}</span>
+        </div>
       </div>
-      ${linhasDetalhe}
+      ${linhasDetalhe}${linhasProd}
       <details style="margin-top:8px;">
         <summary style="font-size:12px;color:#d94d7d;cursor:pointer;">${lancado?'✏️ Editar lançamento':'+ Lançar produção do dia'}</summary>
         <div style="margin-top:8px;padding:10px;background:#fffaf5;border-radius:8px;border:1px solid #f5c5a3;">
-          ${inputsMassa||'<p style="font-size:12px;color:#aaa;">Nenhum tipo de massa calculado para este dia.</p>'}
+          ${inputsMassa}
           <button class="btn btn-rosa" style="margin-top:6px;padding:8px 16px;font-size:12px;"
             onclick="salvarMassaDiario('${data}')">💾 Salvar</button>
         </div>
       </details>
     </div>`;
-  }).join('') || '<p style="color:#aaa;font-size:13px;">Nenhum dia com pedidos no período.</p>';
+  }).join('');
 
   div.innerHTML = `
     <div class="massa-painel">
