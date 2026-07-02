@@ -2057,10 +2057,12 @@ function compartilharPedido() {
   const p  = pedidos.find(x => x.id === id); if (!p) return;
   const dataFmt = p.data ? p.data.split('-').reverse().join('/') : '—';
   const itens   = (p.itens||[]).map(i => `  • ${i.produto}: ${i.qtd} un — R$ ${(i.total||0).toFixed(2).replace('.',',')}`).join('\n');
+  const taxa    = p.taxaEntrega || 0;
   const total   = (p.total||0).toFixed(2).replace('.',',');
   const entrada = (p.entrada||0).toFixed(2).replace('.',',');
   const saldo   = Math.max(0, (p.total||0) - (p.entrada||0)).toFixed(2).replace('.',',');
-  const texto   = `🍬 *Vanessa Doces Finos*\n\n👤 Cliente: ${p.cliente}\n📅 Entrega: ${dataFmt}\n📍 Endereço: ${p.endereco||'—'}\n\n*Itens do pedido:*\n${itens}\n\n💰 Total: R$ ${total}\n✅ Entrada: R$ ${entrada}\n⏳ Saldo a pagar: R$ ${saldo}\n\n${p.obs ? '📝 Obs: ' + p.obs : ''}`.trim();
+  const linhaTaxa = taxa > 0 ? `\n🚚 Taxa de entrega: R$ ${taxa.toFixed(2).replace('.',',')}` : '';
+  const texto = `🍬 *Vanessa Doces Finos*\n\n👤 Cliente: ${p.cliente}\n📅 Entrega: ${dataFmt}\n📍 Endereço: ${p.endereco||'—'}\n\n*Itens do pedido:*\n${itens}\n\n💰 Total: R$ ${total}${linhaTaxa}\n✅ Entrada: R$ ${entrada}\n⏳ Saldo a pagar: R$ ${saldo}\n\n${p.obs ? '📝 Obs: ' + p.obs : ''}`.trim();
   if (navigator.share) {
     navigator.share({ title: 'Pedido — ' + p.cliente, text: texto });
   } else {
@@ -3274,8 +3276,8 @@ function atualizarTodasAsTelas() {
 </script>
 
 <!-- MODAL CPF CONTRATO -->
-<div class="modal" id="modalCpfContrato">
-  <div class="modal-box" style="width:420px;">
+<div class="modal" id="modalCpfContrato" style="z-index:200;">
+  <div class="modal-box" style="width:420px;margin-top:25vh;">
     <h2 style="color:#8a5a34;font-size:17px;margin-bottom:16px;">📄 Gerar Contrato</h2>
     <input type="hidden" id="cpfContratoPedidoId">
     <label>CPF do Cliente</label>
