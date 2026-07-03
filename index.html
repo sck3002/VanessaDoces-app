@@ -2558,6 +2558,7 @@ function salvarTipoInsumo() {
   sbUpsert('tipos_insumos', [novo]);
   document.getElementById('nomeNovoTipoInsumo').value = '';
   renderTiposInsumos();
+  alert(`✅ Insumo "${nome}" cadastrado!`);
 }
 function renderTiposInsumos() {
   const cont = document.getElementById('listaTiposInsumos');
@@ -2620,7 +2621,7 @@ function salvarInsumo() {
   if (estoque <= 0) { alert('Informe a quantidade.'); return; }
   const novo = { id: Date.now(), nome, unidade, estoque, preco, data: dataCompra };
   insumos.push(novo); sbUpsert('insumos',[novo]);
-  registrarLog('INSUMO', `Compra lançada — ${nomeInsumo} | Qtd: ${estoque} ${unidade} | Unit: R$ ${preco.toFixed(2)} | Total: R$ ${(estoque*preco).toFixed(2)}`);
+  registrarLog('INSUMO', `Compra lançada — ${nome} | Qtd: ${estoque} ${unidade} | Unit: R$ ${preco.toFixed(2)} | Total: R$ ${(estoque*preco).toFixed(2)}`);
   document.getElementById('nomeInsumo').value = '';
   document.getElementById('insumoSelecionadoNome').value = '';
   document.getElementById('insumoSelecionadoUnidade').value = '';
@@ -2630,6 +2631,7 @@ function salvarInsumo() {
   document.getElementById('totalInsumoCalc').textContent = 'R$ 0,00';
   document.getElementById('dataCompraInsumo').value = defaultDateInput;
   renderInsumos(); atualizarFiltroAnoInsumos();
+  alert(`✅ Compra de "${nome}" lançada com sucesso!`);
 }
  
 function atualizarFiltroAnoInsumos() {
@@ -2711,6 +2713,7 @@ function salvarProduto() {
   document.getElementById('nomeProduto').value      = '';
   document.getElementById('precoProduto').value     = '';
   document.getElementById('categoriaProduto').value = 'Simples';
+  alert(`✅ Produto "${nome}" cadastrado!`);
 }
 
 
@@ -2816,22 +2819,19 @@ function mudarCategoriaProduto(id) {
   sbUpsert('produtos', [p]);
   renderProdutos();
   popularSelectProduto();
+  alert(`✅ Categoria de "${p.nome}" alterada para ${norm}!`);
 }
 
 
 /* ===== EXCLUIR PRODUTO ===== */
 
 function excluirProduto(id) {
-
+  const p = produtos.find(x => x.id === id);
+  if (!confirm(`Excluir o produto "${p ? p.nome : ''}" permanentemente?`)) return;
   sbDeletar('produtos', id);
-
-  produtos =
-    produtos.filter(x => x.id !== id);
-
+  produtos = produtos.filter(x => x.id !== id);
   renderProdutos();
-
   popularSelectProduto();
-
 }
 
 
@@ -3129,6 +3129,7 @@ function adicionarLinhaReceita() {
   document.getElementById('receitaPor100').value = '';
   renderReceitaLinhas(prodId);
   renderProdutos();
+  alert(`✅ ${tipo.nome} (${por100} UN/100) adicionado à receita!`);
 }
 function removerLinhaReceita(prodId, idx) {
   const p = produtos.find(x=>x.id===prodId); if(!p) return;
