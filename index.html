@@ -1300,6 +1300,11 @@ function abrirDetalhePedido(id) {
 function fecharDetalhePedido() {
   const el = document.getElementById('detalhePedidoOverlay');
   if (el) el.style.zIndex = ''; /* reseta z-index caso tenha sido elevado pela agenda */
+  /* Resetar também os overlays de edição */
+  ['editClienteOverlay','editItensOverlay'].forEach(oid => {
+    const oel = document.getElementById(oid);
+    if (oel) oel.style.zIndex = '';
+  });
   _ovFechar('detalhePedidoOverlay');
   overlayDetalhePedidoId = null;
 }
@@ -1395,7 +1400,18 @@ function abrirEditarItens() {
   document.getElementById('editValorEntrada').value = (p.entrada||0).toFixed(2);
   calcularBalançoModalEditar();
   const sel = document.getElementById('editAdicionarDoceSelect');
-  sel.innerHTML = produtos.map(pr=>`<option value="${pr.id}">${pr.nome} (R$ ${(pr.preco||0).toFixed(2)}/un)</option>`).join('');
+  sel.innerHTML = '';
+  ORDEM_CAT.forEach(cat => {
+    const lista = produtos.filter(pr=>(pr.categoria||'Simples')===cat).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+    if (!lista.length) return;
+    const grp = document.createElement('optgroup'); grp.label = `— ${cat} —`;
+    lista.forEach(pr => {
+      const opt = document.createElement('option');
+      opt.value = pr.id; opt.textContent = `${pr.nome} (R$ ${(pr.preco||0).toFixed(2)}/un)`;
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
+  });
   _ovAbrir('editItensOverlay');
 }
 function fecharEditarItens() { _ovFechar('editItensOverlay'); }
@@ -2296,6 +2312,11 @@ function mostrarPedidosDoDia(data, lista) {
 function abrirDetalhePedidoDeAgenda(id) {
   const el = document.getElementById('detalhePedidoOverlay');
   if (el) el.style.zIndex = '160';
+  /* Elevar também os overlays de edição para ficarem acima do detalhe */
+  ['editClienteOverlay','editItensOverlay'].forEach(oid => {
+    const oel = document.getElementById(oid);
+    if (oel) oel.style.zIndex = '161';
+  });
   abrirDetalhePedido(id);
 }
 
