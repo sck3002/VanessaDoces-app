@@ -694,11 +694,6 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 <div class="rodape">Vanessa Doces Finos © 2026</div>
 </div><!-- fim container -->
 
-<!-- MODAL IMPRESSÃO -->
-<div class="modal" id="modal">
-  <button onclick="fecharModal()">Fechar</button>
-  <div class="a4" id="a4"></div>
-</div>
 <!-- ========== OVERLAYS DE NAVEGAÇÃO ========== -->
 <div id="navBackdrop" onclick="fecharDetalhePedido()"></div>
 
@@ -1435,11 +1430,10 @@ async function salvarItensPedido() {
   alert('✅ Itens salvos!');
 }
 
-/* — Excluir do detalhe — */
-function excluirPedidoDetalhe(id) {
+async function excluirPedidoDetalhe(id) {
   if(!confirm('Excluir este pedido permanentemente?')) return;
   const p = pedidos.find(x=>x.id===id);
-  sbDeletar('pedidos',id);
+  await sbDeletar('pedidos',id);
   pedidos = pedidos.filter(x=>x.id!==id);
   registrarLog('PEDIDO',`Excluído — ${p?p.cliente:'?'}`);
   fecharDetalhePedido();
@@ -1586,7 +1580,9 @@ function calcularTotalItem() {
 }
 function adicionarItem() {
   const sel = document.getElementById('produto'); if(!sel.value) return;
-  const produto = produtos.find(p=>p.id===parseInt(sel.value)).nome;
+  const prod = produtos.find(p=>p.id===parseInt(sel.value));
+  if (!prod) { alert('Produto não encontrado. Recarregue a lista.'); return; }
+  const produto = prod.nome;
   const qtd = parseInt(document.getElementById('quantidade').value);
   const valor = parseFloat(document.getElementById('valor').value);
   if(!qtd || qtd <= 0){ alert('Informe a quantidade.'); return; }
@@ -1623,7 +1619,7 @@ function atualizarTotalComEntrega() {
 }
 
 /* ===== FINALIZAR PEDIDO ===== */
-function finalizarPedido() {
+async function finalizarPedido() {
   const telefone = document.getElementById('telefone').value.trim();
   const cliente  = document.getElementById('cliente').value.trim();
   const dataEntrega = document.getElementById('entrega').value;
@@ -1640,7 +1636,8 @@ function finalizarPedido() {
   const novoPedido = { id: Date.now(), cliente, telefone, data: dataEntrega, endereco, obs: observacoes, itens: [...itensPedidoAtual], status: statusPedido, entrada, total: totalFinal, taxaEntrega: taxa };
   pedidos.push(novoPedido);
   try {
-    sbUpsert('pedidos', [novoPedido]);
+    const ok = await sbUpsert('pedidos', [novoPedido]);
+    if (!ok) { pedidos = pedidos.filter(x=>x.id!==novoPedido.id); alert('Erro ao salvar o pedido. Tente novamente.'); return; }
     registrarLog('PEDIDO', `Pedido lançado — Cliente: ${cliente} | Entrega: ${dataEntrega} | Total: R$ ${totalFinal.toFixed(2)}`);
     const telefoneLimpo = telefone.replace(/\D/g,'');
     const clienteExiste = clientes.find(c => (c.tel||'').toString().replace(/\D/g,'') === telefoneLimpo || (c.id||'').toString().replace(/\D/g,'') === telefoneLimpo);
@@ -1649,7 +1646,7 @@ function finalizarPedido() {
       clientes.push(novoCliente); sbUpsert('clientes', [novoCliente]);
       registrarLog('CLIENTE', `Cliente cadastrado — ${cliente} | Tel: ${telefone}`);
     }
-  } catch(e){ console.error('Erro ao salvar:', e); }
+  } catch(e){ console.error('Erro ao salvar:', e); alert('Erro ao salvar o pedido: ' + e.message); return; }
   alert('Pedido salvo com sucesso!');
   fecharNovoPedido();
   try { atualizarTodasAsTelas(); } catch(e) { console.error('Erro ao atualizar telas:', e); }
@@ -1869,23 +1866,8 @@ function gerarContrato() {
 
  
 /* ===== CLIENTES ===== */
-async function adicionarCliente() {
-  const id   = document.getElementById('telCliente').value.trim();
-  const nome = document.getElementById('nomeCliente').value.trim();
-  const rua  = document.getElementById('rua').value.trim();
-  const num  = document.getElementById('numero').value.trim();
-  const bairro = document.getElementById('bairro').value.trim();
-  const ref  = document.getElementById('referencia').value.trim();
-  if (!nome || !id) { alert('Preencha o nome e o telefone!'); return; }
-  const endCompleto = `${rua}${num?', '+num:''}${bairro?' - '+bairro:''}${ref?' (Ref: '+ref+')':''}`;
-  const novoCliente = { id, nome, tel: id, end: endCompleto };
-  const { error } = await sbClient.from('clientes').upsert([novoCliente], { onConflict: 'id' });
-  if (error) { alert('Erro ao salvar cliente: ' + error.message); return; }
-  const idx = clientes.findIndex(c => String(c.id) === String(id));
-  if (idx !== -1) clientes[idx] = novoCliente; else clientes.push(novoCliente);
-  renderizarClientes(); limparCamposCliente(); alert('Cliente salvo com sucesso!');
-}
- 
+/* adicionarCliente removida — substituída por salvarClienteForm() */
+
 function renderizarClientes(filtroExterno) {
   const campo = document.getElementById('filtroCliente');
   const filtro = ((filtroExterno !== undefined ? filtroExterno : (campo ? campo.value : '')) || '')
@@ -1992,10 +1974,14 @@ function excluirClienteOverlay(id) {
 }
 /* ===== PEDIDOS LIST ===== */
 function renderPedidos() {
-  const busca  = document.getElementById('filtroBusca').value.toLowerCase();
-  const status = document.getElementById('filtroStatus').value;
-  const data   = document.getElementById('filtroData').value;
-  const lista  = document.getElementById('listaPedidos');
+  const buscaEl  = document.getElementById('filtroBusca');
+  const statusEl = document.getElementById('filtroStatus');
+  const dataEl   = document.getElementById('filtroData');
+  const lista    = document.getElementById('listaPedidos');
+  if (!buscaEl || !lista) return; /* aba não está ativa */
+  const busca  = buscaEl.value.toLowerCase();
+  const status = statusEl ? statusEl.value : '';
+  const data   = dataEl   ? dataEl.value   : '';
   let filtrados = pedidos.filter(p => {
     const nome = (p.cliente || '').toLowerCase();
     const tel  = (p.telefone || '').replace(/\D/g,'');
@@ -2030,20 +2016,7 @@ function renderPedidos() {
 }
  
 /* ===== EDITAR PEDIDO ===== */
-function abrirEditar(id) {
-  abrirDetalhePedido(id); return;
-  const p = pedidos.find(x=>x.id===id); if(!p) return;
-  document.getElementById('editCliente').value = p.cliente;
-  document.getElementById('editEndereco').value = p.endereco||'';
-  document.getElementById('editTelefone').value = p.telefone||'';
-  document.getElementById('editEntrega').value = p.data||'';
-  document.getElementById('editObs').value = p.obs||'';
-  document.getElementById('editStatus').value = p.status;
-  document.getElementById('editValorEntrada').value = (p.entrada||0).toFixed(2);
-  itensEditandoPedido = JSON.parse(JSON.stringify(p.itens));
-  atualizarItensTabelaModalEditar();
-  document.getElementById('modalEditarPedido').classList.add('active');
-}
+function abrirEditar(id) { abrirDetalhePedido(id); }
 function verificarMudancaStatusModal() {
   const status = document.getElementById('editStatus').value;
   const total  = parseFloat(document.getElementById('editValorTotal').value) || 0;
@@ -2123,28 +2096,6 @@ function compartilharPedido() {
   } else {
     navigator.clipboard.writeText(texto).then(() => alert('Pedido copiado para a área de transferência!'));
   }
-}
-function salvarEdicaoPedido() {
-  const id = overlayDetalhePedidoId;
-  const idx = pedidos.findIndex(x=>x.id===id); if(idx===-1) return;
-  if(itensEditandoPedido.length === 0) { alert("O pedido não pode ficar vazio!"); return; }
-  const totalCalculado = itensEditandoPedido.reduce((acc,i) => acc+i.total, 0);
-  const entradaInformada = parseFloat((document.getElementById('editValorEntrada').value||'').replace(',','.')) || 0;
-  let statusInformado = document.getElementById('editStatus').value;
-  if (totalCalculado - entradaInformada > 0) statusInformado = 'pendente';
-  else if (statusInformado === 'pendente' && entradaInformada >= totalCalculado) statusInformado = 'pago';
-  pedidos[idx].cliente  = document.getElementById('editCliente').value.trim();
-  pedidos[idx].endereco = document.getElementById('editEndereco').value;
-  pedidos[idx].telefone = document.getElementById('editTelefone').value;
-  pedidos[idx].data     = document.getElementById('editEntrega').value;
-  pedidos[idx].obs      = document.getElementById('editObs').value;
-  pedidos[idx].status   = statusInformado;
-  pedidos[idx].entrada  = entradaInformada;
-  pedidos[idx].itens    = [...itensEditandoPedido];
-  pedidos[idx].total    = totalCalculado;
-  sbUpsert('pedidos',[pedidos[idx]]); 
-  registrarLog('PEDIDO', `Pedido alterado — Cliente: ${pedidos[idx].cliente} | Entrega: ${pedidos[idx].data} | Total: R$ ${pedidos[idx].total.toFixed(2)}`);
-  atualizarTodasAsTelas(); fecharModalEditar();
 }
 function fecharModalEditar() { fecharDetalhePedido(); }
 function excluirPedido(id) {
@@ -3050,7 +3001,7 @@ function renderLogs() {
   }).join('');
 }
 function formatarData(d){ if(!d) return ''; const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
-function gerarNovoId(arr){ return arr.length===0 ? 1 : Math.max(...arr.map(x=>x.id||0))+1; }
+function gerarNovoId(arr){ return arr.length===0 ? 1 : arr.reduce((max,x)=>Math.max(max,x.id||0),0)+1; }
 function limparFiltros(){ document.getElementById('filtroBusca').value=''; document.getElementById('filtroStatus').value=''; document.getElementById('filtroData').value=''; renderPedidos(); }
  
 document.getElementById('produto').addEventListener('change', atualizarValor);
