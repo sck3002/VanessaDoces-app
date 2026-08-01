@@ -1015,15 +1015,50 @@ verificarLogin().then(logado => {
       alert('Erro ao carregar o banco de dados. Verifique o console.');
     });
 });
+
+/* Recarrega dados quando o app volta ao foco (ex: saiu, voltou) */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    const { data: { session } } = sbClient.auth.getSession().then(({ data }) => {
+      if (!data?.session) return;
+      carregarSistema().then(() => {
+        try { atualizarTodasAsTelas(); } catch(e) { console.error(e); }
+      }).catch(e => console.error('Erro ao recarregar dados:', e));
+    });
+  }
+});
  
 async function sbListar(tabela) {
   const { data, error } = await sbClient.from(tabela).select('*');
   if (error) { console.error(`Erro ao listar ${tabela}:`, error.message); return []; }
   return data || [];
 }
+
+/* Indicador global de salvamento */
+function _setSavingIndicator(ativo) {
+  let el = document.getElementById('savingIndicator');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'savingIndicator';
+    el.style.cssText = 'position:fixed;bottom:66px;right:12px;z-index:999;background:#8a5a34;color:white;font-size:11px;padding:5px 12px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.3);transition:opacity .3s;';
+    document.body.appendChild(el);
+  }
+  if (ativo) {
+    el.textContent = '💾 Salvando...';
+    el.style.opacity = '1';
+    el.style.display = 'block';
+  } else {
+    el.textContent = '✅ Salvo';
+    el.style.opacity = '1';
+    setTimeout(() => { el.style.opacity = '0'; setTimeout(()=>{ el.style.display='none'; }, 300); }, 1500);
+  }
+}
+
 async function sbUpsert(tabela, lista) {
   if (!lista || lista.length === 0) return true;
+  _setSavingIndicator(true);
   const { error } = await sbClient.from(tabela).upsert(lista, { onConflict: 'id' });
+  _setSavingIndicator(false);
   if (error) {
     const msg = `Erro ao salvar em "${tabela}":\n${error.message}`;
     console.error(msg);
@@ -1033,7 +1068,9 @@ async function sbUpsert(tabela, lista) {
   return true;
 }
 async function sbDeletar(tabela, id) {
+  _setSavingIndicator(true);
   const { error } = await sbClient.from(tabela).delete().eq('id', id);
+  _setSavingIndicator(false);
   if (error) {
     const msg = `Erro ao excluir de "${tabela}":\n${error.message}`;
     console.error(msg);
@@ -2625,7 +2662,7 @@ function renderInsumos() {
     const nomeOk = !filtroNome || (i.nome||'').toLowerCase().includes(filtroNome);
     const anoOk  = !filtroAno  || (i.data||'').startsWith(filtroAno);
     return nomeOk && anoOk;
-  }).sort((a,b) => new Date(b.data||'2026-01-01') - new Date(a.data||'2026-01-01'));
+  }).sort((a,b) => (b.id||0) - (a.id||0)); /* ordem de lançamento: mais recente primeiro */
  
   document.getElementById('listaInsumos').innerHTML = filtrados.map(i => `
     <div class="insumo-item">
