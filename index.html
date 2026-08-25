@@ -1641,19 +1641,22 @@ function removerItemAtual(idx) {
   atualizarResumoAtual(); renderItensTabela();
 }
 function atualizarResumoAtual() {
-  document.getElementById('totalItens').innerText = totalItensAtual;
+  const taxaEl   = document.getElementById('taxaEntrega');
+  const taxa     = taxaEl ? (parseFloat((taxaEl.value||'').replace(',','.')) || 0) : 0;
+  const subtotal = itensPedidoAtual.reduce((s,i)=>s+i.total, 0);
+  const totalComTaxa = subtotal + taxa;
+  valorTotalAtual = totalComTaxa;
+  document.getElementById('totalItens').innerText    = totalItensAtual;
   document.getElementById('quantidadeTotal').innerText = Math.round(quantidadeTotalAtual);
-  document.getElementById('valorTotal').innerText = 'R$ '+valorTotalAtual.toFixed(2);
-  document.getElementById('rodapeTotalPedido').innerText = 'R$ '+valorTotalAtual.toFixed(2);
+  document.getElementById('valorTotal').innerText    = 'R$ '+totalComTaxa.toFixed(2);
+  document.getElementById('rodapeTotalPedido').innerText = 'R$ '+totalComTaxa.toFixed(2);
+  if (taxa > 0) {
+    document.getElementById('valorTotal').title = `Subtotal: R$ ${subtotal.toFixed(2)} + Taxa: R$ ${taxa.toFixed(2)}`;
+  }
 }
  
 /* ===== TAXA DE ENTREGA ===== */
-function atualizarTotalComEntrega() {
-  const taxa = parseFloat((document.getElementById('taxaEntrega').value||'').replace(',','.')) || 0;
-  const subtotal = itensPedidoAtual.reduce((s,i)=>s+i.total,0);
-  valorTotalAtual = subtotal + taxa;
-  atualizarResumoAtual();
-}
+function atualizarTotalComEntrega() { atualizarResumoAtual(); }
 
 /* ===== FINALIZAR PEDIDO ===== */
 async function finalizarPedido() {
