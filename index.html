@@ -159,7 +159,22 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
 .massa-saldo-pos{color:#ff9800;font-weight:700;}
 .dia-log-row{background:white;border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1px solid #f0e0d0;}
 .dia-log-row.lancado{border-color:#28a745;background:#f6fff9;}
-/* Receita do produto */
+/* Relatório */
+.relatorio-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+.relatorio-col{background:white;border-radius:10px;overflow:hidden;border:1px solid #f0e0d0;}
+.relatorio-col-titulo{background:#8a5a34;color:white;font-size:12px;font-weight:700;padding:8px 12px;text-transform:uppercase;letter-spacing:.5px;}
+.relatorio-col table{width:100%;border-collapse:collapse;font-size:11px;}
+.relatorio-col th{background:#f5ede6;color:#6b3f20;padding:6px 8px;text-align:left;font-size:10px;font-weight:700;}
+.relatorio-col td{padding:5px 8px;border-bottom:1px solid #f5f0eb;color:#333;}
+.relatorio-col tr:last-child td{border-bottom:none;}
+.relatorio-rodape{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;}
+.relatorio-total{background:white;border-radius:10px;padding:10px 12px;text-align:center;border:1px solid #f0e0d0;}
+.relatorio-total span{display:block;font-size:10px;color:#888;margin-bottom:4px;}
+.relatorio-total b{font-size:15px;}
+@media(max-width:768px){
+  .relatorio-grid{grid-template-columns:1fr;}
+  .relatorio-rodape{grid-template-columns:1fr;}
+}
 .receita-linha{display:flex;align-items:center;gap:8px;background:#fff5f0;border-radius:8px;padding:6px 10px;margin-bottom:5px;font-size:12px;}
 .receita-linha span{flex:1;color:#6b3f20;font-weight:600;}
 /* Período de massas — mobile-first */
@@ -637,9 +652,12 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
         <h2>Fluxo de Caixa e Produção</h2>
         <p style="font-size:12px;color:#c49070;">Gestão de Pedidos e Balanço Geral Operacional</p>
       </div>
-      <div class="dash-filtros-wrapper">
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+        <button class="btn btn-rosa" style="padding:8px 16px;font-size:13px;" onclick="abrirRelatorio()">📊 Relatório</button>
+        <div class="dash-filtros-wrapper">
         <div class="dash-filtro-anos" id="dashFiltroAnosContainer"></div>
         <div class="dash-filtro-meses" id="dashFiltroMesesContainer"></div>
+        </div>
       </div>
     </div>
 
@@ -734,6 +752,30 @@ table td{padding:12px;border-bottom:1px solid #eee;font-size:13px;}
       <input type="text" id="clienteFormRef" placeholder="Referência">
       <button class="btn btn-verde" style="width:100%;margin-top:14px;" onclick="salvarClienteForm()">💾 Salvar</button>
     </div>
+  </div>
+</div>
+
+<!-- OVERLAY RELATÓRIO -->
+<div id="relatorioOverlay" class="nav-overlay nav-overlay-2">
+  <div class="nav-header">
+    <button class="nav-back" onclick="fecharRelatorio()">← Voltar</button>
+    <span class="nav-titulo">📊 Relatório por Período</span>
+  </div>
+  <div class="nav-body">
+    <div class="card" style="margin-bottom:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:flex-end;">
+        <div>
+          <label style="font-size:11px;">De</label>
+          <input type="date" id="relDe" style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;">Até</label>
+          <input type="date" id="relAte" style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;font-size:13px;">
+        </div>
+        <button class="btn btn-rosa" style="padding:9px 16px;white-space:nowrap;" onclick="renderRelatorio()">🔍 Consultar</button>
+      </div>
+    </div>
+    <div id="relatorioConteudo"></div>
   </div>
 </div>
 
@@ -1237,7 +1279,7 @@ function importarBancoCompleto() {
 /* ===== ABAS ===== */
 function trocarAba(index) {
   ['novoPedidoOverlay','detalhePedidoOverlay','editClienteOverlay','editItensOverlay',
-   'agendaMesOverlay','agendaDiaOverlay','clienteDetalheOverlay','clienteFormOverlay']
+   'agendaMesOverlay','agendaDiaOverlay','clienteDetalheOverlay','clienteFormOverlay','relatorioOverlay']
     .forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('active'); });
   document.getElementById('navBackdrop')?.classList.remove('active');
   overlayDetalhePedidoId = null;
@@ -1275,7 +1317,7 @@ function _ovAbrir(id) {
 function _ovFechar(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove('active');
-  const nivel1 = ['novoPedidoOverlay','detalhePedidoOverlay','agendaMesOverlay','clienteDetalheOverlay'];
+  const nivel1 = ['novoPedidoOverlay','detalhePedidoOverlay','agendaMesOverlay','clienteDetalheOverlay','relatorioOverlay'];
   const algumAberto = nivel1.some(x => document.getElementById(x)?.classList.contains('active'));
   if (!algumAberto) document.getElementById('navBackdrop').classList.remove('active');
 }
@@ -1309,7 +1351,7 @@ function renderDetalhePedido(id) {
   const total   = p.total || 0;
   const entrada = p.entrada || 0;
   const taxa    = p.taxaEntrega || 0;
-  const saldo   = Math.max(0, total + taxa - entrada);
+  const saldo   = Math.max(0, total - entrada);
   const doces   = itens.filter(i=>(i.produto||'').trim().toLowerCase()!=='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
   const bc      = itens.filter(i=>(i.produto||'').trim().toLowerCase()==='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
   const stCls   = {'pendente':'badge-pendente','pago':'badge-pago','cancelado':'badge-cancelado'}[p.status||'pendente'];
@@ -1994,8 +2036,7 @@ function renderPedidos() {
   lista.innerHTML = filtrados.map(p => {
     const entrada = p.entrada || 0;
     const total   = p.total   || 0;
-    const taxa    = p.taxaEntrega || 0;
-    const saldo   = Math.max(0, total + taxa - entrada);
+    const saldo   = Math.max(0, total - entrada);
     const itens   = p.itens   || [];
     const status  = p.status  || 'pendente';
     const cliente = p.cliente || '—';
@@ -2100,7 +2141,7 @@ function compartilharPedido() {
   const taxa    = p.taxaEntrega || 0;
   const total   = (p.total||0).toFixed(2).replace('.',',');
   const entrada = (p.entrada||0).toFixed(2).replace('.',',');
-  const saldo   = Math.max(0, (p.total||0) + taxa - (p.entrada||0)).toFixed(2).replace('.',',');
+  const saldo   = Math.max(0, (p.total||0) - (p.entrada||0)).toFixed(2).replace('.',',');
   const linhaTaxa = taxa > 0 ? `\n🚚 Taxa de entrega: R$ ${taxa.toFixed(2).replace('.',',')}` : '';
   const texto = `🍬 *Vanessa Doces Finos*\n\n👤 Cliente: ${p.cliente}\n📅 Entrega: ${dataFmt}\n📍 Endereço: ${p.endereco||'—'}\n\n*Itens do pedido:*\n${itens}\n\n💰 Total: R$ ${total}${linhaTaxa}\n✅ Entrada: R$ ${entrada}\n⏳ Saldo a pagar: R$ ${saldo}\n\n${p.obs ? '📝 Obs: ' + p.obs : ''}`.trim();
   if (navigator.share) {
@@ -2531,7 +2572,7 @@ function abrirA4(data, pedidosDia) {
         clientes.find(c => String(c.id) === String(p.telefone)) ||
         clientes.find(c => c.nome?.trim().toLowerCase() === p.cliente?.trim().toLowerCase()) ||
         {};
-      const saldo = (p.total||0) + (p.taxaEntrega||0) - (p.entrada||0);
+      const saldo = (p.total||0) - (p.entrada||0);
       return `
         <div class="card-entrega">
           <div class="card-nome">${p.cliente}</div>
@@ -3005,6 +3046,99 @@ function atualizarDashboard() {
 }
  
 /* ===== RENDER LOGS ===== */
+/* ===== RELATÓRIO POR PERÍODO ===== */
+function abrirRelatorio() {
+  const hoje = new Date();
+  const ano  = hoje.getFullYear();
+  const mes  = String(hoje.getMonth()+1).padStart(2,'0');
+  const ult  = new Date(ano, hoje.getMonth()+1, 0).getDate();
+  const el1  = document.getElementById('relDe');
+  const el2  = document.getElementById('relAte');
+  if (el1 && !el1.value) el1.value = `${ano}-${mes}-01`;
+  if (el2 && !el2.value) el2.value = `${ano}-${mes}-${String(ult).padStart(2,'0')}`;
+  document.getElementById('relatorioConteudo').innerHTML = '';
+  _ovAbrir('relatorioOverlay');
+}
+function fecharRelatorio() { _ovFechar('relatorioOverlay'); }
+
+function renderRelatorio() {
+  const de  = document.getElementById('relDe').value;
+  const ate = document.getElementById('relAte').value;
+  const div = document.getElementById('relatorioConteudo');
+  if (!de || !ate) { alert('Informe o período.'); return; }
+
+  /* Entradas */
+  const entradas = pedidos
+    .filter(p => p.data >= de && p.data <= ate && p.status !== 'cancelado')
+    .sort((a,b) => a.data.localeCompare(b.data));
+  const totalEntradas = entradas.reduce((s,p) => s+(p.total||0)+(p.taxaEntrega||0), 0);
+  const linhasEntradas = entradas.length
+    ? entradas.map(p => {
+        const qtd   = (p.itens||[]).filter(i=>(i.produto||'').trim().toLowerCase()!=='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
+        const total = (p.total||0)+(p.taxaEntrega||0);
+        return `<tr>
+          <td>${formatarData(p.data)}</td>
+          <td>${(p.cliente||'').split(' ')[0]}</td>
+          <td style="text-align:center;">${Math.round(qtd)}</td>
+          <td style="text-align:right;color:#28a745;font-weight:600;">R$&nbsp;${total.toFixed(2)}</td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:12px;">Nenhuma entrada no período</td></tr>';
+
+  /* Saídas */
+  const saidas = insumos
+    .filter(i => (i.data||'') >= de && (i.data||'') <= ate)
+    .sort((a,b) => (a.data||'').localeCompare(b.data||''));
+  const totalSaidas = saidas.reduce((s,i) => s+((i.estoque||0)*(i.preco||0)), 0);
+  const linhasSaidas = saidas.length
+    ? saidas.map(i => {
+        const total = (i.estoque||0)*(i.preco||0);
+        return `<tr>
+          <td>${formatarData(i.data)}</td>
+          <td>${i.nome||'—'}</td>
+          <td style="text-align:center;">${i.estoque||0} ${i.unidade||''}</td>
+          <td style="text-align:right;color:#dc2626;font-weight:600;">R$&nbsp;${total.toFixed(2)}</td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:12px;">Nenhuma saída no período</td></tr>';
+
+  const liquido = totalEntradas - totalSaidas;
+  const corLiq  = liquido >= 0 ? '#28a745' : '#dc2626';
+
+  div.innerHTML = `
+    <div class="relatorio-grid">
+      <div class="relatorio-col">
+        <div class="relatorio-col-titulo">✅ Entradas</div>
+        <table>
+          <thead><tr><th>Data</th><th>Cliente</th><th>Qtd</th><th>Total</th></tr></thead>
+          <tbody>${linhasEntradas}</tbody>
+        </table>
+      </div>
+      <div class="relatorio-col">
+        <div class="relatorio-col-titulo" style="background:#dc2626;">🛒 Saídas</div>
+        <table>
+          <thead><tr><th>Data</th><th>Material</th><th>Qtd</th><th>Total</th></tr></thead>
+          <tbody>${linhasSaidas}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="relatorio-rodape">
+      <div class="relatorio-total">
+        <span>Total Entradas</span>
+        <b style="color:#28a745;">R$ ${totalEntradas.toFixed(2)}</b>
+      </div>
+      <div class="relatorio-total">
+        <span>Total Saídas</span>
+        <b style="color:#dc2626;">R$ ${totalSaidas.toFixed(2)}</b>
+      </div>
+      <div class="relatorio-total" style="border-color:${corLiq};">
+        <span>Líquido</span>
+        <b style="color:${corLiq};">R$ ${liquido.toFixed(2)}</b>
+        <span style="font-size:9px;color:${corLiq};">${liquido>=0?'superávit':'déficit'}</span>
+      </div>
+    </div>`;
+}
+
 async function carregarLogs() {
   const { data, error } = await sbClient.from('logs').select('*').order('created_at', { ascending: false }).limit(200);
   if (error) { console.error('Erro ao carregar logs:', error.message); return; }
