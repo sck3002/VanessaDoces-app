@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vanessa-doces-v42';
+const CACHE_NAME = 'vanessa-doces-v43';
 
 // Assets obrigatórios — se qualquer um falhar, a instalação aborta
 const ASSETS_REQUIRED = [
