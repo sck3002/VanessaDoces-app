@@ -189,15 +189,20 @@ table tr:hover td{background:var(--bg);}
 
 /* ━━━ LISTA PEDIDOS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .pedido-item,.produto-item,.insumo-item{
-  background:var(--surface);border-radius:var(--radius-md);padding:12px 14px;
-  margin-bottom:8px;box-shadow:var(--shadow-sm);
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  border:1.5px solid transparent;transition:border-color .15s;
+  background:transparent;border-radius:0;padding:14px 0;
+  margin-bottom:0;box-shadow:none;border:none;
+  border-bottom:1px solid var(--divider);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  cursor:pointer;transition:background .1s;
 }
-.pedido-item:hover{border-color:var(--brand-mid);}
+.pedido-item:hover,.produto-item:hover,.insumo-item:hover{background:var(--bg-subtle);margin-left:-4px;margin-right:-4px;padding-left:4px;padding-right:4px;border-radius:var(--radius-sm);}
+.pedido-item:last-child,.produto-item:last-child,.insumo-item:last-child{border-bottom:none;}
 .pedido-info,.produto-info,.insumo-info{flex:1;min-width:0;}
-.pedido-info strong,.produto-info strong,.insumo-info strong{color:var(--text-1);font-size:13px;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pedido-info span,.produto-info span,.insumo-info span{display:block;color:var(--text-2);font-size:11px;line-height:1.5;margin-top:1px;}
+.pedido-info strong,.produto-info strong,.insumo-info strong{color:var(--text-1);font-size:14px;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.pedido-info span,.produto-info span,.insumo-info span{display:block;color:var(--text-2);font-size:11px;line-height:1.6;margin-top:0;}
+.pedido-info .list-label{font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px;}
+.pedido-info .list-value{font-size:13px;font-weight:700;color:var(--brand);margin-top:2px;}
+.list-chevron{color:var(--text-3);font-size:18px;line-height:1;flex-shrink:0;}
 
 /* ━━━ FILTROS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .filtros{display:flex;gap:8px;margin-bottom:16px;flex-direction:column;}
@@ -513,7 +518,7 @@ table tr:hover td{background:var(--bg);}
         <option value="">Todos os anos</option>
       </select>
     </div>
-    <div id="listaInsumos" style="max-height:340px;overflow-y:auto;padding:8px;border:1px solid #eee;border-radius:10px;background:#fafafa;"></div>
+    <div id="listaInsumos" style="max-height:400px;overflow-y:auto;"></div>
     <div id="resumoInsumoSelecionado" style="display:none;margin-top:12px;padding:12px;background:#fff5f0;border-radius:10px;border:1px solid #f5c5a3;">
       <h3 id="resumoInsumoTitulo" style="color:#8a5a34;font-size:12px;margin-bottom:8px;"></h3>
       <div id="resumoInsumoConteudo" style="font-size:11px;"></div>
@@ -529,6 +534,9 @@ table tr:hover td{background:var(--bg);}
     <button onclick="trocarSubAba(2)">📦 Insumos</button>
     <button onclick="trocarSubAba(3)">🍫 Massas</button>
     <button onclick="trocarSubAba(4)">📋 Logs</button>
+    <button onclick="trocarSubAba(5)">⚙️ Meu Cadastro</button>
+    <button onclick="trocarSubAba(5)">⚙️ Meu Cadastro</button>
+    <button onclick="trocarSubAba(5)">⚙️ Meu Cadastro</button>
   </div>
 
   <!-- SUBABA 0: CLIENTES -->
@@ -637,6 +645,23 @@ table tr:hover td{background:var(--bg);}
     </div>
   </div>
 
+  <!-- SUBABA 5: MEU CADASTRO -->
+  <div class="subaba">
+    <div class="card">
+      <h2>⚙️ Meu Cadastro</h2>
+      <p style="font-size:12px;color:var(--text-3);margin-bottom:16px;">Esses dados são usados no contrato. Salvos neste dispositivo.</p>
+      <label>Nome Completo</label><input type="text" id="mcNome" placeholder="Vanessa Alvarenga Pinto">
+      <label>CPF</label><input type="text" id="mcCpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCpf(this)">
+      <label>Telefone</label><input type="text" id="mcTelefone" placeholder="22 99999-9999">
+      <label>Endereço</label><input type="text" id="mcEndereco" placeholder="Rua Exemplo, 123 - Bairro">
+      <label>Chave PIX</label><input type="text" id="mcPix" placeholder="CPF, e-mail ou telefone">
+      <label>Instagram / Contato adicional</label><input type="text" id="mcInstagram" placeholder="@vanessadosdocinhos">
+      <div class="botoes">
+        <button class="btn btn-rosa" onclick="salvarMeuCadastro()">💾 Salvar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- SUBABA 4: LOGS -->
   <div class="subaba">
     <div class="card">
@@ -720,6 +745,32 @@ table tr:hover td{background:var(--bg);}
 </div>
 <!-- ========== OVERLAYS DE NAVEGAÇÃO ========== -->
 <div id="navBackdrop" onclick="fecharDetalhePedido()"></div>
+
+
+  <!-- SUBABA 5: MEU CADASTRO -->
+  <div class="subaba">
+    <div class="card">
+      <h2>⚙️ Meu Cadastro</h2>
+      <p style="font-size:12px;color:var(--text-3);margin-bottom:16px;">
+        Seus dados aparecem no contrato gerado pelo sistema. Salvos localmente neste dispositivo.
+      </p>
+      <label>Nome Completo</label>
+      <input type="text" id="mcNome" placeholder="Ex: Vanessa Alvarenga Pinto">
+      <label>CPF</label>
+      <input type="text" id="mcCpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCpf(this)">
+      <label>Telefone / WhatsApp</label>
+      <input type="text" id="mcTelefone" placeholder="(22) 99999-9999">
+      <label>Chave PIX</label>
+      <input type="text" id="mcPix" placeholder="CPF, e-mail, telefone ou chave aleatória">
+      <label>Endereço</label>
+      <input type="text" id="mcEndereco" placeholder="Rua, número, bairro">
+      <label>Cidade</label>
+      <input type="text" id="mcCidade" placeholder="Ex: Campos dos Goytacazes - RJ">
+      <div class="botoes">
+        <button class="btn btn-rosa" onclick="salvarMeuCadastro()">💾 Salvar</button>
+      </div>
+    </div>
+  </div>
 
 <!-- OVERLAY CLIENTE: DETALHE -->
 <div id="clienteDetalheOverlay" class="nav-overlay nav-overlay-2">
@@ -1033,6 +1084,7 @@ verificarLogin().then(logado => {
       try { atualizarTodasAsTelas(); } catch(e) { console.error('Erro ao renderizar telas:', e); }
       try { atualizarFiltroAnoInsumos(); } catch(e) { console.error(e); }
       try { trocarSubAbaAgenda(0); } catch(e) { console.error(e); }
+      try { meuCadastro = JSON.parse(localStorage.getItem('meuCadastro')||'{}'); } catch(e){}
     })
     .catch(err => {
       console.error('Erro ao carregar banco:', err);
@@ -1461,6 +1513,9 @@ function trocarSubAba(index) {
   if(index === 1) { renderProdutos(); fecharReceita(); }  if(index === 2) renderTiposInsumos();
   if(index === 3) renderTiposMassa();
   if(index === 4) carregarLogs();
+  if(index === 5) carregarMeuCadastro();
+  if(index === 5) carregarMeuCadastro();
+  if(index === 5) carregarMeuCadastro();
 }
 
 function fecharAutocompletes() {
@@ -1745,7 +1800,7 @@ function gerarContrato() {
   <h2>1. DA IDENTIFICAÇÃO DAS PARTES</h2>
   <p>Pelo presente contrato de prestação de serviços, firmado entre <b>${p.cliente}</b>, C.P.F ${cpf},
   endereço ${p.endereco||'—'}, telefone ${p.telefone||'—'}, doravante denominada <b>CONTRATANTE</b>,
-  e <b>Vanessa Alvarenga Pinto</b>, C.P.F. 143.725.727-51, telefone 22-99874-9536 doravante denominada
+  e <b>${mc.nome||'Vanessa Alvarenga Pinto'}</b>, C.P.F. ${mc.cpf||'—'}, telefone ${mc.telefone||'—'} doravante denominada
   <b>CONTRATADA</b>, as partes identificadas acima têm entre si justos e acertados os termos que reger-se-ão
   pelas cláusulas seguintes.</p>
 
@@ -1905,15 +1960,15 @@ function renderizarClientes(filtroExterno) {
     cont.innerHTML = '<p style="color:#aaa;text-align:center;padding:24px;font-size:13px;">Nenhum cliente encontrado.</p>';
     return;
   }
-  cont.innerHTML = lista.map(c => `
-    <div class="pedido-item" style="cursor:pointer;" onclick="abrirDetalheCliente('${c.id}')">
+  cont.innerHTML = lista.length ? lista.map(c => `
+    <div class="pedido-item" onclick="abrirDetalheCliente('${c.id}')">
       <div class="pedido-info">
+        <span class="list-label">${c.tel||'—'}</span>
         <strong>${c.nome||'—'}</strong>
-        <span>📱 ${c.tel||'—'}</span>
-        ${c.end?`<span>📍 ${c.end}</span>`:''}
+        ${c.end?`<span>${c.end}</span>`:''}
       </div>
-      <span style="font-size:20px;color:#ccc;">›</span>
-    </div>`).join('');
+      <span class="list-chevron">›</span>
+    </div>`).join('') : '<p style="color:var(--text-3);text-align:center;padding:32px 0;font-size:13px;">Nenhum cliente encontrado.</p>';
 }
 
 function abrirDetalheCliente(id) {
@@ -2010,26 +2065,26 @@ function renderPedidos() {
       (!status || p.status === status) &&
       (!data   || p.data   === data);
   }).sort((a,b) => new Date(b.data) - new Date(a.data));
-  lista.innerHTML = filtrados.map(p => {
+  lista.innerHTML = filtrados.length ? filtrados.map(p => {
     const entrada = p.entrada || 0;
     const total   = p.total   || 0;
-    const saldo   = Math.max(0, total - entrada);
+    const taxa    = p.taxaEntrega || 0;
+    const saldo   = Math.max(0, total + taxa - entrada);
     const itens   = p.itens   || [];
     const status  = p.status  || 'pendente';
     const cliente = p.cliente || '—';
     const unTotal = Math.round(itens.reduce((s,i)=>s+(i.qtd||0),0));
-    return `<div class="pedido-item" onclick="abrirDetalhePedido(${p.id})" style="cursor:pointer;">
+    const stLabel = {'pendente':'Pendente','pago':'Pago','cancelado':'Cancelado'}[status]||status;
+    return `<div class="pedido-item" onclick="abrirDetalhePedido(${p.id})">
       <div class="pedido-info">
-        <strong>${cliente.toUpperCase()}</strong>
-        <span>📅 ${formatarData(p.data)} · 🍬 ${unTotal} un · R$ ${total.toFixed(2)}</span>
-        <span style="color:${saldo>0?'#ff9800':'#28a745'};">Saldo: R$ ${saldo.toFixed(2)}</span>
+        <span class="list-label"><span class="badge badge-${status}" style="font-size:9px;padding:2px 8px;">${stLabel}</span> &nbsp;${formatarData(p.data)}</span>
+        <strong>${cliente}</strong>
+        <span>${unTotal} un · R$ ${(total+taxa).toFixed(2)}</span>
+        <span class="list-value">Saldo: R$ ${saldo.toFixed(2)}</span>
       </div>
-      <div class="pedido-acoes">
-        <span class="badge badge-${status}" style="font-size:10px;padding:2px 8px;">${status.toUpperCase()}</span>
-        <span style="font-size:20px;color:#ccc;text-align:right;">›</span>
-      </div>
+      <span class="list-chevron">›</span>
     </div>`;
-  }).join('');
+  }).join('') : '<p style="color:var(--text-3);text-align:center;padding:32px 0;font-size:13px;">Nenhum pedido encontrado.</p>';
 }
  
 /* ===== EDITAR PEDIDO ===== */
@@ -2283,7 +2338,7 @@ function mostrarPedidosDoDia(data, lista) {
         onclick="abrirDetalhePedidoDeAgenda(${p.id})">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <div>
-          <strong style="font-size:13px;color:#8a5a34;">${(p.cliente||'').toUpperCase()}</strong>
+          <strong style="font-size:13px;color:var(--brown);font-weight:600;">${p.cliente||''}</strong>
           <div style="font-size:11px;color:#666;margin-top:2px;">
             🍬 ${Math.round(doc)} un${bc>0?` · 💍 ${Math.round(bc)} BC`:''}
             &nbsp;·&nbsp; R$ ${(p.total||0).toFixed(2)}
@@ -2361,7 +2416,7 @@ function abrirA4(data, pedidosDia) {
     const totalStr = `${totalPedido} doces${bc>0?` e ${Math.round(bc)} bem casados`:''}`;
     colunas[index%3] += `
       <div class="print-pedido-box">
-        <div class="print-pedido-header">${p.cliente.toUpperCase()}</div>
+        <div class="print-pedido-header">${p.cliente}</div>
         <div class="print-pedido-body">
           <table class="print-pedido-table">
             <thead><tr><th>Qtd</th><th>Produto</th></tr></thead>
@@ -2674,14 +2729,17 @@ function renderInsumos() {
     return nomeOk && anoOk;
   }).sort((a,b) => new Date(b.data||'2026-01-01') - new Date(a.data||'2026-01-01'));
  
-  document.getElementById('listaInsumos').innerHTML = filtrados.map(i => `
-    <div class="insumo-item">
+  document.getElementById('listaInsumos').innerHTML = filtrados.length ? filtrados.map(i => {
+    const total = (i.estoque||0)*(i.preco||0);
+    return `<div class="insumo-item">
       <div class="insumo-info">
+        <span class="list-label">${formatarData(i.data||defaultDateInput)}</span>
         <strong>${i.nome}</strong>
-        <span>📅 ${formatarData(i.data||defaultDateInput)} &nbsp;|&nbsp; Qtde: ${i.estoque||0} (${i.unidade||'?'}) &nbsp;|&nbsp; Unit: R$ ${(i.preco||0).toFixed(2)} &nbsp;|&nbsp; <b>Total: R$ ${((i.estoque||0)*(i.preco||0)).toFixed(2)}</b></span>
+        <span>${i.estoque||0} ${i.unidade||'un'} · R$ ${(i.preco||0).toFixed(2)}/un</span>
+        <span class="list-value">R$ ${total.toFixed(2)}</span>
       </div>
-      <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirInsumo(${i.id})">🗑</button>
-    </div>`).join('');
+      <button class="btn btn-vermelho" style="padding:5px 10px;font-size:12px;" onclick="excluirInsumo(${i.id})">🗑</button>
+    </div>`;}).join('') : '<p style="color:var(--text-3);text-align:center;padding:32px 0;font-size:13px;">Nenhum lançamento encontrado.</p>';
  
   // Resumo por item quando filtro de nome está ativo
   const resumoDiv = document.getElementById('resumoInsumoSelecionado');
@@ -2805,18 +2863,15 @@ function renderProdutos() {
         : '<span style="color:#ccc;">sem receita</span>';
       return `<div class="produto-item">
         <div class="produto-info">
+          <span class="list-label"><span style="${estilo};padding:1px 8px;border-radius:10px;font-size:9px;">${cat}</span></span>
           <strong>${p.nome}</strong>
-          <span>R$ ${(p.preco||0).toFixed(2)} un &nbsp;
-            <span style="${estilo};padding:1px 8px;border-radius:10px;font-size:10px;">${cat}</span>
-          </span>
-          <span style="font-size:11px;color:#8a5a34;">🍫 ${recLabel}</span>
+          <span>R$ ${(p.preco||0).toFixed(2)} un · ${recLabel}</span>
         </div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <button class="btn-acao btn-acao-marrom" onclick="abrirReceita(${p.id})">🍫 Receita</button>
-          <button class="btn" style="padding:5px 8px;font-size:11px;" title="Mudar categoria"
-            onclick="mudarCategoriaProduto(${p.id})">🏷️</button>
-          <button class="btn" style="padding:5px 8px;" onclick="alterarValorProduto(${p.id})">✏️</button>
-          <button class="btn btn-vermelho" style="padding:5px 8px;" onclick="excluirProduto(${p.id})">🗑</button>
+        <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+          <button class="btn-acao btn-acao-marrom" onclick="abrirReceita(${p.id})">🍫</button>
+          <button class="btn-acao btn-acao-azul" onclick="mudarCategoriaProduto(${p.id})">🏷️</button>
+          <button class="btn-acao btn-acao-azul" onclick="alterarValorProduto(${p.id})">✏️</button>
+          <button class="btn-acao btn-acao-vermelho" onclick="excluirProduto(${p.id})">🗑</button>
         </div>
       </div>`;
     }).join('');
@@ -3023,6 +3078,33 @@ function atualizarDashboard() {
 }
  
 /* ===== RENDER LOGS ===== */
+
+/* ===== MEU CADASTRO (localStorage) ===== */
+let meuCadastro = {};
+
+function carregarMeuCadastro() {
+  try { meuCadastro = JSON.parse(localStorage.getItem('meuCadastro') || '{}'); } catch(e) { meuCadastro = {}; }
+  document.getElementById('mcNome').value     = meuCadastro.nome     || '';
+  document.getElementById('mcCpf').value      = meuCadastro.cpf      || '';
+  document.getElementById('mcTelefone').value = meuCadastro.telefone || '';
+  document.getElementById('mcPix').value      = meuCadastro.pix      || '';
+  document.getElementById('mcEndereco').value = meuCadastro.endereco || '';
+  document.getElementById('mcCidade').value   = meuCadastro.cidade   || '';
+}
+
+function salvarMeuCadastro() {
+  meuCadastro = {
+    nome:     document.getElementById('mcNome').value.trim(),
+    cpf:      document.getElementById('mcCpf').value.trim(),
+    telefone: document.getElementById('mcTelefone').value.trim(),
+    pix:      document.getElementById('mcPix').value.trim(),
+    endereco: document.getElementById('mcEndereco').value.trim(),
+    cidade:   document.getElementById('mcCidade').value.trim(),
+  };
+  localStorage.setItem('meuCadastro', JSON.stringify(meuCadastro));
+  alert('✅ Cadastro salvo com sucesso!');
+}
+
 async function carregarLogs() {
   const { data, error } = await sbClient.from('logs').select('*').order('created_at', { ascending: false }).limit(200);
   if (error) { console.error('Erro ao carregar logs:', error.message); return; }
