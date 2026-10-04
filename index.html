@@ -582,6 +582,21 @@ table tr:hover td{background:var(--bg);}
         </div>
         <button class="btn btn-rosa" style="padding:8px 14px;font-size:12px;" onclick="adicionarLinhaReceita()">+ Adicionar</button>
       </div>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid #f0e0d0;">
+        <h3 style="font-size:13px;color:#8a5a34;margin-bottom:8px;">🧾 Ingredientes por 100 un (custo)</h3>
+        <div id="ingredientesLinhas" style="margin-bottom:10px;min-height:30px;"></div>
+        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+          <div style="flex:2;min-width:140px;">
+            <label style="font-size:11px;">Insumo</label>
+            <select id="ingInsumoSelect" style="padding:8px;font-size:12px;border-radius:8px;border:1px solid #ccc;width:100%;"></select>
+          </div>
+          <div style="flex:1;min-width:80px;">
+            <label style="font-size:11px;">Qtde por 100 un</label>
+            <input type="number" id="ingQtd" step="any" min="0" placeholder="ex: 400" style="padding:8px;font-size:12px;border-radius:8px;border:1px solid #ccc;width:100%;">
+          </div>
+          <button class="btn btn-rosa" style="padding:8px 14px;font-size:12px;" onclick="adicionarIngrediente()">+ Adicionar</button>
+        </div>
+      </div>
       <input type="hidden" id="receitaProdutoId">
     </div>
   </div>
@@ -604,6 +619,11 @@ table tr:hover td{background:var(--bg);}
           <option value="lt">Litro (lt)</option>
           <option value="ml">Mililitro (ml)</option>
         </select>
+        <label style="font-size:11px;margin-top:8px;">Rende quantas unidades de uso por compra</label>
+        <input type="number" id="fatorNovoTipoInsumo" value="1" min="0" step="any" style="padding:9px;font-size:11px;border-radius:8px;">
+        <label style="font-size:11px;margin-top:8px;">Unidade de uso (ex: g, un)</label>
+        <input type="text" id="usoNovoTipoInsumo" placeholder="igual à unidade de medida" style="padding:9px;font-size:11px;border-radius:8px;">
+        <label style="font-size:11px;margin-top:8px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="maoObraNovoTipoInsumo" style="width:auto;"> É mão de obra</label>
         <div class="botoes" style="margin-top:12px;">
           <button class="btn btn-marrom" onclick="salvarTipoInsumo()" style="padding:9px 14px;font-size:11px;border-radius:8px;">+ Cadastrar Tipo</button>
         </div>
@@ -683,6 +703,11 @@ table tr:hover td{background:var(--bg);}
         <div class="valor-destaque txt-azul" id="kpiVolumeDoces">0 un</div>
         <div class="sub-legenda">Produção do Período</div>
       </div>
+      <div class="card-premium">
+        <span>Ticket Médio</span>
+        <div class="valor-destaque txt-azul" id="kpiTicketMedio">R$ 0,00</div>
+        <div class="sub-legenda">Por encomenda, com frete</div>
+      </div>
     </div>
 
     <div class="dash-layout-corpo-trio">
@@ -705,6 +730,13 @@ table tr:hover td{background:var(--bg);}
           </table>
         </div>
       </div>
+    </div>
+    <div class="section-titulo-interna" style="margin-top:8px;">💰 Margem por Produto</div>
+    <div class="tabela-premium-wrapper" style="height:auto;max-height:480px;overflow-x:auto;">
+      <table class="tabela-premium">
+        <thead><tr><th>Produto</th><th>Vend.</th><th>Receita</th><th>Custo</th><th>Resultado</th><th>Margem</th></tr></thead>
+        <tbody id="tbodyMargemProdutos"></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -2572,10 +2604,16 @@ function salvarTipoInsumo() {
   if (!nome) { alert('Informe o nome do insumo.'); return; }
   const jaExiste = tiposInsumos.find(t => t.nome.toLowerCase() === nome.toLowerCase());
   if (jaExiste) { alert('Esse insumo já está cadastrado.'); return; }
-  const novo = { id: Date.now(), nome, unidade };
+  const fator = parseFloat((document.getElementById('fatorNovoTipoInsumo').value||'').replace(',','.')) || 1;
+  const unidade_uso = document.getElementById('usoNovoTipoInsumo').value.trim() || unidade;
+  const mao_de_obra = document.getElementById('maoObraNovoTipoInsumo').checked;
+  const novo = { id: Date.now(), nome, unidade, fator, unidade_uso, mao_de_obra };
   tiposInsumos.push(novo);
   sbUpsert('tipos_insumos', [novo]);
   document.getElementById('nomeNovoTipoInsumo').value = '';
+  document.getElementById('fatorNovoTipoInsumo').value = '1';
+  document.getElementById('usoNovoTipoInsumo').value = '';
+  document.getElementById('maoObraNovoTipoInsumo').checked = false;
   renderTiposInsumos();
   alert(`✅ Insumo "${nome}" cadastrado!`);
 }
@@ -2584,8 +2622,8 @@ function renderTiposInsumos() {
   if (tiposInsumos.length === 0) { cont.innerHTML = '<p style="color:#aaa;font-size:12px;text-align:center;">Nenhum tipo cadastrado.</p>'; return; }
   cont.innerHTML = tiposInsumos.map(t => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#fff5f0;border-radius:8px;margin-bottom:5px;font-size:13px;">
-      <span><b style="color:#8a5a34;">${t.nome}</b> <span style="color:#aaa;">(${t.unidade})</span></span>
-      <button class="btn btn-vermelho" style="padding:3px 8px;font-size:11px;" onclick="excluirTipoInsumo(${t.id})">✕</button>
+      <span><b style="color:#8a5a34;">${t.nome}</b> <span style="color:#aaa;">(${t.unidade}${(t.fator&&t.fator!=1)?' · rende '+t.fator+' '+(t.unidade_uso||''):''})</span>${t.mao_de_obra?' <span style="color:#d94d7d;font-size:11px;">👷 mão de obra</span>':''}</span>
+      <span><button class="btn btn-cinza" style="padding:3px 8px;font-size:11px;" onclick="editarTipoInsumo(${t.id})">✏️</button> <button class="btn btn-vermelho" style="padding:3px 8px;font-size:11px;" onclick="excluirTipoInsumo(${t.id})">✕</button></span>
     </div>`).join('');
 }
 function excluirTipoInsumo(id) {
@@ -2716,6 +2754,118 @@ function excluirInsumo(id) {
   renderInsumos(); 
 }
  
+/* ===== CUSTO / INGREDIENTES ===== */
+function _nm(s){ return (s||'').toString().trim().toLowerCase(); }
+function _dataLocal(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function _hoje(){ return _dataLocal(new Date()); }
+function _tipoInsumo(nome){ return tiposInsumos.find(t=>_nm(t.nome)===_nm(nome)); }
+function _precoUsoInsumo(nome, fim){
+  fim = fim || _hoje();
+  const t = _tipoInsumo(nome);
+  const fator = (t && parseFloat(t.fator) > 0) ? parseFloat(t.fator) : 1;
+  const compras = insumos.filter(i => _nm(i.nome)===_nm(nome) && i.data && (i.estoque||0) > 0);
+  if (!compras.length) return 0;
+  const d = new Date(fim+'T00:00:00'); d.setDate(d.getDate()-90);
+  const ini = _dataLocal(d);
+  const janela = compras.filter(i => i.data > ini && i.data <= fim);
+  if (janela.length) {
+    const q = janela.reduce((s,i)=>s+i.estoque,0), v = janela.reduce((s,i)=>s+i.estoque*(i.preco||0),0);
+    return q ? v/q/fator : 0;
+  }
+  const ord = compras.slice().sort((a,b)=>b.data.localeCompare(a.data));
+  const ate = ord.filter(i => i.data <= fim);
+  return ((ate.length ? ate : ord)[0].preco||0)/fator;
+}
+function editarTipoInsumo(id) {
+  const t = tiposInsumos.find(x => x.id === id); if (!t) return;
+  const f = prompt(`"${t.nome}"\n\nQuantas unidades de uso rende cada compra?\n(ex: pacote de 5 kg usado em g = 5000)`, t.fator || 1);
+  if (f === null) return;
+  const fator = parseFloat(String(f).replace(',', '.'));
+  if (isNaN(fator) || fator <= 0) { alert('Informe um número maior que zero.'); return; }
+  const u = prompt('Unidade de uso (ex: g, un):', t.unidade_uso || t.unidade || '');
+  if (u === null) return;
+  const mo = confirm(`"${t.nome}" é mão de obra?\n\nOK = sim, Cancelar = não`);
+  t.fator = fator; t.unidade_uso = u.trim(); t.mao_de_obra = mo;
+  sbUpsert('tipos_insumos', [t]); renderTiposInsumos(); atualizarDashboard();
+}
+function popularSelectIngredientes() {
+  const sel = document.getElementById('ingInsumoSelect'); if (!sel) return;
+  sel.innerHTML = tiposInsumos.filter(t => !t.mao_de_obra).slice().sort((a,b)=>a.nome.localeCompare(b.nome))
+    .map(t => `<option value="${t.id}">${t.nome} (${t.unidade_uso || t.unidade})</option>`).join('');
+}
+function renderIngredientesLinhas(prodId) {
+  const p = produtos.find(x => x.id === prodId); if (!p) return;
+  const ing = p.ingredientes || [];
+  const div = document.getElementById('ingredientesLinhas');
+  if (!ing.length) { div.innerHTML = '<p style="color:#aaa;font-size:12px;">Nenhum ingrediente informado.</p>'; return; }
+  let total = 0;
+  const linhas = ing.map((r, i) => {
+    const t = _tipoInsumo(r.nome);
+    const custo = r.qtd * _precoUsoInsumo(r.nome); total += custo;
+    return `<div class="receita-linha"><span>🧾 ${r.nome}</span><span style="color:#666;font-size:12px;">${r.qtd} ${(t && (t.unidade_uso || t.unidade)) || ''} · R$ ${custo.toFixed(2)}</span><button class="btn btn-vermelho" style="padding:2px 8px;font-size:11px;" onclick="removerIngrediente(${prodId},${i})">✕</button></div>`;
+  }).join('');
+  div.innerHTML = linhas + `<div style="text-align:right;font-size:12px;margin-top:6px;"><b>Custo por 100 un: R$ ${total.toFixed(2)}</b></div>`;
+}
+function adicionarIngrediente() {
+  const prodId = parseInt(document.getElementById('receitaProdutoId').value);
+  const tipoId = parseInt(document.getElementById('ingInsumoSelect').value);
+  const qtd = parseFloat((document.getElementById('ingQtd').value||'').replace(',','.'));
+  if (!tipoId || isNaN(qtd) || qtd <= 0) { alert('Selecione o insumo e informe a quantidade.'); return; }
+  const t = tiposInsumos.find(x => x.id === tipoId); if (!t) return;
+  const p = produtos.find(x => x.id === prodId); if (!p) return;
+  if (!p.ingredientes) p.ingredientes = [];
+  if (p.ingredientes.some(r => _nm(r.nome) === _nm(t.nome))) { alert('Este insumo já está na receita.'); return; }
+  p.ingredientes.push({ nome: t.nome, qtd });
+  sbUpsert('produtos', [p]);
+  document.getElementById('ingQtd').value = '';
+  renderIngredientesLinhas(prodId);
+}
+function removerIngrediente(prodId, idx) {
+  const p = produtos.find(x => x.id === prodId); if (!p) return;
+  p.ingredientes.splice(idx, 1);
+  sbUpsert('produtos', [p]);
+  renderIngredientesLinhas(prodId);
+}
+function atualizarMargemProdutos(pedidosFiltrados, insumosFiltrados, volumeDoces) {
+  const tb = document.getElementById('tbodyMargemProdutos'); if (!tb) return;
+  let fim = _hoje();
+  if (anoFiltroSelecionado !== 'Todos') {
+    const mes = mesFiltroSelecionado !== 'Todos' ? parseInt(mesFiltroSelecionado) : 12;
+    const ult = new Date(parseInt(anoFiltroSelecionado), mes, 0).getDate();
+    const fimPer = anoFiltroSelecionado + '-' + String(mes).padStart(2,'0') + '-' + String(ult).padStart(2,'0');
+    if (fimPer < fim) fim = fimPer;
+  }
+  const moTotal = insumosFiltrados.reduce((s,i) => { const t = _tipoInsumo(i.nome); return s + ((t && t.mao_de_obra) ? (i.estoque||0)*(i.preco||0) : 0); }, 0);
+  const moDoce = volumeDoces > 0 ? moTotal / volumeDoces : 0;
+  const vend = {};
+  pedidosFiltrados.forEach(p => (p.itens||[]).forEach(i => {
+    const k = (i.produto||'').trim(); if (!k) return;
+    if (!vend[k]) vend[k] = { qtd: 0, receita: 0 };
+    vend[k].qtd += i.qtd||0; vend[k].receita += i.total||0;
+  }));
+  const lista = Object.entries(vend).map(([nome, v]) => {
+    const prod = produtos.find(x => _nm(x.nome) === _nm(nome));
+    const ing = (prod && prod.ingredientes) || [];
+    if (!ing.length) return { nome, qtd: v.qtd, receita: v.receita, custo: null };
+    const c100 = ing.reduce((s, r) => s + r.qtd * _precoUsoInsumo(r.nome, fim), 0);
+    return { nome, qtd: v.qtd, receita: v.receita, custo: v.qtd/100*c100 + v.qtd*moDoce };
+  });
+  const com = lista.filter(x => x.custo !== null).sort((a,b) => (b.receita-b.custo) - (a.receita-a.custo));
+  const sem = lista.filter(x => x.custo === null).sort((a,b) => b.receita - a.receita);
+  const brl = n => 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const cor = n => n >= 0 ? 'txt-verde' : 'txt-vermelho';
+  const linha = x => {
+    if (x.custo === null) return `<tr><td><b>${x.nome}</b></td><td>${Math.round(x.qtd)}</td><td>${brl(x.receita)}</td><td>—</td><td>—</td><td>—</td></tr>`;
+    const res = x.receita - x.custo;
+    return `<tr><td><b>${x.nome}</b></td><td>${Math.round(x.qtd)}</td><td>${brl(x.receita)}</td><td>${brl(x.custo)}</td><td class="${cor(res)}">${brl(res)}</td><td class="${cor(res)}">${x.receita ? (res/x.receita*100).toFixed(1) : '0.0'}%</td></tr>`;
+  };
+  if (!lista.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#c49070;padding:20px;">Sem vendas no período.</td></tr>'; return; }
+  const tq = com.reduce((s,x)=>s+x.qtd,0), tr = com.reduce((s,x)=>s+x.receita,0), tc = com.reduce((s,x)=>s+x.custo,0), tres = tr - tc;
+  const total = com.length ? `<tr style="background:var(--bg);"><td><b>Total com receita</b></td><td><b>${Math.round(tq)}</b></td><td><b>${brl(tr)}</b></td><td><b>${brl(tc)}</b></td><td class="${cor(tres)}"><b>${brl(tres)}</b></td><td class="${cor(tres)}"><b>${tr ? (tres/tr*100).toFixed(1) : '0.0'}%</b></td></tr>` : '';
+  const nota = `<tr><td colspan="6" style="font-size:11px;color:#999;">Mão de obra rateada: ${brl(moDoce)} por doce</td></tr>`;
+  tb.innerHTML = com.map(linha).join('') + total + sem.map(linha).join('') + nota;
+}
+
 /* ===== PRODUTOS ===== */
 
 function salvarProduto() {
@@ -2956,14 +3106,15 @@ function atualizarDashboard() {
   let totalSaidas = insumosFiltrados.reduce((s,i)=>s+(i.estoque*i.preco),0);
   let resultadoLiquido = totalEntradas - totalSaidas;
  
-  document.getElementById('kpiTotalEntradas').innerText = 'R$ '+totalEntradas.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  document.getElementById('kpiTotalEntradas').innerText = 'R$ '+totalEntradas.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   document.getElementById('kpiContEntradas').innerText = `${pedidosFiltrados.length} Encomendas`;
-  document.getElementById('kpiTotalSaidas').innerText = 'R$ '+totalSaidas.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  document.getElementById('kpiTotalSaidas').innerText = 'R$ '+totalSaidas.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   const divLiquido = document.getElementById('kpiResultadoLiquido');
-  divLiquido.innerText = 'R$ '+resultadoLiquido.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  divLiquido.innerText = 'R$ '+resultadoLiquido.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   divLiquido.className = resultadoLiquido>=0?'valor-destaque txt-verde':'valor-destaque txt-vermelho';
   document.getElementById('kpiResultadoStatus').innerText = resultadoLiquido>=0?'superávit':'déficit';
   document.getElementById('kpiVolumeDoces').innerText = Math.round(volumeDoces).toLocaleString('pt-BR')+' un';
+  document.getElementById('kpiTicketMedio').innerText = 'R$ '+(pedidosFiltrados.length?totalEntradas/pedidosFiltrados.length:0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
  
   // Ranking Gastos
   const rankingGastos = Object.entries(gastosPorInsumo).map(([nome,total])=>({nome,total})).sort((a,b)=>b.total-a.total);
@@ -3020,6 +3171,7 @@ function atualizarDashboard() {
     tbody.appendChild(tr);
   });
   if(tbody.innerHTML==='') tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#c49070;padding:20px;">Sem registros.</td></tr>`;
+  atualizarMargemProdutos(pedidosFiltrados, insumosFiltrados, volumeDoces);
 }
  
 /* ===== RENDER LOGS ===== */
@@ -3115,6 +3267,7 @@ function abrirReceita(prodId) {
   document.getElementById('receitaProdutoNome').textContent = p.nome;
   popularSelectTipoMassa();
   renderReceitaLinhas(prodId);
+  popularSelectIngredientes(); renderIngredientesLinhas(prodId);
   document.getElementById('receitaPanel').style.display = 'block';
   document.getElementById('receitaPanel').scrollIntoView({behavior:'smooth'});
 }
@@ -3227,6 +3380,15 @@ function renderMassasAgenda() {
   const avisoSem = semReceita.length
     ? `<p style="font-size:11px;color:#c07000;margin-top:8px;">⚠️ Sem receita configurada: ${semReceita.join(', ')}</p>` : '';
 
+  const docesMap = {};
+  pedidos.filter(p => p.data >= inicio && p.data <= fim && p.status !== 'cancelado')
+    .forEach(p => (p.itens||[]).forEach(i => { const k = (i.produto||'').trim(); if (k) docesMap[k] = (docesMap[k]||0) + (i.qtd||0); }));
+  const docesLista = Object.entries(docesMap).sort((a,b) => b[1]-a[1]);
+  const docesTotal = docesLista.reduce((s,[,q]) => s+q, 0);
+  const docesPeriodo = docesLista.length
+    ? `<table class="massa-tabela"><thead><tr><th>Doce</th><th style="text-align:right;">Quantidade</th></tr></thead><tbody>${docesLista.map(([n,q]) => `<tr><td><b style="color:#6b3f20;">${n}</b></td><td style="text-align:right;">${Math.round(q)} un</td></tr>`).join('')}<tr><td><b>Total</b></td><td style="text-align:right;"><b>${Math.round(docesTotal)} un</b></td></tr></tbody></table>`
+    : '<p style="color:#aaa;font-size:13px;">Sem pedidos no período.</p>';
+
   /* ── Diário por dia — todos os dias do período ── */
 
   /* Monta mapa de unidades previstas por dia (só dias com pedidos) */
@@ -3326,6 +3488,10 @@ function renderMassasAgenda() {
       <h3>📊 Consolidado do Período</h3>
       ${consolidado}
       ${avisoSem}
+    </div>
+    <div class="massa-painel">
+      <h3>🍬 Doces do Período</h3>
+      ${docesPeriodo}
     </div>
     <div class="massa-painel">
       <h3>📅 Diário de Produção</h3>
