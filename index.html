@@ -292,6 +292,20 @@ table tr:hover td{background:var(--bg);}
   .a4{position:absolute;left:0;top:0;box-shadow:none;margin:0;width:100%;padding:0;}
   .fechar,.no-print{display:none !important;}
 }
+
+/* Dashboard compacto */
+.card-premium{padding:9px 12px;}
+.card-premium span{font-size:9px;margin-bottom:2px;}
+.card-premium .valor-destaque{font-size:15px;margin-bottom:0;}
+.card-premium .sub-legenda{font-size:10px;line-height:1.3;}
+.dash-cards-row{gap:8px;margin-bottom:16px;}
+@media(max-width:768px){.dash-cards-row{grid-template-columns:1fr 1fr !important;}}
+.tabela-premium{display:table;table-layout:fixed;width:100%;}
+.tabela-premium.tabela-compacta th{padding:6px;font-size:9px;}
+.tabela-premium.tabela-compacta td{padding:6px;font-size:11px;line-height:1.25;}
+.tabela-premium.tabela-margem th{padding:6px 3px;font-size:8.5px;letter-spacing:.2px;}
+.tabela-premium.tabela-margem td{padding:6px 3px;font-size:10.5px;line-height:1.2;}
+.tabela-premium.tabela-margem th:not(:first-child),.tabela-premium.tabela-margem td:not(:first-child){text-align:right;}
 </style>
 <style>
 /* ━━━ SUBABAS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -685,28 +699,43 @@ table tr:hover td{background:var(--bg);}
     <div class="dash-cards-row">
       <div class="card-premium">
         <span>Total Entradas</span>
-        <div class="valor-destaque txt-verde" id="kpiTotalEntradas">R$ 0,00</div>
+        <div class="valor-destaque txt-verde" id="kpiTotalEntradas">—</div>
         <div class="sub-legenda" id="kpiContEntradas">0 Encomendas</div>
       </div>
       <div class="card-premium">
         <span>Total Saídas</span>
-        <div class="valor-destaque txt-vermelho" id="kpiTotalSaidas">R$ 0,00</div>
-        <div class="sub-legenda">Com base na data dos insumos</div>
+        <div class="valor-destaque txt-vermelho" id="kpiTotalSaidas">—</div>
+        <div class="sub-legenda">Pela data dos insumos</div>
       </div>
       <div class="card-premium">
         <span>Resultado Líquido</span>
-        <div class="valor-destaque txt-verde" id="kpiResultadoLiquido">R$ 0,00</div>
+        <div class="valor-destaque txt-verde" id="kpiResultadoLiquido">—</div>
         <div class="sub-legenda" id="kpiResultadoStatus">superávit</div>
       </div>
       <div class="card-premium">
-        <span>Volume de Doces</span>
-        <div class="valor-destaque txt-azul" id="kpiVolumeDoces">0 un</div>
-        <div class="sub-legenda">Produção do Período</div>
+        <span>Margem Geral</span>
+        <div class="valor-destaque txt-verde" id="kpiMargemGeral">—</div>
+        <div class="sub-legenda">Resultado ÷ entradas</div>
+      </div>
+      <div class="card-premium">
+        <span>Volume</span>
+        <div class="valor-destaque txt-azul" id="kpiVolumeDoces">—</div>
+        <div class="sub-legenda" id="kpiVolumeDetalhe">—</div>
       </div>
       <div class="card-premium">
         <span>Ticket Médio</span>
-        <div class="valor-destaque txt-azul" id="kpiTicketMedio">R$ 0,00</div>
+        <div class="valor-destaque txt-azul" id="kpiTicketMedio">—</div>
         <div class="sub-legenda">Por encomenda, com frete</div>
+      </div>
+      <div class="card-premium">
+        <span>Preço Médio Doce</span>
+        <div class="valor-destaque txt-azul" id="kpiPrecoMedioDoce">—</div>
+        <div class="sub-legenda" id="kpiPrecoMedioDoceQtd">—</div>
+      </div>
+      <div class="card-premium">
+        <span>Preço Médio Bem Casado</span>
+        <div class="valor-destaque txt-azul" id="kpiPrecoMedioBC">—</div>
+        <div class="sub-legenda" id="kpiPrecoMedioBCQtd">—</div>
       </div>
     </div>
 
@@ -721,8 +750,8 @@ table tr:hover td{background:var(--bg);}
       </div>
       <div>
         <div class="section-titulo-interna">📋 Detalhamento Mensal</div>
-        <div class="tabela-premium-wrapper">
-          <table class="tabela-premium">
+        <div class="tabela-premium-wrapper" style="height:auto;max-height:260px;">
+          <table class="tabela-premium tabela-compacta">
             <thead>
               <tr><th>Mês</th><th>Entradas</th><th>Saídas</th><th>Resultado</th></tr>
             </thead>
@@ -731,10 +760,11 @@ table tr:hover td{background:var(--bg);}
         </div>
       </div>
     </div>
-    <div class="section-titulo-interna" style="margin-top:8px;">💰 Margem por Produto</div>
-    <div class="tabela-premium-wrapper" style="height:auto;max-height:480px;overflow-x:auto;">
-      <table class="tabela-premium">
-        <thead><tr><th>Produto</th><th>Vend.</th><th>Receita</th><th>Custo</th><th>Resultado</th><th>Margem</th></tr></thead>
+    <div class="section-titulo-interna" style="margin-top:8px;">💰 Margem por Produto (R$)</div>
+    <div class="tabela-premium-wrapper" style="height:auto;max-height:none;overflow:visible;">
+      <table class="tabela-premium tabela-margem">
+        <colgroup><col style="width:27%"><col style="width:11%"><col style="width:16%"><col style="width:15%"><col style="width:16%"><col style="width:15%"></colgroup>
+        <thead><tr><th>Produto</th><th>Vend.</th><th>Receita</th><th>Custo</th><th>Result.</th><th>Margem</th></tr></thead>
         <tbody id="tbodyMargemProdutos"></tbody>
       </table>
     </div>
@@ -2852,17 +2882,19 @@ function atualizarMargemProdutos(pedidosFiltrados, insumosFiltrados, volumeDoces
   });
   const com = lista.filter(x => x.custo !== null).sort((a,b) => (b.receita-b.custo) - (a.receita-a.custo));
   const sem = lista.filter(x => x.custo === null).sort((a,b) => b.receita - a.receita);
+  const n0 = n => n.toLocaleString('pt-BR', {maximumFractionDigits: 0});
   const brl = n => 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
   const cor = n => n >= 0 ? 'txt-verde' : 'txt-vermelho';
+  const pct = (res, rec) => (rec ? (res/rec*100).toFixed(1).replace('.', ',') : '0,0') + '%';
   const linha = x => {
-    if (x.custo === null) return `<tr><td><b>${x.nome}</b></td><td>${Math.round(x.qtd)}</td><td>${brl(x.receita)}</td><td>—</td><td>—</td><td>—</td></tr>`;
+    if (x.custo === null) return `<tr><td><b>${x.nome}</b></td><td>${Math.round(x.qtd)}</td><td>${n0(x.receita)}</td><td>—</td><td>—</td><td>—</td></tr>`;
     const res = x.receita - x.custo;
-    return `<tr><td><b>${x.nome}</b></td><td>${Math.round(x.qtd)}</td><td>${brl(x.receita)}</td><td>${brl(x.custo)}</td><td class="${cor(res)}">${brl(res)}</td><td class="${cor(res)}">${x.receita ? (res/x.receita*100).toFixed(1) : '0.0'}%</td></tr>`;
+    return `<tr><td><b>${x.nome}</b></td><td>${Math.round(x.qtd)}</td><td>${n0(x.receita)}</td><td>${n0(x.custo)}</td><td class="${cor(res)}">${n0(res)}</td><td class="${cor(res)}"><b>${pct(res, x.receita)}</b></td></tr>`;
   };
   if (!lista.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#c49070;padding:20px;">Sem vendas no período.</td></tr>'; return; }
   const tq = com.reduce((s,x)=>s+x.qtd,0), tr = com.reduce((s,x)=>s+x.receita,0), tc = com.reduce((s,x)=>s+x.custo,0), tres = tr - tc;
-  const total = com.length ? `<tr style="background:var(--bg);"><td><b>Total com receita</b></td><td><b>${Math.round(tq)}</b></td><td><b>${brl(tr)}</b></td><td><b>${brl(tc)}</b></td><td class="${cor(tres)}"><b>${brl(tres)}</b></td><td class="${cor(tres)}"><b>${tr ? (tres/tr*100).toFixed(1) : '0.0'}%</b></td></tr>` : '';
-  const nota = `<tr><td colspan="6" style="font-size:11px;color:#999;">Mão de obra rateada: ${brl(moDoce)} por doce</td></tr>`;
+  const total = com.length ? `<tr style="background:var(--bg);"><td><b>Total c/ receita</b></td><td><b>${Math.round(tq)}</b></td><td><b>${n0(tr)}</b></td><td><b>${n0(tc)}</b></td><td class="${cor(tres)}"><b>${n0(tres)}</b></td><td class="${cor(tres)}"><b>${pct(tres, tr)}</b></td></tr>` : '';
+  const nota = `<tr><td colspan="6" style="font-size:10px;color:#999;text-align:left;">Mão de obra rateada: ${brl(moDoce)} por doce</td></tr>`;
   tb.innerHTML = com.map(linha).join('') + total + sem.map(linha).join('') + nota;
 }
 
@@ -3115,6 +3147,18 @@ function atualizarDashboard() {
   document.getElementById('kpiResultadoStatus').innerText = resultadoLiquido>=0?'superávit':'déficit';
   document.getElementById('kpiVolumeDoces').innerText = Math.round(volumeDoces).toLocaleString('pt-BR')+' un';
   document.getElementById('kpiTicketMedio').innerText = 'R$ '+(pedidosFiltrados.length?totalEntradas/pedidosFiltrados.length:0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const _qv = {d:[0,0], b:[0,0]};
+  pedidosFiltrados.forEach(p => p.itens.forEach(i => { const g = _nm(i.produto)==='bem casado' ? _qv.b : _qv.d; g[0] += i.qtd||0; g[1] += i.total||0; }));
+  const _f2 = n => 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const _nu = n => Math.round(n).toLocaleString('pt-BR');
+  const divMargem = document.getElementById('kpiMargemGeral');
+  divMargem.innerText = totalEntradas>0 ? (resultadoLiquido/totalEntradas*100).toFixed(1).replace('.',',')+'%' : '—';
+  divMargem.className = resultadoLiquido>=0?'valor-destaque txt-verde':'valor-destaque txt-vermelho';
+  document.getElementById('kpiVolumeDetalhe').innerText = `Doces ${_nu(_qv.d[0])} · B. casados ${_nu(_qv.b[0])}`;
+  document.getElementById('kpiPrecoMedioDoce').innerText = _qv.d[0] ? _f2(_qv.d[1]/_qv.d[0]) : '—';
+  document.getElementById('kpiPrecoMedioDoceQtd').innerText = `${_nu(_qv.d[0])} un vendidas`;
+  document.getElementById('kpiPrecoMedioBC').innerText = _qv.b[0] ? _f2(_qv.b[1]/_qv.b[0]) : '—';
+  document.getElementById('kpiPrecoMedioBCQtd').innerText = `${_nu(_qv.b[0])} un vendidas`;
  
   // Ranking Gastos
   const rankingGastos = Object.entries(gastosPorInsumo).map(([nome,total])=>({nome,total})).sort((a,b)=>b.total-a.total);
@@ -3165,9 +3209,9 @@ function atualizarDashboard() {
     const resultado = d.entradas - d.saidas;
     const tr = document.createElement('tr');
     tr.innerHTML = `<td><b>${NOMES_MESES[mesIdx].substring(0,3)}</b></td>
-      <td class="txt-verde">R$ ${d.entradas.toFixed(0)}</td>
-      <td class="txt-vermelho">R$ ${d.saidas.toFixed(0)}</td>
-      <td class="${resultado>=0?'txt-verde':'txt-vermelho'}">R$ ${resultado.toFixed(0)}</td>`;
+      <td class="txt-verde">R$ ${d.entradas.toLocaleString('pt-BR',{maximumFractionDigits:0})}</td>
+      <td class="txt-vermelho">R$ ${d.saidas.toLocaleString('pt-BR',{maximumFractionDigits:0})}</td>
+      <td class="${resultado>=0?'txt-verde':'txt-vermelho'}">R$ ${resultado.toLocaleString('pt-BR',{maximumFractionDigits:0})}</td>`;
     tbody.appendChild(tr);
   });
   if(tbody.innerHTML==='') tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#c49070;padding:20px;">Sem registros.</td></tr>`;
