@@ -303,7 +303,7 @@ table tr:hover td{background:var(--bg);}
 .tabela-premium{display:table;table-layout:fixed;width:100%;}
 .tabela-premium.tabela-compacta th{padding:6px;font-size:9px;}
 .tabela-premium.tabela-compacta td{padding:6px;font-size:11px;line-height:1.25;}
-.tabela-premium.tabela-margem th{padding:6px 3px;font-size:8.5px;letter-spacing:.2px;}
+.tabela-premium.tabela-margem th{cursor:pointer;user-select:none;padding:6px 3px;font-size:8.5px;letter-spacing:.2px;}
 .tabela-premium.tabela-margem td{padding:6px 3px;font-size:10.5px;line-height:1.2;}
 .tabela-premium.tabela-margem th:not(:first-child),.tabela-premium.tabela-margem td:not(:first-child){text-align:right;}
 </style>
@@ -763,8 +763,8 @@ table tr:hover td{background:var(--bg);}
     <div class="section-titulo-interna" style="margin-top:8px;">💰 Margem por Produto (R$)</div>
     <div class="tabela-premium-wrapper" style="height:auto;max-height:none;overflow:visible;">
       <table class="tabela-premium tabela-margem">
-        <colgroup><col style="width:27%"><col style="width:11%"><col style="width:16%"><col style="width:15%"><col style="width:16%"><col style="width:15%"></colgroup>
-        <thead><tr><th>Produto</th><th>Vend.</th><th>Receita</th><th>Custo</th><th>Result.</th><th>Margem</th></tr></thead>
+        <colgroup><col style="width:25%"><col style="width:11%"><col style="width:16%"><col style="width:15%"><col style="width:17%"><col style="width:16%"></colgroup>
+        <thead><tr><th data-c="nome" data-l="Produto" onclick="ordenarMargem('nome')">Produto</th><th data-c="qtd" data-l="Vend." onclick="ordenarMargem('qtd')">Vend.</th><th data-c="receita" data-l="Receita" onclick="ordenarMargem('receita')">Receita</th><th data-c="custo" data-l="Custo" onclick="ordenarMargem('custo')">Custo</th><th data-c="resultado" data-l="Result." onclick="ordenarMargem('resultado')">Result.</th><th data-c="margem" data-l="Margem" onclick="ordenarMargem('margem')">Margem</th></tr></thead>
         <tbody id="tbodyMargemProdutos"></tbody>
       </table>
     </div>
@@ -2856,6 +2856,13 @@ function removerIngrediente(prodId, idx) {
   sbUpsert('produtos', [p]);
   renderIngredientesLinhas(prodId);
 }
+let margemOrdem = { campo: 'resultado', dir: 'desc' };
+function ordenarMargem(campo) {
+  if (margemOrdem.campo === campo) margemOrdem.dir = margemOrdem.dir === 'asc' ? 'desc' : 'asc';
+  else { margemOrdem.campo = campo; margemOrdem.dir = campo === 'nome' ? 'asc' : 'desc'; }
+  atualizarDashboard();
+}
+
 function atualizarMargemProdutos(pedidosFiltrados, insumosFiltrados, volumeDoces) {
   const tb = document.getElementById('tbodyMargemProdutos'); if (!tb) return;
   let fim = _hoje();
@@ -2880,8 +2887,12 @@ function atualizarMargemProdutos(pedidosFiltrados, insumosFiltrados, volumeDoces
     const c100 = ing.reduce((s, r) => s + r.qtd * _precoUsoInsumo(r.nome, fim), 0);
     return { nome, qtd: v.qtd, receita: v.receita, custo: v.qtd/100*c100 + v.qtd*moDoce };
   });
-  const com = lista.filter(x => x.custo !== null).sort((a,b) => (b.receita-b.custo) - (a.receita-a.custo));
-  const sem = lista.filter(x => x.custo === null).sort((a,b) => b.receita - a.receita);
+  const _mk = x => ({ nome: _nm(x.nome), qtd: x.qtd, receita: x.receita, custo: x.custo,
+    resultado: x.custo === null ? 0 : x.receita - x.custo,
+    margem: (x.custo === null || !x.receita) ? 0 : (x.receita - x.custo) / x.receita })[margemOrdem.campo];
+  const cmp = (a, b) => { const va = _mk(a), vb = _mk(b); const r = typeof va === 'string' ? va.localeCompare(vb, 'pt-BR') : va - vb; return margemOrdem.dir === 'asc' ? r : -r; };
+  const com = lista.filter(x => x.custo !== null).sort(cmp);
+  const sem = lista.filter(x => x.custo === null).sort((a,b) => ['nome','qtd','receita'].includes(margemOrdem.campo) ? cmp(a,b) : b.receita - a.receita);
   const n0 = n => n.toLocaleString('pt-BR', {maximumFractionDigits: 0});
   const brl = n => 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
   const cor = n => n >= 0 ? 'txt-verde' : 'txt-vermelho';
@@ -2896,6 +2907,7 @@ function atualizarMargemProdutos(pedidosFiltrados, insumosFiltrados, volumeDoces
   const total = com.length ? `<tr style="background:var(--bg);"><td><b>Total c/ receita</b></td><td><b>${Math.round(tq)}</b></td><td><b>${n0(tr)}</b></td><td><b>${n0(tc)}</b></td><td class="${cor(tres)}"><b>${n0(tres)}</b></td><td class="${cor(tres)}"><b>${pct(tres, tr)}</b></td></tr>` : '';
   const nota = `<tr><td colspan="6" style="font-size:10px;color:#999;text-align:left;">Mão de obra rateada: ${brl(moDoce)} por doce</td></tr>`;
   tb.innerHTML = com.map(linha).join('') + total + sem.map(linha).join('') + nota;
+  document.querySelectorAll('.tabela-margem th[data-c]').forEach(th => { th.textContent = th.dataset.l + (th.dataset.c === margemOrdem.campo ? (margemOrdem.dir === 'asc' ? ' ▲' : ' ▼') : ''); });
 }
 
 /* ===== PRODUTOS ===== */
