@@ -408,6 +408,36 @@ table tr:hover td{background:var(--bg);}
   .agenda-meses-grid{grid-template-columns:1fr;}
 }
 </style>
+<style>
+/* ===== ESTÉTICA FLAT (estilo app de banco) ===== */
+.dica{font-size:11px;color:var(--text-3);margin-top:3px;}
+.par{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.btn:disabled{background:#d1d3d6 !important;color:#9ca3af !important;cursor:default;transform:none;box-shadow:none;}
+.pedido-lado{text-align:right;flex-shrink:0;}
+.pedido-lado b{display:block;font-size:14px;color:var(--text-1);}
+.pedido-lado small{font-size:10.5px;font-weight:700;text-transform:lowercase;}
+.st-pendente{color:#b45309;}.st-pago{color:#15803d;}.st-cancelado{color:#b91c1c;}
+.barra-acoes{display:flex;gap:10px;position:sticky;bottom:0;background:#fff;padding:10px 0 12px;border-top:1px solid var(--divider);margin-top:8px;z-index:3;}
+@media(max-width:768px){
+  body,.conteudo,.nav-overlay{background:#fff;}
+  .nav-overlay,.nav-overlay-2,.nav-overlay-3{left:0 !important;right:0 !important;bottom:58px !important;border-radius:0 !important;box-shadow:none !important;}
+  .nav-header{border-radius:0 !important;padding:8px 14px;}
+  .nav-body{padding:6px 16px 16px;}
+  .card,.detalhe-secao{background:transparent !important;box-shadow:none !important;border-radius:0 !important;padding:4px 0 8px !important;margin-bottom:6px !important;border-bottom:1px solid var(--divider);}
+  .card h2{font-size:14px;margin-bottom:4px;}
+  label{text-transform:none !important;letter-spacing:0 !important;font-size:12px !important;font-weight:500 !important;color:var(--text-3) !important;margin:10px 0 0 !important;}
+  input:not([type=checkbox]):not([type=hidden]),select,textarea{border:0 !important;border-bottom:1.5px solid #cfd4da !important;border-radius:0 !important;background:transparent !important;box-shadow:none !important;padding:4px 2px !important;min-height:36px !important;font-size:15px !important;}
+  input:not([type=checkbox]):focus,select:focus,textarea:focus{border-bottom-color:var(--brand) !important;box-shadow:0 1px 0 0 var(--brand) !important;}
+  textarea{height:40px !important;}
+  input[type=checkbox]{width:auto !important;min-height:0 !important;}
+  .pedido-item,.produto-item,.insumo-item{background:transparent !important;box-shadow:none !important;border:0 !important;border-bottom:1px solid var(--divider) !important;border-radius:0 !important;padding:9px 2px !important;margin:0 !important;}
+  .pedido-info strong{font-size:14px;font-weight:600;}
+  .pedido-info span{color:var(--text-3);font-size:12px;}
+  #listaInsumos{border:0 !important;background:transparent !important;padding:0 !important;}
+  .filtros{gap:2px;margin-bottom:6px;}
+  .barra-acoes .btn{border-radius:14px;min-height:50px;font-size:15px;}
+}
+</style>
 </head>
 <body>
 <div class="container">
@@ -503,10 +533,12 @@ table tr:hover td{background:var(--bg);}
       <div id="insumoSelecionadoInfo" style="display:none;margin-top:6px;padding:7px 10px;background:#fff5f0;border-radius:8px;font-size:11px;color:#8a5a34;font-weight:500;"></div>
       <label style="font-size:11px;margin-top:8px;">Data da Compra</label>
       <input type="date" id="dataCompraInsumo" style="padding:9px;font-size:11px;border-radius:8px;">
-      <label style="font-size:11px;margin-top:8px;">Quantidade</label>
-      <input type="text" inputmode="decimal" id="estoqueInsumo" value="0" oninput="calcularTotalInsumo()" style="padding:9px;font-size:11px;border-radius:8px;">
-      <label style="font-size:11px;margin-top:8px;">Preço Unitário (R$)</label>
-      <input type="text" inputmode="decimal" id="precoInsumo" value="0,00" oninput="calcularTotalInsumo()" style="padding:9px;font-size:11px;border-radius:8px;">
+      <div class="par">
+        <div><label>Quantidade</label>
+        <input type="text" inputmode="decimal" id="estoqueInsumo" value="0" oninput="calcularTotalInsumo()"></div>
+        <div><label>Preço unitário (R$)</label>
+        <input type="text" inputmode="decimal" id="precoInsumo" value="0,00" oninput="calcularTotalInsumo()"></div>
+      </div>
       <div style="margin-top:10px;padding:8px 12px;background:#f9f9f9;border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:11px;color:#666;">Total da Compra:</span>
         <span id="totalInsumoCalc" style="font-size:15px;font-weight:bold;color:#d94d7d;">R$ 0,00</span>
@@ -873,11 +905,14 @@ table tr:hover td{background:var(--bg);}
         <div class="autocomplete-lista" id="listaAutocompleteNome" style="display:none;"></div>
       </div>
       <label>Endereço</label><input type="text" id="endereco">
-      <label>Data Entrega</label><input type="date" id="entrega">
-      <label>Valor de Entrada (R$)</label>
-      <input type="text" inputmode="decimal" id="valorEntrada" value="0.00" placeholder="0,00">
-      <label>Taxa de Entrega (R$) <span style="font-size:11px;color:#aaa;">0 = retirada</span></label>
-      <input type="text" inputmode="decimal" id="taxaEntrega" value="0.00" placeholder="0,00" oninput="atualizarTotalComEntrega()">
+      <label>Data de entrega</label><input type="date" id="entrega">
+      <div class="par">
+        <div><label>Entrada (R$)</label>
+        <input type="text" inputmode="decimal" id="valorEntrada" value="0.00" placeholder="0,00"></div>
+        <div><label>Taxa de entrega (R$)</label>
+        <input type="text" inputmode="decimal" id="taxaEntrega" value="0.00" placeholder="0,00" oninput="atualizarTotalComEntrega()">
+        <div class="dica">0 = retirada</div></div>
+      </div>
       <label>Observações</label><textarea id="obs" style="height:60px;"></textarea>
     </div>
     <div class="card" style="margin-bottom:10px;">
@@ -898,16 +933,16 @@ table tr:hover td{background:var(--bg);}
         </tr></tfoot>
       </table>
     </div>
-    <div style="display:flex;gap:10px;">
-      <button class="btn btn-laranja" style="flex:1;" onclick="limparPedido()">🗑 Limpar</button>
-      <button class="btn btn-verde" style="flex:2;" onclick="finalizarPedido()">💾 Salvar Pedido</button>
-    </div>
     <div class="card" style="margin-top:10px;padding:10px 14px;">
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
         <div><div style="font-size:11px;color:#aaa;">Tipos</div><div id="totalItens" style="font-weight:700;color:#8a5a34;font-size:18px;">0</div></div>
         <div><div style="font-size:11px;color:#aaa;">Unidades</div><div id="quantidadeTotal" style="font-weight:700;color:#8a5a34;font-size:18px;">0</div></div>
         <div><div style="font-size:11px;color:#aaa;">Total</div><div id="valorTotal" style="font-weight:700;color:#d94d7d;font-size:16px;">R$ 0,00</div></div>
       </div>
+    </div>
+    <div class="barra-acoes">
+      <button class="btn btn-cinza" style="flex:1;" onclick="limparPedido()">Limpar</button>
+      <button class="btn btn-verde" id="btnSalvarPedido" style="flex:2;" onclick="finalizarPedido()" disabled>Salvar pedido</button>
     </div>
   </div>
 </div>
@@ -1717,6 +1752,7 @@ function atualizarResumoAtual() {
   document.getElementById('quantidadeTotal').innerText = Math.round(quantidadeTotalAtual);
   document.getElementById('valorTotal').innerText = 'R$ '+valorTotalAtual.toFixed(2);
   document.getElementById('rodapeTotalPedido').innerText = 'R$ '+valorTotalAtual.toFixed(2);
+  atualizarBotaoSalvar();
 }
  
 /* ===== TAXA DE ENTREGA ===== */
@@ -2125,13 +2161,12 @@ function renderPedidos() {
     const unTotal = Math.round(itens.reduce((s,i)=>s+(i.qtd||0),0));
     return `<div class="pedido-item" onclick="abrirDetalhePedido(${p.id})" style="cursor:pointer;">
       <div class="pedido-info">
-        <strong>${cliente.toUpperCase()}</strong>
-        <span>📅 ${formatarData(p.data)} · 🍬 ${unTotal} un · R$ ${total.toFixed(2)}</span>
-        <span style="color:${saldo>0?'#ff9800':'#28a745'};">Saldo: R$ ${saldo.toFixed(2)}</span>
+        <strong>${cliente}</strong>
+        <span>${formatarData(p.data)} · ${unTotal} un${saldo>0?` · saldo ${fmtBRL(saldo)}`:''}</span>
       </div>
-      <div class="pedido-acoes">
-        <span class="badge badge-${status}" style="font-size:10px;padding:2px 8px;">${status.toUpperCase()}</span>
-        <span style="font-size:20px;color:#ccc;text-align:right;">›</span>
+      <div class="pedido-lado">
+        <b>${fmtBRL(total)}</b>
+        <small class="st-${status}">${status}</small>
       </div>
     </div>`;
   }).join('');
@@ -2388,7 +2423,7 @@ function mostrarPedidosDoDia(data, lista) {
         onclick="abrirDetalhePedidoDeAgenda(${p.id})">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <div>
-          <strong style="font-size:13px;color:#8a5a34;">${(p.cliente||'').toUpperCase()}</strong>
+          <strong style="font-size:13px;color:#8a5a34;">${p.cliente||''}</strong>
           <div style="font-size:11px;color:#666;margin-top:2px;">
             🍬 ${Math.round(doc)} un${bc>0?` · 💍 ${Math.round(bc)} BC`:''}
             &nbsp;·&nbsp; R$ ${(p.total||0).toFixed(2)}
@@ -3298,11 +3333,23 @@ function renderLogs() {
     </div>`;
   }).join('');
 }
+function fmtBRL(n){ return 'R$ '+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function formatarData(d){ if(!d) return ''; const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function gerarNovoId(arr){ return arr.length===0 ? 1 : Math.max(...arr.map(x=>x.id||0))+1; }
 function limparFiltros(){ document.getElementById('filtroBusca').value=''; document.getElementById('filtroStatus').value=''; document.getElementById('filtroData').value=''; renderPedidos(); }
  
 document.getElementById('produto').addEventListener('change', atualizarValor);
+function atualizarBotaoSalvar() {
+  const b = document.getElementById('btnSalvarPedido'); if (!b) return;
+  const v = id => (document.getElementById(id)?.value || '').trim();
+  b.disabled = !(v('cliente') && v('telefone') && v('entrega') && itensPedidoAtual.length > 0);
+}
+['telefone','cliente','entrega'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', atualizarBotaoSalvar);
+  el.addEventListener('change', atualizarBotaoSalvar);
+});
+document.getElementById('novoPedidoOverlay').addEventListener('click', () => setTimeout(atualizarBotaoSalvar, 0));
 document.getElementById('quantidade').addEventListener('input', calcularTotalItem);
  
 /* ===== IMPORTAR CONTATO DO CELULAR ===== */
@@ -3317,6 +3364,7 @@ async function importarContato() {
     if (c.name?.[0])  document.getElementById('cliente').value  = c.name[0];
     if (c.tel?.[0])   document.getElementById('telefone').value = c.tel[0].replace(/\D/g,'');
     buscarClientePorTelefone();
+    atualizarBotaoSalvar();
   } catch(e) { console.warn('Contato cancelado ou erro:', e); }
 }
 
