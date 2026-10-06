@@ -543,6 +543,7 @@ table tr:hover td{background:var(--bg);}
     <button onclick="trocarSubAba(2)">📦 Insumos</button>
     <button onclick="trocarSubAba(3)">🍫 Massas</button>
     <button onclick="trocarSubAba(4)">📋 Logs</button>
+    <button onclick="trocarSubAba(5)">🪪 Meu Cadastro</button>
   </div>
 
   <!-- SUBABA 0: CLIENTES -->
@@ -679,6 +680,21 @@ table tr:hover td{background:var(--bg);}
         <button class="btn btn-cinza" style="padding:6px 14px;font-size:12px;" onclick="carregarLogs()">🔄 Atualizar</button>
       </div>
       <div id="listaLogs" style="max-height:500px;overflow-y:auto;"></div>
+    </div>
+  </div>
+
+  <!-- SUBABA 5: MEU CADASTRO -->
+  <div class="subaba">
+    <div class="card" style="max-width:500px;">
+      <h2>🪪 Meu Cadastro (Contratada)</h2>
+      <p style="font-size:11px;color:#888;margin-bottom:6px;">Esses dados são usados no contrato.</p>
+      <label>Nome Completo</label>
+      <input type="text" id="meuNome">
+      <label>CPF</label>
+      <input type="text" id="meuCpf" maxlength="14" oninput="mascaraCpf(this)">
+      <label>Telefone</label>
+      <input type="text" id="meuTelefone">
+      <div class="botoes"><button class="btn btn-verde" onclick="salvarMeuCadastro()">💾 Salvar</button></div>
     </div>
   </div>
 
@@ -1147,6 +1163,7 @@ function salvarLS() {
  
 let pedidos = [], produtos = [], insumos = [], clientes = [], tiposInsumos = [];
 let tiposMassa = [], massasDiario = [];
+let meuCadastro = null;
 let itensPedidoAtual = [], itensEditandoPedido = [];
 let totalItensAtual = 0, quantidadeTotalAtual = 0, valorTotalAtual = 0;
 let anoFiltroSelecionado = "Todos";
@@ -1286,11 +1303,13 @@ function importarBackup(input) {
  
 /* ===== CARREGAR SISTEMA ===== */
 async function carregarSistema() {
-  const [p, pr, ins, cli, ti, tm, md] = await Promise.all([
+  const [p, pr, ins, cli, ti, tm, md, mc] = await Promise.all([
     sbListar('pedidos'), sbListar('produtos'), sbListar('insumos'),
     sbListar('clientes'), sbListar('tipos_insumos'),
-    sbListar('tipos_massa'), sbListar('massas_diario')
+    sbListar('tipos_massa'), sbListar('massas_diario'),
+    sbListar('meu_cadastro')
   ]);
+  meuCadastro = (mc && mc.length) ? mc[0] : null;
   if (p.length === 0 && pr.length === 0 && ins.length === 0) {
     pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
     produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
@@ -1511,6 +1530,26 @@ function excluirPedidoDetalhe(id) {
   renderPedidos();
 }
 
+/* ===== MEU CADASTRO ===== */
+function renderMeuCadastro() {
+  const c = meuCadastro || {};
+  document.getElementById('meuNome').value     = c.nome     || '';
+  document.getElementById('meuCpf').value      = c.cpf      || '';
+  document.getElementById('meuTelefone').value = c.telefone || '';
+}
+async function salvarMeuCadastro() {
+  const nome     = document.getElementById('meuNome').value.trim();
+  const cpf      = document.getElementById('meuCpf').value.trim();
+  const telefone = document.getElementById('meuTelefone').value.trim();
+  if (!nome || !cpf) { alert('Preencha nome e CPF.'); return; }
+  const reg = { id: 1, nome, cpf, telefone };
+  const ok = await sbUpsert('meu_cadastro', [reg]);
+  if (!ok) return;
+  meuCadastro = reg;
+  registrarLog('SISTEMA', 'Meu Cadastro atualizado');
+  alert('✅ Cadastro salvo!');
+}
+
 /* ===== SUBABAS CADASTROS ===== */
 function trocarSubAba(index) {
   const abaAtiva = document.querySelector('.aba.active');
@@ -1523,6 +1562,7 @@ function trocarSubAba(index) {
   if(index === 1) { renderProdutos(); fecharReceita(); }  if(index === 2) renderTiposInsumos();
   if(index === 3) renderTiposMassa();
   if(index === 4) carregarLogs();
+  if(index === 5) renderMeuCadastro();
 }
 
 function fecharAutocompletes() {
@@ -1752,6 +1792,9 @@ function gerarContrato() {
   if(!cpf){ alert('Informe o CPF do cliente.'); return; }
   const id = parseInt(document.getElementById('cpfContratoPedidoId').value);
   const p  = pedidos.find(x=>x.id===id); if(!p) return;
+  if (!meuCadastro || !meuCadastro.nome || !meuCadastro.cpf) {
+    alert('Preencha primeiro Cadastros → Meu Cadastro.'); return;
+  }
   document.getElementById('modalCpfContrato').classList.remove('active');
 
   const dataEntrega = p.data ? p.data.split('-').reverse().join('/') : '—';
@@ -1807,7 +1850,7 @@ function gerarContrato() {
   <h2>1. DA IDENTIFICAÇÃO DAS PARTES</h2>
   <p>Pelo presente contrato de prestação de serviços, firmado entre <b>${p.cliente}</b>, C.P.F ${cpf},
   endereço ${p.endereco||'—'}, telefone ${p.telefone||'—'}, doravante denominada <b>CONTRATANTE</b>,
-  e <b>Vanessa Alvarenga Pinto</b>, C.P.F. 143.725.727-51, telefone 22-99874-9536 doravante denominada
+  e <b>${meuCadastro.nome}</b>, C.P.F. ${meuCadastro.cpf}, telefone ${meuCadastro.telefone||'—'} doravante denominada
   <b>CONTRATADA</b>, as partes identificadas acima têm entre si justos e acertados os termos que reger-se-ão
   pelas cláusulas seguintes.</p>
 
