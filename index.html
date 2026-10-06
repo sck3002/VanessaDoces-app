@@ -440,7 +440,8 @@ table tr:hover td{background:var(--bg);}
 /* ━━━ SELETOR DE PRODUTOS ━━━ */
 .picker-trigger{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:14px;color:var(--text-1);cursor:pointer;min-height:42px;text-align:left;}
 .picker-caret{color:var(--text-3);flex-shrink:0;}
-.picker-secao{position:sticky;top:0;background:var(--brown-dark);color:#fff;font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:9px 16px;z-index:2;}
+.picker-secao{position:sticky;top:var(--hh,52px);background:var(--brown-light);color:var(--brown);font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:8px 16px;z-index:1;border-bottom:1px solid var(--divider);}
+.picker-trigger span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
 .picker-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;background:var(--surface);border-bottom:1px solid var(--divider);cursor:pointer;font-size:14px;}
 .picker-item:active{background:var(--brand-light);}
 .picker-item-ativo{background:var(--brand-light);}
@@ -1756,6 +1757,8 @@ function abrirSeletorProdutos(selectId) {
       </div>`).join('');
   }).join('');
   _ovAbrir('seletorProdutoOverlay');
+  const hd = document.querySelector('#seletorProdutoOverlay .nav-header');
+  if (hd) document.getElementById('seletorProdutoBody').style.setProperty('--hh', hd.offsetHeight + 'px');
 }
 function escolherProduto(id) {
   const sel = _seletorAlvo; if (!sel) return;
