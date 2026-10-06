@@ -16,7 +16,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
-/* ━━━ TOKENS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━ TOKENS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 :root{
   --brand:#d94d7d;
   --brand-light:#fdf2f6;
@@ -66,7 +66,7 @@ body{background:var(--bg);overflow:hidden;color:var(--text-1);}
 .card h2{color:var(--brown);font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
 
 /* ━━━ TIPOGRAFIA ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-label{display:block;margin-top:10px;margin-bottom:3px;font-weight:600;font-size:11px;color:var(--text-2);text-transform:uppercase;letter-spacing:.4px;}
+label{display:block;margin-top:14px;margin-bottom:5px;font-weight:600;font-size:11px;color:var(--text-2);text-transform:uppercase;letter-spacing:.4px;}
 
 /* ━━━ INPUTS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 input,select,textarea{
@@ -79,7 +79,7 @@ textarea{height:72px;resize:none;}
 select{cursor:pointer;}
 
 /* ━━━ BOTÕES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-.btn{border:none;padding:7px 20px;border-radius:var(--radius-sm);cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;letter-spacing:.1px;}
+.btn{border:none;padding:10px 20px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;letter-spacing:.1px;}
 .btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);}
 .btn:active{transform:translateY(0);}
 .btn-rosa{background:var(--brand);color:white;}
@@ -236,7 +236,7 @@ table tr:hover td{background:var(--bg);}
 .dashboard-premium{background:transparent;padding:0;min-height:100%;}
 .dash-header-filtros{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;gap:12px;}
 .dash-header-filtros h2{color:var(--brown-dark);font-size:18px;font-weight:700;}
-.dash-header-filtros p{color:var(--text-3);font-size:11px;:2px;}
+.dash-header-filtros p{color:var(--text-3);font-size:11px;margin-top:2px;}
 .dash-filtros-wrapper{display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
 .dash-filtro-anos{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;}
 .dash-filtro-meses{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;}
@@ -260,7 +260,7 @@ table tr:hover td{background:var(--bg);}
 .section-titulo-interna{font-size:10px;color:var(--text-3);margin-bottom:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--divider);padding-bottom:8px;}
 .container-grafico{height:260px;display:flex;align-items:flex-end;justify-content:space-between;padding:20px 10px 10px;background:var(--surface);border-radius:var(--radius-md);border:1.5px solid var(--divider);position:relative;box-shadow:var(--shadow-sm);}
 .tabela-premium-wrapper{background:var(--surface);border-radius:var(--radius-md);overflow:hidden;height:260px;overflow-y:auto;box-shadow:var(--shadow-sm);}
-.tabela-premium{width:100%;border-collapse:collapse;:0;font-size:12px;text-align:left;}
+.tabela-premium{width:100%;border-collapse:collapse;margin-top:0;font-size:12px;text-align:left;}
 .tabela-premium th{background:var(--bg);color:var(--text-3);padding:8px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2;}
 .tabela-premium td{padding:10px 12px;border-bottom:1px solid var(--divider);color:var(--text-1);font-size:12px;}
 .tabela-premium tr:hover{background:var(--bg);}
@@ -437,6 +437,17 @@ table tr:hover td{background:var(--bg);}
   .filtros{gap:2px;margin-bottom:6px;}
   .barra-acoes .btn{border-radius:14px;min-height:50px;font-size:15px;}
 }
+/* ━━━ SELETOR DE PRODUTOS ━━━ */
+.picker-trigger{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:14px;color:var(--text-1);cursor:pointer;min-height:42px;text-align:left;}
+.picker-caret{color:var(--text-3);flex-shrink:0;}
+.picker-secao{position:sticky;top:0;background:var(--brown-dark);color:#fff;font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:9px 16px;z-index:2;}
+.picker-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;background:var(--surface);border-bottom:1px solid var(--divider);cursor:pointer;font-size:14px;}
+.picker-item:active{background:var(--brand-light);}
+.picker-item-ativo{background:var(--brand-light);}
+.picker-item-ativo .picker-item-nome{color:var(--brand);font-weight:600;}
+.picker-item-preco{color:var(--text-3);font-size:13px;font-weight:500;white-space:nowrap;}
+.picker-item-preco::before{content:'R$ ';font-size:11px;}
+@media(max-width:768px){.picker-trigger{border:0 !important;border-bottom:1.5px solid #cfd4da !important;border-radius:0 !important;background:transparent !important;padding:4px 2px !important;min-height:36px;font-size:15px !important;}}
 </style>
 </head>
 <body>
@@ -918,7 +929,8 @@ table tr:hover td{background:var(--bg);}
     <div class="card" style="margin-bottom:10px;">
       <h2>Itens do Pedido</h2>
       <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end;margin-bottom:10px;">
-        <div><label style="font-size:12px;">Produto / Sabor</label><select id="produto" onchange="atualizarValor()"></select></div>
+        <div><label style="font-size:12px;">Produto / Sabor</label><button type="button" class="picker-trigger" onclick="abrirSeletorProdutos('produto')"><span id="pickerProdutoLabel">Selecione o doce…</span><span class="picker-caret">▾</span></button>
+          <select id="produto" style="display:none" onchange="atualizarValor()"></select></div>
         <div><label style="font-size:12px;">Qtd</label><input type="number" id="quantidade" min="1" style="width:65px;" oninput="calcularTotalItem()"></div>
         <button class="btn btn-rosa" style="padding:10px 14px;white-space:nowrap;" onclick="adicionarItem()">+ Add</button>
       </div>
@@ -1003,7 +1015,8 @@ table tr:hover td{background:var(--bg);}
     <div class="card" style="margin-bottom:10px;">
       <p style="font-size:11px;font-weight:700;color:#8a5a34;margin-bottom:10px;">🍬 DOCES DA ENCOMENDA</p>
       <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end;margin-bottom:10px;">
-        <div><label style="font-size:12px;">Doce / Sabor</label><select id="editAdicionarDoceSelect" style="font-size:13px;"></select></div>
+        <div><label style="font-size:12px;">Doce / Sabor</label><button type="button" class="picker-trigger" style="font-size:13px;" onclick="abrirSeletorProdutos('editAdicionarDoceSelect')"><span id="pickerEditLabel">Selecione o doce…</span><span class="picker-caret">▾</span></button>
+          <select id="editAdicionarDoceSelect" style="display:none;"></select></div>
         <div><label style="font-size:12px;">Qtd</label><input type="number" id="editAdicionarDoceQtd" min="1" style="width:65px;"></div>
         <button class="btn btn-rosa" style="padding:10px 14px;" onclick="adicionarDoceNoPedidoEditado()">+ Add</button>
       </div>
@@ -1011,6 +1024,15 @@ table tr:hover td{background:var(--bg);}
     </div>
     <button class="btn btn-verde" style="width:100%;" onclick="salvarItensPedido()">💾 Salvar Itens</button>
   </div>
+</div>
+
+<!-- SELETOR DE PRODUTOS -->
+<div id="seletorProdutoOverlay" class="nav-overlay nav-overlay-3">
+  <div class="nav-header">
+    <button class="nav-back" onclick="fecharSeletorProdutos()">← Voltar</button>
+    <span class="nav-titulo">Escolha o doce</span>
+  </div>
+  <div class="nav-body" id="seletorProdutoBody" style="padding:0;"></div>
 </div>
 
 <script>
@@ -1531,6 +1553,7 @@ function abrirEditarItens() {
   calcularBalançoModalEditar();
   const sel = document.getElementById('editAdicionarDoceSelect');
   sel.innerHTML = produtos.map(pr=>`<option value="${pr.id}">${pr.nome} (R$ ${(pr.preco||0).toFixed(2)}/un)</option>`).join('');
+  resetSeletorProduto();
   _ovAbrir('editItensOverlay');
 }
 function fecharEditarItens() { _ovFechar('editItensOverlay'); }
@@ -1711,8 +1734,46 @@ function popularSelectProduto() {
       s.appendChild(grp);
     });
   });
+  resetSeletorProduto();
   atualizarValor();
 }
+/* ===== SELETOR DE PRODUTOS (substitui o <select> nativo) ===== */
+let _seletorAlvo = null;
+function abrirSeletorProdutos(selectId) {
+  _seletorAlvo = document.getElementById(selectId);
+  if (!_seletorAlvo) return;
+  const selecionado = String(_seletorAlvo.value || '');
+  const grupos = {};
+  ORDEM_CAT.forEach(c => grupos[c] = []);
+  produtos.forEach(p => { const cat = p.categoria || 'Simples'; if (!grupos[cat]) grupos[cat] = []; grupos[cat].push(p); });
+  ORDEM_CAT.forEach(c => grupos[c].sort((a,b)=>(a.nome||'').localeCompare(b.nome||'')));
+  document.getElementById('seletorProdutoBody').innerHTML = ORDEM_CAT.map(cat => {
+    const lista = grupos[cat]; if (!lista.length) return '';
+    return `<div class="picker-secao">${cat}</div>` + lista.map(p => `
+      <div class="picker-item ${String(p.id)===selecionado?'picker-item-ativo':''}" onclick="escolherProduto(${p.id})">
+        <span class="picker-item-nome">${p.nome}</span>
+        <span class="picker-item-preco">${(p.preco||0).toFixed(2).replace('.',',')}</span>
+      </div>`).join('');
+  }).join('');
+  _ovAbrir('seletorProdutoOverlay');
+}
+function escolherProduto(id) {
+  const sel = _seletorAlvo; if (!sel) return;
+  sel.value = id;
+  sel.dispatchEvent(new Event('change'));
+  const p = produtos.find(x => String(x.id) === String(id));
+  const rotulo = document.getElementById(sel.id === 'produto' ? 'pickerProdutoLabel' : 'pickerEditLabel');
+  if (rotulo && p) rotulo.textContent = p.nome;
+  fecharSeletorProdutos();
+}
+function fecharSeletorProdutos() { _ovFechar('seletorProdutoOverlay'); }
+function resetSeletorProduto() {
+  const a = document.getElementById('produto'); if (a) a.selectedIndex = -1;
+  const b = document.getElementById('editAdicionarDoceSelect'); if (b) b.selectedIndex = -1;
+  const la = document.getElementById('pickerProdutoLabel'); if (la) la.textContent = 'Selecione o doce…';
+  const lb = document.getElementById('pickerEditLabel'); if (lb) lb.textContent = 'Selecione o doce…';
+}
+
 function atualizarValor() {
   const selectElem = document.getElementById('produto'); if(!selectElem.value) return;
   const prod = produtos.find(p=>p.id===parseInt(selectElem.value)); if(!prod) return;
@@ -1725,7 +1786,7 @@ function calcularTotalItem() {
   document.getElementById('totalItem').value = 'R$ '+(qtd*valor).toFixed(2);
 }
 function adicionarItem() {
-  const sel = document.getElementById('produto'); if(!sel.value) return;
+  const sel = document.getElementById('produto'); if(!sel.value){ alert('Selecione o doce.'); return; }
   const produto = produtos.find(p=>p.id===parseInt(sel.value)).nome;
   const qtd = parseInt(document.getElementById('quantidade').value);
   const valor = parseFloat(document.getElementById('valor').value);
@@ -1799,7 +1860,7 @@ function limparPedido() {
   ['cliente','telefone','endereco','entrega','obs','valorEntrada','taxaEntrega'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value = (id === 'valorEntrada' || id === 'taxaEntrega') ? '0.00' : '';
   });
-  const p = document.getElementById('produto'); if(p) p.selectedIndex = 0;
+  resetSeletorProduto();
   const q = document.getElementById('quantidade'); if(q) q.value = '';
   const v = document.getElementById('valor'); if(v) v.value = '';
   const t = document.getElementById('totalItem'); if(t) t.value = '';
@@ -2231,7 +2292,7 @@ function adicionarDoceNoPedidoEditado() {
   const qtdInput = document.getElementById('editAdicionarDoceQtd');
   const quantidade = parseInt(qtdInput.value) || 0;
   if(quantidade <= 0) { alert("Digite uma quantidade válida!"); return; }
-  const prodObj = produtos.find(p => p.id === parseInt(select.value)); if(!prodObj) return;
+  const prodObj = produtos.find(p => p.id === parseInt(select.value)); if(!prodObj){ alert('Selecione o doce.'); return; }
   const indexExistente = itensEditandoPedido.findIndex(i => i.produto.toLowerCase() === prodObj.nome.toLowerCase());
   if(indexExistente !== -1) {
     itensEditandoPedido[indexExistente].qtd += quantidade;
