@@ -1013,6 +1013,11 @@ table tr:hover td{background:var(--bg);}
         <div><label style="font-size:12px;">Entrada / Pagamento (R$)</label>
           <input type="text" inputmode="decimal" id="editValorEntrada" placeholder="0,00" oninput="calcularBalançoModalEditar()"></div>
       </div>
+      <div style="margin-top:8px;">
+        <label style="font-size:12px;">Taxa de entrega (R$)</label>
+        <input type="text" inputmode="decimal" id="editTaxaEntrega" value="0.00" placeholder="0,00" oninput="atualizarItensTabelaModalEditar()">
+        <div class="dica">0 = retirada</div>
+      </div>
       <div style="margin-top:10px;text-align:right;border-top:1px solid #e8d5c0;padding-top:8px;">
         <span style="font-size:11px;color:#555;">SALDO A PAGAR:</span>
         <div id="editSaldoAPagar" style="font-size:22px;font-weight:700;color:#28a745;">R$ 0,00</div>
@@ -1554,6 +1559,7 @@ async function salvarClientePedido() {
 function abrirEditarItens() {
   const p = pedidos.find(x=>x.id===overlayDetalhePedidoId); if(!p) return;
   itensEditandoPedido = JSON.parse(JSON.stringify(p.itens||[]));
+  document.getElementById('editTaxaEntrega').value = (p.taxaEntrega||0).toFixed(2);
   atualizarItensTabelaModalEditar();
   document.getElementById('editValorEntrada').value = (p.entrada||0).toFixed(2);
   calcularBalançoModalEditar();
@@ -1567,11 +1573,13 @@ async function salvarItensPedido() {
   const id  = overlayDetalhePedidoId;
   const idx = pedidos.findIndex(x=>x.id===id); if(idx===-1) return;
   if(!itensEditandoPedido.length){ alert('O pedido não pode ficar vazio!'); return; }
-  const totalCalc = itensEditandoPedido.reduce((acc,i)=>acc+i.total,0);
+  const taxa      = parseFloat((document.getElementById('editTaxaEntrega').value||'0').replace(',','.'))||0;
+  const totalCalc = itensEditandoPedido.reduce((acc,i)=>acc+i.total,0) + taxa;
   const entrada   = parseFloat((document.getElementById('editValorEntrada').value||'0').replace(',','.'))||0;
   const saldo     = totalCalc - entrada;
   pedidos[idx].itens   = [...itensEditandoPedido];
   pedidos[idx].total   = totalCalc;
+  pedidos[idx].taxaEntrega = taxa;
   pedidos[idx].entrada = entrada;
   if(pedidos[idx].status!=='cancelado') pedidos[idx].status = saldo<=0?'pago':'pendente';
   const ok = await sbUpsert('pedidos',[pedidos[idx]]);
@@ -2285,7 +2293,8 @@ function atualizarItensTabelaModalEditar() {
       </div>`;
     }).join('');
   }
-  document.getElementById('editValorTotal').value = totalAcumulado.toFixed(2);
+  const taxaEd = parseFloat(((document.getElementById('editTaxaEntrega')||{}).value||'0').replace(',','.')) || 0;
+  document.getElementById('editValorTotal').value = (totalAcumulado + taxaEd).toFixed(2);
   calcularBalançoModalEditar();
 }
 function alterarQtdItemModalEditar(idx, novaQtd) {
@@ -3765,8 +3774,12 @@ function atualizarTodasAsTelas() {
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(reg => console.log('SW registrado:', reg.scope))
+    let _recarregou = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (_recarregou) return; _recarregou = true; location.reload();
+    });
+    navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' })
+      .then(reg => { console.log('SW registrado:', reg.scope); reg.update(); })
       .catch(err => console.warn('SW falhou:', err));
   });
 }
