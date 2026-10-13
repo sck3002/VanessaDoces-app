@@ -442,6 +442,10 @@ table tr:hover td{background:var(--bg);}
   .barra-acoes{padding:8px 0 10px;}
   .barra-acoes .btn{border-radius:12px;min-height:42px;font-size:14px;padding:8px 14px;}
 }
+#avisoApp{position:fixed;left:50%;bottom:76px;transform:translate(-50%,20px);background:#3b2a20;color:#fff;font-size:13px;padding:10px 16px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:400;max-width:90vw;text-align:center;}
+#avisoApp.on{opacity:1;transform:translate(-50%,0);}
+.insumo-novo .insumo-info{background:var(--brand-light);border-radius:8px;padding:6px 8px;}
+.tag-novo{font-size:10px;font-weight:600;color:var(--brand);margin-left:6px;}
 /* ━━━ SELETOR DE PRODUTOS ━━━ */
 .picker-trigger{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:14px;color:var(--text-1);cursor:pointer;min-height:42px;text-align:left;}
 .picker-caret{color:var(--text-3);flex-shrink:0;}
@@ -1243,8 +1247,7 @@ const NOMES_MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julh
 document.getElementById('dataAtual').innerText =
   new Date().toLocaleDateString('pt-BR');
 
-document.getElementById('dataCompraInsumo').value =
-  new Date().toISOString().split('T')[0];
+document.getElementById('dataCompraInsumo').value = _hoje();   /* data local (toISOString usava UTC e virava o dia às 21h) */
  
 const BANCO_INICIAL = {
   produtos: [
@@ -1408,7 +1411,7 @@ function trocarAba(index) {
    'agendaMesOverlay','agendaDiaOverlay','clienteDetalheOverlay','clienteFormOverlay',
    'seletorProdutoOverlay','modalCpfContrato']
     .forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('active'); });
-  _histLimpar();
+  _histTrocarAba(index);
   document.getElementById('navBackdrop')?.classList.remove('active');
   overlayDetalhePedidoId = null;
   document.querySelectorAll('.aba').forEach(a=>a.classList.remove('active'));
@@ -1442,6 +1445,8 @@ let _pilhaTelas = [];          /* ids das telas abertas, da mais antiga à mais 
 let _ignorarPop = 0;           /* popstate provocados por nós mesmos (não são gestos do usuário) */
 let _fechandoPorGesto = false;
 let _backPend = 0, _backTimer = null;
+let _marcadorAba = false;      /* true enquanto o usuário está fora da Agenda (1 passo no histórico) */
+let _filaHist = [];            /* ações que precisam esperar o history.go terminar */
 const _fechadores = {
   novoPedidoOverlay:    () => fecharNovoPedido(),
   detalhePedidoOverlay: () => fecharDetalhePedido(),
@@ -1473,18 +1478,36 @@ function _histFechar(id) {
   _pilhaTelas.splice(i, 1);
   if (!_fechandoPorGesto) _histVoltar(1);
 }
-function _histLimpar() {       /* troca de aba: descarta os passos de todas as telas abertas */
-  const n = _pilhaTelas.length;
+function _depoisDoHistorico(fn) {
+  if (_backTimer || _ignorarPop > 0) _filaHist.push(fn); else fn();
+}
+function _histTrocarAba(index) {   /* troca de aba: descarta as telas abertas e ajusta o passo da Agenda */
+  let k = _pilhaTelas.length;
   _pilhaTelas = [];
-  if (n) _histVoltar(n);
+  if (index === 0 && _marcadorAba) { k++; _marcadorAba = false; }
+  if (k) _histVoltar(k);
+  if (index !== 0 && !_marcadorAba) {
+    _marcadorAba = true;
+    _depoisDoHistorico(() => { try { history.pushState({ marcador: true }, ''); } catch(e) {} });
+  }
 }
 window.addEventListener('popstate', () => {
-  if (_ignorarPop > 0) { _ignorarPop--; return; }
+  if (_ignorarPop > 0) {
+    _ignorarPop--;
+    if (_ignorarPop === 0) _filaHist.splice(0).forEach(fn => fn());
+    return;
+  }
   const id = _pilhaTelas[_pilhaTelas.length - 1];
-  if (!id) return;
-  _fechandoPorGesto = true;
-  try { (_fechadores[id] || (() => {}))(); } finally { _fechandoPorGesto = false; }
-  _pilhaTelas = _pilhaTelas.filter(x => x !== id);
+  if (id) {                                  /* 1) fecha a tela/janela de cima */
+    _fechandoPorGesto = true;
+    try { (_fechadores[id] || (() => {}))(); } finally { _fechandoPorGesto = false; }
+    _pilhaTelas = _pilhaTelas.filter(x => x !== id);
+    return;
+  }
+  if (_marcadorAba) {                        /* 2) aba que não é a Agenda: volta para a Agenda */
+    _marcadorAba = false;
+    trocarAba(0);
+  }                                          /* 3) na Agenda: o navegador sai do app sozinho */
 });
 
 function _ovAbrir(id) {
@@ -2957,16 +2980,28 @@ function calcularTotalInsumo() {
 }
  
 /* ===== INSUMOS (GASTOS) ===== */
-function salvarInsumo() {
+let _insumoDestaque = null;
+function mostrarAviso(msg) {
+  let el = document.getElementById('avisoApp');
+  if (!el) { el = document.createElement('div'); el.id = 'avisoApp'; document.body.appendChild(el); }
+  el.textContent = msg; el.classList.add('on');
+  clearTimeout(mostrarAviso._t); mostrarAviso._t = setTimeout(() => el.classList.remove('on'), 2600);
+}
+async function salvarInsumo() {
   const nome = document.getElementById('insumoSelecionadoNome').value.trim() || document.getElementById('nomeInsumo').value.trim();
   const unidade = document.getElementById('insumoSelecionadoUnidade').value.trim() || 'un';
   const estoque = parseFloat((document.getElementById('estoqueInsumo').value||'').replace(',','.')) || 0;
   const preco   = parseFloat((document.getElementById('precoInsumo').value||'').replace(',','.')) || 0;
-  const dataCompra = document.getElementById('dataCompraInsumo').value || defaultDateInput;
+  const dataCompra = document.getElementById('dataCompraInsumo').value || _hoje();
   if (!nome) { alert('Selecione ou informe um insumo.'); return; }
   if (estoque <= 0) { alert('Informe a quantidade.'); return; }
   const novo = { id: Date.now(), nome, unidade, estoque, preco, data: dataCompra };
-  insumos.push(novo); sbUpsert('insumos',[novo]);
+  const btn = document.querySelector('button[onclick="salvarInsumo()"]');
+  if (btn) btn.disabled = true;
+  const ok = await sbUpsert('insumos',[novo]);      /* só confirma depois que o banco respondeu */
+  if (btn) btn.disabled = false;
+  if (!ok) return;                                   /* sbUpsert já avisou o erro; o formulário continua preenchido */
+  insumos.push(novo);
   registrarLog('INSUMO', `Compra lançada — ${nome} | Qtd: ${estoque} ${unidade} | Unit: R$ ${preco.toFixed(2)} | Total: R$ ${(estoque*preco).toFixed(2)}`);
   document.getElementById('nomeInsumo').value = '';
   document.getElementById('insumoSelecionadoNome').value = '';
@@ -2975,9 +3010,19 @@ function salvarInsumo() {
   document.getElementById('estoqueInsumo').value = '0';
   document.getElementById('precoInsumo').value = '0.00';
   document.getElementById('totalInsumoCalc').textContent = 'R$ 0,00';
-  document.getElementById('dataCompraInsumo').value = defaultDateInput;
-  renderInsumos(); atualizarFiltroAnoInsumos();
-  alert(`✅ Compra de "${nome}" lançada com sucesso!`);
+  document.getElementById('dataCompraInsumo').value = _hoje();
+  /* limpa os filtros para a compra nova não ficar escondida, mostra a lista e destaca a linha */
+  document.getElementById('filtroInsumoNome').value = '';
+  atualizarFiltroAnoInsumos(); document.getElementById('filtroInsumoAno').value = '';
+  _insumoDestaque = novo.id;
+  renderInsumos();
+  const linha = document.querySelector('#listaInsumos .insumo-novo');
+  if (linha) {
+    linha.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    document.getElementById('listaInsumos').closest('.card').scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+  mostrarAviso(`✓ ${nome} lançado — ${formatarData(dataCompra)}`);
+  setTimeout(() => { _insumoDestaque = null; renderInsumos(); }, 5000);
 }
  
 function atualizarFiltroAnoInsumos() {
@@ -3002,10 +3047,10 @@ function renderInsumos() {
   }).sort((a,b) => new Date(b.data||'2026-01-01') - new Date(a.data||'2026-01-01'));
  
   document.getElementById('listaInsumos').innerHTML = filtrados.map(i => `
-    <div class="insumo-item">
+    <div class="insumo-item${i.id===_insumoDestaque?' insumo-novo':''}">
       <div class="insumo-info">
-        <strong>${i.nome}</strong>
-        <span>📅 ${formatarData(i.data||defaultDateInput)} &nbsp;|&nbsp; Qtde: ${i.estoque||0} (${i.unidade||'?'}) &nbsp;|&nbsp; Unit: R$ ${(i.preco||0).toFixed(2)} &nbsp;|&nbsp; <b>Total: R$ ${((i.estoque||0)*(i.preco||0)).toFixed(2)}</b></span>
+        <strong>${i.nome}${i.id===_insumoDestaque?' <span class="tag-novo">✓ lançado agora</span>':''}</strong>
+        <span>📅 ${formatarData(i.data||_hoje())} &nbsp;|&nbsp; Qtde: ${i.estoque||0} (${i.unidade||'?'}) &nbsp;|&nbsp; Unit: R$ ${(i.preco||0).toFixed(2)} &nbsp;|&nbsp; <b>Total: R$ ${((i.estoque||0)*(i.preco||0)).toFixed(2)}</b></span>
       </div>
       <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirInsumo(${i.id})">🗑</button>
     </div>`).join('');
