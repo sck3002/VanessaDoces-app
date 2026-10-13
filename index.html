@@ -1405,8 +1405,10 @@ function importarBancoCompleto() {
 /* ===== ABAS ===== */
 function trocarAba(index) {
   ['novoPedidoOverlay','detalhePedidoOverlay','editClienteOverlay','editItensOverlay',
-   'agendaMesOverlay','agendaDiaOverlay','clienteDetalheOverlay','clienteFormOverlay']
+   'agendaMesOverlay','agendaDiaOverlay','clienteDetalheOverlay','clienteFormOverlay',
+   'seletorProdutoOverlay','modalCpfContrato']
     .forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('active'); });
+  _histLimpar();
   document.getElementById('navBackdrop')?.classList.remove('active');
   overlayDetalhePedidoId = null;
   document.querySelectorAll('.aba').forEach(a=>a.classList.remove('active'));
@@ -1435,14 +1437,66 @@ function trocarSubAbaAgenda(index) {
 }
 
 /* ===== OVERLAYS DE NAVEGAÇÃO ===== */
+/* ===== HISTÓRICO × TELAS: faz o gesto/botão voltar do Android fechar a tela de cima ===== */
+let _pilhaTelas = [];          /* ids das telas abertas, da mais antiga à mais nova */
+let _ignorarPop = 0;           /* popstate provocados por nós mesmos (não são gestos do usuário) */
+let _fechandoPorGesto = false;
+let _backPend = 0, _backTimer = null;
+const _fechadores = {
+  novoPedidoOverlay:    () => fecharNovoPedido(),
+  detalhePedidoOverlay: () => fecharDetalhePedido(),
+  editClienteOverlay:   () => fecharEditarCliente(),
+  editItensOverlay:     () => fecharEditarItens(),
+  seletorProdutoOverlay:() => fecharSeletorProdutos(),
+  clienteDetalheOverlay:() => fecharDetalheCliente(),
+  clienteFormOverlay:   () => fecharFormCliente(),
+  agendaMesOverlay:     () => fecharAgendaMes(),
+  agendaDiaOverlay:     () => fecharAgendaDia(),
+  modalCpfContrato:     () => fecharModalCpf()
+};
+function _histVoltar(n) {      /* junta vários "voltar" do mesmo instante em um único history.go */
+  _backPend += n;
+  if (_backTimer) return;
+  _backTimer = setTimeout(() => {
+    const k = _backPend; _backPend = 0; _backTimer = null;
+    if (k > 0) { _ignorarPop++; try { history.go(-k); } catch(e) { _ignorarPop--; } }
+  }, 0);
+}
+function _histAbrir(id) {
+  if (_pilhaTelas.includes(id)) return;
+  _pilhaTelas.push(id);
+  try { history.pushState({ tela: id }, ''); } catch(e) {}
+}
+function _histFechar(id) {
+  const i = _pilhaTelas.indexOf(id);
+  if (i < 0) return;
+  _pilhaTelas.splice(i, 1);
+  if (!_fechandoPorGesto) _histVoltar(1);
+}
+function _histLimpar() {       /* troca de aba: descarta os passos de todas as telas abertas */
+  const n = _pilhaTelas.length;
+  _pilhaTelas = [];
+  if (n) _histVoltar(n);
+}
+window.addEventListener('popstate', () => {
+  if (_ignorarPop > 0) { _ignorarPop--; return; }
+  const id = _pilhaTelas[_pilhaTelas.length - 1];
+  if (!id) return;
+  _fechandoPorGesto = true;
+  try { (_fechadores[id] || (() => {}))(); } finally { _fechandoPorGesto = false; }
+  _pilhaTelas = _pilhaTelas.filter(x => x !== id);
+});
+
 function _ovAbrir(id) {
   const el = document.getElementById(id);
   if (el) { el.classList.add('active'); el.scrollTop = 0; }
   document.getElementById('navBackdrop').classList.add('active');
+  _histAbrir(id);
 }
 function _ovFechar(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove('active');
+  _histFechar(id);
   const nivel1 = ['novoPedidoOverlay','detalhePedidoOverlay','agendaMesOverlay','clienteDetalheOverlay'];
   const algumAberto = nivel1.some(x => document.getElementById(x)?.classList.contains('active'));
   if (!algumAberto) document.getElementById('navBackdrop').classList.remove('active');
@@ -1895,6 +1949,11 @@ function abrirContrato(id) {
   document.getElementById('cpfContratoPedidoId').value = id;
   document.getElementById('cpfContratante').value = '';
   document.getElementById('modalCpfContrato').classList.add('active');
+  _histAbrir('modalCpfContrato');
+}
+function fecharModalCpf() {
+  document.getElementById('modalCpfContrato').classList.remove('active');
+  _histFechar('modalCpfContrato');
 }
 function abrirContratoDoModal() {
   if(!overlayDetalhePedidoId) return;
@@ -1908,7 +1967,7 @@ function gerarContrato() {
   if (!meuCadastro || !meuCadastro.nome || !meuCadastro.cpf) {
     alert('Preencha primeiro Cadastros → Meu Cadastro.'); return;
   }
-  document.getElementById('modalCpfContrato').classList.remove('active');
+  fecharModalCpf();
 
   const dataEntrega = p.data ? p.data.split('-').reverse().join('/') : '—';
   const hoje = new Date().toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
@@ -2329,16 +2388,60 @@ function calcularBalançoModalEditar() {
   divSaldo.style.color = saldo > 0 ? '#ff9800' : '#28a745';
 }
 function compartilharPedido() {
-  const id = overlayDetalhePedidoId;
-  const p  = pedidos.find(x => x.id === id); if (!p) return;
-  const dataFmt = p.data ? p.data.split('-').reverse().join('/') : '—';
-  const itens   = (p.itens||[]).map(i => `  • ${i.produto}: ${i.qtd} un — R$ ${(i.total||0).toFixed(2).replace('.',',')}`).join('\n');
-  const taxa    = p.taxaEntrega || 0;
-  const total   = (p.total||0).toFixed(2).replace('.',',');
-  const entrada = (p.entrada||0).toFixed(2).replace('.',',');
-  const saldo   = Math.max(0, (p.total||0) - (p.entrada||0)).toFixed(2).replace('.',',');
-  const linhaTaxa = taxa > 0 ? `\n🚚 Taxa de entrega: R$ ${taxa.toFixed(2).replace('.',',')}` : '';
-  const texto = `🍬 *Vanessa Doces Finos*\n\n👤 Cliente: ${p.cliente}\n📅 Entrega: ${dataFmt}\n📍 Endereço: ${p.endereco||'—'}\n\n*Itens do pedido:*\n${itens}\n\n💰 Total: R$ ${total}${linhaTaxa}\n✅ Entrada: R$ ${entrada}\n⏳ Saldo a pagar: R$ ${saldo}\n\n${p.obs ? '📝 Obs: ' + p.obs : ''}`.trim();
+  const p = pedidos.find(x => x.id === overlayDetalhePedidoId); if (!p) return;
+  const W = 30;                                   /* largura do bloco monoespaçado */
+  const brl = n => 'R$ ' + (n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  /* linha estilo cardápio: texto à esquerda, pontilhado, valor à direita */
+  const linha = (esq, dir) => {
+    const partes = []; let atual = '';
+    esq.split(' ').forEach(w => {
+      if ((atual + ' ' + w).trim().length > W - 2) { partes.push(atual); atual = w; }
+      else atual = (atual + ' ' + w).trim();
+    });
+    let ult = atual;
+    if (ult.length + dir.length + 5 > W) { partes.push(ult); ult = ''; }   /* valor não cabe: desce para linha própria */
+    const miolo = W - ult.length - dir.length - (ult ? 2 : 1);
+    return partes.concat((ult ? ult + ' ' : '') + '·'.repeat(miolo) + ' ' + dir).join('\n');
+  };
+  const semana = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+  let dataFmt = '—';
+  if (p.data) { const [y,m,d] = p.data.split('-'); dataFmt = `${semana[new Date(+y,+m-1,+d).getDay()]}, ${d}/${m}/${y}`; }
+
+  const itens    = p.itens || [];
+  const taxa     = p.taxaEntrega || 0;
+  const total    = p.total || 0;
+  const entrada  = p.entrada || 0;
+  const saldo    = Math.max(0, total - entrada);
+  const doces    = itens.reduce((a,i) => a + (i.total||0), 0);
+  const ajuste   = Math.round((total - doces - taxa) * 100) / 100;   /* mantém a conta sempre fechada */
+
+  const blocoItens = itens.map(i => linha(`${i.qtd} ${i.produto}`, brl(i.total))).join('\n');
+  const conta = [linha('Doces', brl(doces))];
+  if (taxa > 0)           conta.push(linha('+ Entrega', brl(taxa)));
+  if (Math.abs(ajuste)>=0.01) conta.push(linha(ajuste>0?'+ Ajuste':'− Desconto', brl(Math.abs(ajuste))));
+  conta.push('─'.repeat(W), linha('TOTAL', brl(total)));
+  if (entrada > 0)        conta.push(linha('Entrada paga', '− ' + brl(entrada)));
+
+  const aviso = taxa > 0
+    ? `🚚 _Entrega de ${brl(taxa)} *já incluída* no total._`
+    : `🏠 _Retirada no local · sem taxa de entrega._`;
+  const destaque = saldo > 0 ? `💰 *Falta pagar: ${brl(saldo)}*` : `✅ *Pedido quitado*`;
+
+  const texto = [
+    `✦ *Vanessa Doces Finos* ✦`,
+    `_Pedido de ${p.cliente}_`,
+    ``,
+    `*Entrega*  ${dataFmt}`,
+    `*Local*  ${p.endereco || 'a combinar'}`,
+    ``,
+    '```\n' + blocoItens + '\n' + '─'.repeat(W) + '\n' + conta.join('\n') + '\n```',
+    aviso,
+    destaque,
+    p.obs ? `\n📝 ${p.obs}` : '',
+    ``,
+    `_Feito com carinho_ 🍫`
+  ].join('\n').replace(/\n{3,}/g, '\n\n').trim();
+
   if (navigator.share) {
     navigator.share({ title: 'Pedido — ' + p.cliente, text: texto });
   } else {
@@ -3766,7 +3869,7 @@ function atualizarTodasAsTelas() {
     <label>CPF do Cliente</label>
     <input type="text" id="cpfContratante" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCpf(this)">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">
-      <button class="btn btn-cinza" onclick="document.getElementById('modalCpfContrato').classList.remove('active')">Cancelar</button>
+      <button class="btn btn-cinza" onclick="fecharModalCpf()">Cancelar</button>
       <button class="btn btn-marrom" onclick="gerarContrato()">Gerar</button>
     </div>
   </div>
