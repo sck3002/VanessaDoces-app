@@ -1186,13 +1186,13 @@ verificarLogin().then(logado => {
     })
     .catch(err => {
       console.error('Erro ao carregar banco:', err);
-      alert('Erro ao carregar o banco de dados. Verifique o console.');
+      alert('Erro ao carregar o banco de dados.\n' + (err && err.message ? err.message : 'Verifique o console.'));
     });
 });
  
 async function sbListar(tabela) {
   const { data, error } = await sbClient.from(tabela).select('*');
-  if (error) { console.error(`Erro ao listar ${tabela}:`, error.message); return []; }
+  if (error) { console.error(`Erro ao listar ${tabela}:`, error.message); return null; }
   return data || [];
 }
 async function sbUpsert(tabela, lista) {
@@ -1249,104 +1249,6 @@ document.getElementById('dataAtual').innerText =
 
 document.getElementById('dataCompraInsumo').value = _hoje();   /* data local (toISOString usava UTC e virava o dia às 21h) */
  
-const BANCO_INICIAL = {
-  produtos: [
-    {id:1,nome:"Brigadeiro",preco:1.10},{id:2,nome:"Cajuzinho",preco:1.10},{id:3,nome:"Casadinho",preco:1.10},
-    {id:4,nome:"Brigadeiro de Churros",preco:1.10},{id:5,nome:"Beijinho",preco:1.10},{id:6,nome:"Chocobol",preco:1.10},
-    {id:7,nome:"Camafeu de Nozes",preco:1.25},{id:8,nome:"Olho de Sogra",preco:1.25},{id:9,nome:"Brigadeiro de Café",preco:1.25},
-    {id:10,nome:"Ninho com Nutella",preco:1.25},{id:11,nome:"Ferrero",preco:1.25},{id:12,nome:"Bombom de Uva",preco:1.30},
-    {id:13,nome:"Bombom de Coco",preco:1.30},{id:14,nome:"Bombom de Nozes",preco:1.30},{id:15,nome:"Bombom de Flocos",preco:1.30},
-    {id:16,nome:"Bombom de Cereja",preco:1.30},{id:17,nome:"Bombom Ouriço",preco:1.30},{id:18,nome:"Bombom de Brigadeiro",preco:1.30},
-    {id:19,nome:"Bombom de Amendoim",preco:1.30},{id:20,nome:"Bombom de Coco com Damasco",preco:1.30},
-    {id:21,nome:"Bombom de Abacaxi com Coco",preco:1.30},{id:22,nome:"Copinho de Limão",preco:1.50},
-    {id:23,nome:"Copinho de Maracujá",preco:1.50},{id:24,nome:"Gotas de Paçoca",preco:1.50},{id:25,nome:"Damasco Recheado",preco:1.50},
-    {id:26,nome:"Copinho de Cereja",preco:2.00},{id:27,nome:"Copinho de Morango",preco:1.70},{id:28,nome:"Mini Bolinho",preco:2.50},
-    {id:29,nome:"Bem Casado",preco:3.50}
-  ],
-  insumos: [
-    {id:101,nome:"Coco 5k",unidade:"un",estoque:1,preco:144.90,data:"2026-03-01"},
-    {id:105,nome:"Creme de leite",unidade:"un",estoque:27,preco:2.49,data:"2026-03-05"},
-    {id:122,nome:"Nutella 3k",unidade:"un",estoque:1,preco:189.00,data:"2026-04-02"},
-    {id:139,nome:"Gas",unidade:"un",estoque:1,preco:55.00,data:"2026-03-10"}
-  ],
-  pedidos: [
-    {id:1001,cliente:"Aline",data:"2026-03-01",status:"pago",entrada:180.00,total:180.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Camafeu de Nozes",qtd:66,valor:1.20,total:80.00}]},
-    {id:1002,cliente:"Emily",data:"2026-03-01",status:"pago",entrada:170.00,total:170.00,itens:[{produto:"Casadinho",qtd:170,valor:1.00,total:170.00}]},
-    {id:1003,cliente:"Hyolanda",data:"2026-05-10",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Beijinho",qtd:120,valor:1.00,total:120.00}]},
-    {id:1004,cliente:"Mariana",data:"2026-05-15",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro de Churros",qtd:120,valor:1.00,total:120.00}]},
-    {id:1005,cliente:"Rayane",data:"2026-06-20",status:"pago",entrada:110.00,total:110.00,itens:[{produto:"Chocobol",qtd:110,valor:1.00,total:110.00}]},
-    {id:1006,cliente:"Geiza Reis",data:"2026-03-04",status:"pago",entrada:132.00,total:132.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00},{produto:"Ferrero",qtd:26,valor:1.20,total:32.00}]},
-    {id:1007,cliente:"Mayara Marcolino",data:"2026-03-06",status:"pago",entrada:60.00,total:60.00,itens:[{produto:"Brigadeiro",qtd:30,valor:1.00,total:30.00},{produto:"Beijinho",qtd:30,valor:1.00,total:30.00}]},
-    {id:1008,cliente:"Bruna Luiza",data:"2026-03-07",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1009,cliente:"Bete",data:"2026-03-07",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1010,cliente:"Gisele",data:"2026-03-07",status:"pago",entrada:140.00,total:140.00,itens:[{produto:"Brigadeiro",qtd:140,valor:1.00,total:140.00}]},
-    {id:1011,cliente:"Duda",data:"2026-03-07",status:"pago",entrada:300.00,total:300.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Beijinho",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1012,cliente:"Carla Virginia",data:"2026-03-07",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1013,cliente:"Rafaela",data:"2026-03-07",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:30,valor:1.00,total:30.00},{produto:"Casadinho",qtd:30,valor:1.00,total:30.00},{produto:"Beijinho",qtd:30,valor:1.00,total:30.00},{produto:"Brigadeiro de Churros",qtd:30,valor:1.00,total:30.00}]},
-    {id:1014,cliente:"Sônia",data:"2026-03-08",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:30,valor:1.00,total:30.00},{produto:"Casadinho",qtd:30,valor:1.00,total:30.00},{produto:"Beijinho",qtd:30,valor:1.00,total:30.00},{produto:"Cajuzinho",qtd:30,valor:1.00,total:30.00}]},
-    {id:1015,cliente:"Marta",data:"2026-03-12",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00}]},
-    {id:1016,cliente:"Patrícia",data:"2026-03-14",status:"pago",entrada:220.00,total:220.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00},{produto:"Ninho com Nutella",qtd:16,valor:1.20,total:20.00}]},
-    {id:1017,cliente:"Marcos",data:"2026-03-14",status:"pago",entrada:200.00,total:200.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Beijinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1018,cliente:"Vivian",data:"2026-03-14",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1019,cliente:"Larissa",data:"2026-03-14",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro de Churros",qtd:100,valor:1.00,total:100.00},{produto:"Ferrero",qtd:16,valor:1.20,total:20.00}]},
-    {id:1020,cliente:"Kênia",data:"2026-03-14",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Beijinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1021,cliente:"Nivia",data:"2026-03-15",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1022,cliente:"Lúcia",data:"2026-03-17",status:"pago",entrada:50.00,total:50.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00}]},
-    {id:1023,cliente:"Renata Miranda",data:"2026-03-19",status:"pago",entrada:240.00,total:240.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00},{produto:"Bombom de Uva",qtd:33,valor:1.20,total:40.00}]},
-    {id:1024,cliente:"Thaís",data:"2026-03-21",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:60,valor:1.00,total:60.00},{produto:"Beijinho",qtd:60,valor:1.00,total:60.00}]},
-    {id:1025,cliente:"Carla",data:"2026-03-21",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1026,cliente:"Juliana Santos",data:"2026-03-21",status:"pago",entrada:180.00,total:180.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Ninho com Nutella",qtd:66,valor:1.20,total:80.00}]},
-    {id:1027,cliente:"Mônica",data:"2026-03-22",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1028,cliente:"Sílvia Reis",data:"2026-03-24",status:"pago",entrada:80.00,total:80.00,itens:[{produto:"Brigadeiro",qtd:40,valor:1.00,total:40.00},{produto:"Casadinho",qtd:40,valor:1.00,total:40.00}]},
-    {id:1029,cliente:"Andressa",data:"2026-03-26",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00}]},
-    {id:1030,cliente:"Letícia",data:"2026-03-28",status:"pago",entrada:200.00,total:200.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Beijinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1031,cliente:"Fernanda",data:"2026-03-28",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00},{produto:"Brigadeiro de Churros",qtd:50,valor:1.00,total:50.00}]},
-    {id:1032,cliente:"Mariane",data:"2026-03-28",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:60,valor:1.00,total:60.00},{produto:"Cajuzinho",qtd:60,valor:1.00,total:60.00}]},
-    {id:1033,cliente:"Isabela",data:"2026-03-28",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1034,cliente:"Gabriela",data:"2026-03-29",status:"pago",entrada:130.00,total:130.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Ferrero",qtd:66,valor:1.20,total:80.00}]},
-    {id:1035,cliente:"Priscila",data:"2026-03-31",status:"pago",entrada:90.00,total:90.00,itens:[{produto:"Brigadeiro",qtd:45,valor:1.00,total:45.00},{produto:"Beijinho",qtd:45,valor:1.00,total:45.00}]},
-    {id:1036,cliente:"Camila Mara",data:"2026-04-02",status:"pago",entrada:160.00,total:160.00,itens:[{produto:"Brigadeiro",qtd:80,valor:1.00,total:80.00},{produto:"Casadinho",qtd:80,valor:1.00,total:80.00}]},
-    {id:1037,cliente:"Tatiana",data:"2026-04-04",status:"pago",entrada:110.00,total:110.00,itens:[{produto:"Brigadeiro",qtd:55,valor:1.00,total:55.00},{produto:"Beijinho",qtd:55,valor:1.00,total:55.00}]},
-    {id:1038,cliente:"Sandra",data:"2026-04-04",status:"pago",entrada:200.00,total:200.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1039,cliente:"Soraia",data:"2026-04-04",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00},{produto:"Cajuzinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1040,cliente:"Amanda Reis",data:"2026-04-05",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro de Churros",qtd:120,valor:1.00,total:120.00}]},
-    {id:1041,cliente:"Cristiane",data:"2026-04-08",status:"pago",entrada:80.00,total:80.00,itens:[{produto:"Brigadeiro",qtd:40,valor:1.00,total:40.00},{produto:"Casadinho",qtd:40,valor:1.00,total:40.00}]},
-    {id:1042,cliente:"Regiane",data:"2026-04-11",status:"pago",entrada:210.00,total:210.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Ninho com Nutella",qtd:91,valor:1.20,total:110.00}]},
-    {id:1043,cliente:"Vanessa Torres",data:"2026-04-11",status:"pago",entrada:140.00,total:140.00,itens:[{produto:"Brigadeiro",qtd:70,valor:1.00,total:70.00},{produto:"Beijinho",qtd:70,valor:1.00,total:70.00}]},
-    {id:1044,cliente:"Aline Santos",data:"2026-04-11",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1045,cliente:"Milena",data:"2026-04-12",status:"pago",entrada:130.00,total:130.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Bombom de Uva",qtd:66,valor:1.20,total:80.00}]},
-    {id:1046,cliente:"Juliana Ferraz",data:"2026-04-15",status:"pago",entrada:90.00,total:90.00,itens:[{produto:"Brigadeiro",qtd:45,valor:1.00,total:45.00},{produto:"Cajuzinho",qtd:45,valor:1.00,total:45.00}]},
-    {id:1047,cliente:"Daniela",data:"2026-04-18",status:"pago",entrada:250.00,total:250.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00},{produto:"Ferrero",qtd:41,valor:1.20,total:50.00}]},
-    {id:1048,cliente:"Elaine",data:"2026-04-18",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00},{produto:"Brigadeiro de Churros",qtd:50,valor:1.00,total:50.00}]},
-    {id:1049,cliente:"Lilian",data:"2026-04-18",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1050,cliente:"Tânia",data:"2026-04-19",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:60,valor:1.00,total:60.00},{produto:"Beijinho",qtd:60,valor:1.00,total:60.00}]},
-    {id:1051,cliente:"Karina",data:"2026-04-22",status:"pago",entrada:70.00,total:70.00,itens:[{produto:"Brigadeiro",qtd:35,valor:1.00,total:35.00},{produto:"Casadinho",qtd:35,valor:1.00,total:35.00}]},
-    {id:1052,cliente:"Michele",data:"2026-04-25",status:"pago",entrada:180.00,total:180.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Ninho com Nutella",qtd:66,valor:1.20,total:80.00}]},
-    {id:1053,cliente:"Priscila Ramos",data:"2026-04-25",status:"pago",entrada:130.00,total:130.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Bombom de Coco",qtd:66,valor:1.20,total:80.00}]},
-    {id:1054,cliente:"Fabiana",data:"2026-04-25",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Beijinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1055,cliente:"Gisele Silva",data:"2026-04-26",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1056,cliente:"Kelly",data:"2026-04-29",status:"pago",entrada:80.00,total:80.00,itens:[{produto:"Brigadeiro",qtd:40,valor:1.00,total:40.00},{produto:"Cajuzinho",qtd:40,valor:1.00,total:40.00}]},
-    {id:1057,cliente:"Úrsula",data:"2026-05-02",status:"pago",entrada:220.00,total:220.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00},{produto:"Ferrero",qtd:16,valor:1.20,total:20.00}]},
-    {id:1058,cliente:"Simone",data:"2026-05-02",status:"pago",entrada:140.00,total:140.00,itens:[{produto:"Brigadeiro",qtd:70,valor:1.00,total:70.00},{produto:"Beijinho",qtd:70,valor:1.00,total:70.00}]},
-    {id:1059,cliente:"Renata Reis",data:"2026-05-02",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro de Churros",qtd:100,valor:1.00,total:100.00}]},
-    {id:1060,cliente:"Talita",data:"2026-05-03",status:"pago",entrada:130.00,total:130.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Bombom de Nozes",qtd:66,valor:1.20,total:80.00}]},
-    {id:1061,cliente:"Sílvia",data:"2026-05-06",status:"pago",entrada:90.00,total:90.00,itens:[{produto:"Brigadeiro",qtd:45,valor:1.00,total:45.00},{produto:"Casadinho",qtd:45,valor:1.00,total:45.00}]},
-    {id:1062,cliente:"Lívia",data:"2026-05-09",status:"pago",entrada:200.00,total:200.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1063,cliente:"Cláudia",data:"2026-05-09",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00},{produto:"Cajuzinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1064,cliente:"Andreia",data:"2026-05-10",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro de Churros",qtd:120,valor:1.00,total:120.00}]},
-    {id:1065,cliente:"Antônia",data:"2026-05-13",status:"pago",entrada:80.00,total:80.00,itens:[{produto:"Brigadeiro",qtd:40,valor:1.00,total:40.00},{produto:"Casadinho",qtd:40,valor:1.00,total:40.00}]},
-    {id:1066,cliente:"Paula",data:"2026-05-16",status:"pago",entrada:180.00,total:180.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Ninho com Nutella",qtd:66,valor:1.20,total:80.00}]},
-    {id:1067,cliente:"Marisa",data:"2026-05-16",status:"pago",entrada:140.00,total:140.00,itens:[{produto:"Brigadeiro",qtd:70,valor:1.00,total:70.00},{produto:"Beijinho",qtd:70,valor:1.00,total:70.00}]},
-    {id:1068,cliente:"Beatriz",data:"2026-05-16",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1069,cliente:"Sueli",data:"2026-05-17",status:"pago",entrada:130.00,total:130.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Bombom de Flocos",qtd:66,valor:1.20,total:80.00}]},
-    {id:1070,cliente:"Regina",data:"2026-05-20",status:"pago",entrada:90.00,total:90.00,itens:[{produto:"Brigadeiro",qtd:45,valor:1.00,total:45.00},{produto:"Cajuzinho",qtd:45,valor:1.00,total:45.00}]},
-    {id:1071,cliente:"Solange",data:"2026-05-23",status:"pago",entrada:240.00,total:240.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00},{produto:"Ferrero",qtd:33,valor:1.20,total:40.00}]},
-    {id:1072,cliente:"Jéssica",data:"2026-05-23",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00},{produto:"Brigadeiro de Churros",qtd:50,valor:1.00,total:50.00}]},
-    {id:1073,cliente:"Luciana",data:"2026-05-23",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1074,cliente:"Diana",data:"2026-05-24",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:60,valor:1.00,total:60.00},{produto:"Beijinho",qtd:60,valor:1.00,total:60.00}]},
-    {id:1075,cliente:"Bruna",data:"2026-05-27",status:"pago",entrada:70.00,total:70.00,itens:[{produto:"Brigadeiro",qtd:35,valor:1.00,total:35.00},{produto:"Casadinho",qtd:35,valor:1.00,total:35.00}]}
-  ]
-};
  
 /* ===== BACKUP / RESTAURAÇÃO ===== */
 function exportarBackup() {
@@ -1380,29 +1282,16 @@ async function carregarSistema() {
     sbListar('tipos_massa'), sbListar('massas_diario'),
     sbListar('meu_cadastro')
   ]);
-  meuCadastro = (mc && mc.length) ? mc[0] : null;
-  if (p.length === 0 && pr.length === 0 && ins.length === 0) {
-    pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
-    produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
-    insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
-    clientes = []; tiposInsumos = []; tiposMassa = []; massasDiario = [];
-    await Promise.all([sbUpsert('pedidos',pedidos),sbUpsert('produtos',produtos),sbUpsert('insumos',insumos)]);
-  } else {
-    pedidos = p || []; produtos = pr || []; insumos = ins || [];
-    clientes = cli || []; tiposInsumos = ti || [];
-    tiposMassa = tm || []; massasDiario = md || [];
+  /* Se alguma leitura falhou, não segue com tela vazia (e nunca grava dados iniciais) */
+  if ([p, pr, ins, cli, ti, tm, md, mc].some(x => x === null)) {
+    throw new Error('Falha ao ler o banco (sessão expirada ou sem permissão). Saia e entre de novo.');
   }
+  meuCadastro = (mc && mc.length) ? mc[0] : null;
+  pedidos = p; produtos = pr; insumos = ins;
+  clientes = cli; tiposInsumos = ti;
+  tiposMassa = tm; massasDiario = md;
 }
  
-function importarBancoCompleto() {
-  if (confirm("Deseja redefinir para as configurações iniciais do Banco de Dados?")) {
-    pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
-    produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
-    insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
-    tiposInsumos = [];
-    salvarLS(); atualizarTodasAsTelas(); alert("Sistema reiniciado com a base de dados original!");
-  }
-}
  
  
 /* ===== ABAS ===== */
@@ -1560,13 +1449,13 @@ function renderDetalhePedido(id) {
   const stCls   = {'pendente':'badge-pendente','pago':'badge-pago','cancelado':'badge-cancelado'}[p.status||'pendente'];
   const itensHtml = itens.map(i=>`
     <div class="detalhe-item-row">
-      <span>🍬 ${i.produto} — ${i.qtd} un</span>
+      <span>🍬 ${esc(i.produto)} — ${i.qtd} un</span>
       <span style="color:#d94d7d;font-weight:600;">R$ ${(i.total||0).toFixed(2)}</span>
     </div>`).join('');
   document.getElementById('detalheTitulo').textContent = (p.cliente||'Pedido').split(' ')[0];
   document.getElementById('detalheConteudo').innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <span class="badge ${stCls}" style="font-size:12px;">${(p.status||'pendente').toUpperCase()}</span>
+      <span class="badge ${stCls}" style="font-size:12px;">${esc((p.status||'pendente').toUpperCase())}</span>
       <span style="font-size:13px;color:#666;">📅 ${formatarData(p.data)}</span>
     </div>
     <div class="detalhe-secao">
@@ -1574,10 +1463,10 @@ function renderDetalhePedido(id) {
         <span class="detalhe-label">👤 Cliente</span>
         <button class="btn-acao btn-acao-azul" onclick="abrirEditarCliente()">✏️ Editar</button>
       </div>
-      <p style="font-size:15px;font-weight:700;color:#333;margin:0 0 4px;">${p.cliente||'—'}</p>
-      ${p.telefone?`<p style="font-size:13px;color:#555;margin:2px 0;">📱 ${p.telefone}</p>`:''}
-      ${p.endereco?`<p style="font-size:13px;color:#555;margin:2px 0;">📍 ${p.endereco}</p>`:''}
-      ${p.obs?`<p style="font-size:12px;color:#888;margin:6px 0 0;font-style:italic;">📝 ${p.obs}</p>`:''}
+      <p style="font-size:15px;font-weight:700;color:#333;margin:0 0 4px;">${esc(p.cliente||'—')}</p>
+      ${p.telefone?`<p style="font-size:13px;color:#555;margin:2px 0;">📱 ${esc(p.telefone)}</p>`:''}
+      ${p.endereco?`<p style="font-size:13px;color:#555;margin:2px 0;">📍 ${esc(p.endereco)}</p>`:''}
+      ${p.obs?`<p style="font-size:12px;color:#888;margin:6px 0 0;font-style:italic;">📝 ${esc(p.obs)}</p>`:''}
     </div>
     <div class="detalhe-secao">
       <div class="detalhe-secao-header">
@@ -1641,7 +1530,7 @@ function abrirEditarItens() {
   document.getElementById('editValorEntrada').value = (p.entrada||0).toFixed(2);
   calcularBalançoModalEditar();
   const sel = document.getElementById('editAdicionarDoceSelect');
-  sel.innerHTML = produtos.map(pr=>`<option value="${pr.id}">${pr.nome} (R$ ${(pr.preco||0).toFixed(2)}/un)</option>`).join('');
+  sel.innerHTML = produtos.map(pr=>`<option value="${esc(pr.id)}">${esc(pr.nome)} (R$ ${(pr.preco||0).toFixed(2)}/un)</option>`).join('');
   resetSeletorProduto();
   _ovAbrir('editItensOverlay');
 }
@@ -1742,9 +1631,9 @@ function buscarClientePorNome() {
   if (!encontrados.length) { lista.style.display = 'none'; return; }
 
   lista.innerHTML = encontrados.map(c => `
-    <div class="autocomplete-item" onclick="selecionarClientePorTelefone('${c.id}')">
-      <strong>${c.nome}</strong>
-      <span>${c.tel||''} — ${c.end||''}</span>
+    <div class="autocomplete-item" data-id="${esc(c.id)}" onclick="selecionarClientePorTelefone(this.dataset.id)">
+      <strong>${esc(c.nome)}</strong>
+      <span>${esc(c.tel||'')} — ${esc(c.end||'')}</span>
     </div>`).join('');
   lista.style.display = 'block';
 }
@@ -1772,9 +1661,9 @@ function buscarClientePorTelefone() {
   if (encontrados.length === 0) { lista.style.display = 'none'; return; }
  
   lista.innerHTML = encontrados.map(c => `
-    <div class="autocomplete-item" onclick="selecionarClientePorTelefone('${c.id}')">
-      <strong>${c.nome}</strong>
-      <span>${c.tel || ''} — ${c.end || ''}</span>
+    <div class="autocomplete-item" data-id="${esc(c.id)}" onclick="selecionarClientePorTelefone(this.dataset.id)">
+      <strong>${esc(c.nome)}</strong>
+      <span>${esc(c.tel || '')} — ${esc(c.end || '')}</span>
     </div>
   `).join('');
   lista.style.display = 'block';
@@ -1842,7 +1731,7 @@ function abrirSeletorProdutos(selectId) {
     const lista = grupos[cat]; if (!lista.length) return '';
     return `<div class="picker-secao">${cat}</div>` + lista.map(p => `
       <div class="picker-item ${String(p.id)===selecionado?'picker-item-ativo':''}" onclick="escolherProduto(${p.id})">
-        <span class="picker-item-nome">${p.nome}</span>
+        <span class="picker-item-nome">${esc(p.nome)}</span>
         <span class="picker-item-preco">${(p.preco||0).toFixed(2).replace('.',',')}</span>
       </div>`).join('');
   }).join('');
@@ -1892,7 +1781,7 @@ function adicionarItem() {
 }
 function renderItensTabela() {
   document.querySelector('#tabelaItens tbody').innerHTML = itensPedidoAtual.map((item, idx)=>`
-    <tr><td>${item.produto}</td><td>${item.qtd} un</td><td>R$ ${item.valor.toFixed(2)}</td><td>R$ ${item.total.toFixed(2)}</td>
+    <tr><td>${esc(item.produto)}</td><td>${item.qtd} un</td><td>R$ ${item.valor.toFixed(2)}</td><td>R$ ${item.total.toFixed(2)}</td>
     <td><button class="btn btn-vermelho" style="padding:6px 12px;" onclick="removerItemAtual(${idx})">Excluir</button></td></tr>
   `).join('');
 }
@@ -2004,7 +1893,7 @@ function gerarContrato() {
 
   const linhasItens = p.itens.map(i=>`
     <tr>
-      <td style="padding:6px 10px;border:1px solid #ccc;">${i.produto}</td>
+      <td style="padding:6px 10px;border:1px solid #ccc;">${esc(i.produto)}</td>
       <td style="padding:6px 10px;border:1px solid #ccc;text-align:center;">${i.qtd}</td>
       <td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">R$ ${(i.valor||0).toFixed(2).replace('.',',')}</td>
       <td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">R$ ${(i.total||0).toFixed(2).replace('.',',')}</td>
@@ -2019,7 +1908,7 @@ function gerarContrato() {
     </tr>` : '';
 
   const html = `<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8">
-  <title>Contrato - ${p.cliente}</title>
+  <title>Contrato - ${esc(p.cliente)}</title>
   <scr` + `ipt src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/scr` + `ipt>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -2043,9 +1932,9 @@ function gerarContrato() {
   <h1>CONTRATO DE PRESTAÇÃO DE SERVIÇOS</h1>
 
   <h2>1. DA IDENTIFICAÇÃO DAS PARTES</h2>
-  <p>Pelo presente contrato de prestação de serviços, firmado entre <b>${p.cliente}</b>, C.P.F ${cpf},
-  endereço ${p.endereco||'—'}, telefone ${p.telefone||'—'}, doravante denominada <b>CONTRATANTE</b>,
-  e <b>${meuCadastro.nome}</b>, C.P.F. ${meuCadastro.cpf}, telefone ${meuCadastro.telefone||'—'} doravante denominada
+  <p>Pelo presente contrato de prestação de serviços, firmado entre <b>${esc(p.cliente)}</b>, C.P.F ${esc(cpf)},
+  endereço ${esc(p.endereco||'—')}, telefone ${esc(p.telefone||'—')}, doravante denominada <b>CONTRATANTE</b>,
+  e <b>${esc(meuCadastro.nome)}</b>, C.P.F. ${esc(meuCadastro.cpf)}, telefone ${esc(meuCadastro.telefone||'—')} doravante denominada
   <b>CONTRATADA</b>, as partes identificadas acima têm entre si justos e acertados os termos que reger-se-ão
   pelas cláusulas seguintes.</p>
 
@@ -2138,7 +2027,7 @@ function gerarContrato() {
       const el = document.getElementById('contrato-conteudo');
       const opt = {
         margin:       [10, 10, 10, 10],
-        filename:     'Contrato_${p.cliente.replace(/\s+/g,'_')}.pdf',
+        filename:     'Contrato_${p.cliente.replace(/[^\p{L}\p{N}_-]+/gu,'_')}.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -2146,7 +2035,7 @@ function gerarContrato() {
       const pdfBlob = await html2pdf().set(opt).from(el).outputPdf('blob');
       const file = new File([pdfBlob], opt.filename, { type: 'application/pdf' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Contrato ${p.cliente}' });
+        await navigator.share({ files: [file], title: 'Contrato ${p.cliente.replace(/[^\p{L}\p{N} _-]+/gu,'')}' });
       } else {
         /* Fallback: download direto */
         const url = URL.createObjectURL(pdfBlob);
@@ -2206,11 +2095,11 @@ function renderizarClientes(filtroExterno) {
     return;
   }
   cont.innerHTML = lista.map(c => `
-    <div class="pedido-item" style="cursor:pointer;" onclick="abrirDetalheCliente('${c.id}')">
+    <div class="pedido-item" style="cursor:pointer;" data-id="${esc(c.id)}" onclick="abrirDetalheCliente(this.dataset.id)">
       <div class="pedido-info">
-        <strong>${c.nome||'—'}</strong>
-        <span>📱 ${c.tel||'—'}</span>
-        ${c.end?`<span>📍 ${c.end}</span>`:''}
+        <strong>${esc(c.nome||'—')}</strong>
+        <span>📱 ${esc(c.tel||'—')}</span>
+        ${c.end?`<span>📍 ${esc(c.end)}</span>`:''}
       </div>
       <span style="font-size:20px;color:#ccc;">›</span>
     </div>`).join('');
@@ -2223,14 +2112,14 @@ function abrirDetalheCliente(id) {
     <div class="detalhe-secao">
       <div class="detalhe-secao-header">
         <span class="detalhe-label">👤 Dados</span>
-        <button class="btn-acao btn-acao-azul" onclick="abrirFormCliente('${c.id}')">✏️ Editar</button>
+        <button class="btn-acao btn-acao-azul" data-id="${esc(c.id)}" onclick="abrirFormCliente(this.dataset.id)">✏️ Editar</button>
       </div>
-      <p style="font-size:15px;font-weight:700;margin:0 0 6px;">${c.nome||'—'}</p>
-      <p style="font-size:13px;color:#555;margin:3px 0;">📱 ${c.tel||'—'}</p>
-      ${c.end?`<p style="font-size:13px;color:#555;margin:3px 0;">📍 ${c.end}</p>`:''}
+      <p style="font-size:15px;font-weight:700;margin:0 0 6px;">${esc(c.nome||'—')}</p>
+      <p style="font-size:13px;color:#555;margin:3px 0;">📱 ${esc(c.tel||'—')}</p>
+      ${c.end?`<p style="font-size:13px;color:#555;margin:3px 0;">📍 ${esc(c.end)}</p>`:''}
     </div>
     <button class="btn btn-vermelho" style="width:100%;margin-top:12px;padding:11px;"
-      onclick="excluirClienteOverlay('${c.id}')">🗑 Excluir Cliente</button>`;
+      data-id="${esc(c.id)}" onclick="excluirClienteOverlay(this.dataset.id)">🗑 Excluir Cliente</button>`;
   _ovAbrir('clienteDetalheOverlay');
 }
 function fecharDetalheCliente() { _ovFechar('clienteDetalheOverlay'); }
@@ -2320,12 +2209,12 @@ function renderPedidos() {
     const unTotal = Math.round(itens.reduce((s,i)=>s+(i.qtd||0),0));
     return `<div class="pedido-item" onclick="abrirDetalhePedido(${p.id})" style="cursor:pointer;">
       <div class="pedido-info">
-        <strong>${cliente}</strong>
+        <strong>${esc(cliente)}</strong>
         <span>${formatarData(p.data)} · ${unTotal} un${saldo>0?` · saldo ${fmtBRL(saldo)}`:''}</span>
       </div>
       <div class="pedido-lado">
         <b>${fmtBRL(total)}</b>
-        <small class="st-${status}">${status}</small>
+        <small class="st-${esc(status)}">${esc(status)}</small>
       </div>
     </div>`;
   }).join('');
@@ -2364,7 +2253,7 @@ function atualizarItensTabelaModalEditar() {
       totalAcumulado += subtotal;
       return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:white;border-radius:10px;margin-bottom:6px;border:1px solid #eee;gap:8px;">
         <div style="flex:1;min-width:0;">
-          <div style="font-weight:600;font-size:13px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.produto}</div>
+          <div style="font-weight:600;font-size:13px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(item.produto)}</div>
           <div style="font-size:11px;color:#888;">R$ ${unitario.toFixed(2)} un · Total: <b style="color:#d94d7d;">R$ ${subtotal.toFixed(2)}</b></div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
@@ -2627,13 +2516,13 @@ function mostrarPedidosDoDia(data, lista) {
         onclick="abrirDetalhePedidoDeAgenda(${p.id})">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <div>
-          <strong style="font-size:13px;color:#8a5a34;">${p.cliente||''}</strong>
+          <strong style="font-size:13px;color:#8a5a34;">${esc(p.cliente||'')}</strong>
           <div style="font-size:11px;color:#666;margin-top:2px;">
             🍬 ${Math.round(doc)} un${bc>0?` · 💍 ${Math.round(bc)} BC`:''}
             &nbsp;·&nbsp; R$ ${(p.total||0).toFixed(2)}
           </div>
         </div>
-        <span class="badge badge-${st}" style="font-size:10px;padding:2px 8px;">${st.toUpperCase()}</span>
+        <span class="badge badge-${st}" style="font-size:10px;padding:2px 8px;">${esc(st.toUpperCase())}</span>
       </div>
     </div>`;
   }).join('');
@@ -2705,16 +2594,16 @@ function abrirA4(data, pedidosDia) {
     const totalStr = `${totalPedido} doces${bc>0?` e ${Math.round(bc)} bem casados`:''}`;
     colunas[index%3] += `
       <div class="print-pedido-box">
-        <div class="print-pedido-header">${p.cliente.toUpperCase()}</div>
+        <div class="print-pedido-header">${esc(p.cliente.toUpperCase())}</div>
         <div class="print-pedido-body">
           <table class="print-pedido-table">
             <thead><tr><th>Qtd</th><th>Produto</th></tr></thead>
-            <tbody>${p.itens.map(i=>`<tr><td>${Math.round(i.qtd)}</td><td>${i.produto}</td></tr>`).join('')}</tbody>
+            <tbody>${p.itens.map(i=>`<tr><td>${Math.round(i.qtd)}</td><td>${esc(i.produto)}</td></tr>`).join('')}</tbody>
           </table>
           <div style="margin-top:6px;font-weight:bold;font-size:10px;border-top:1px dashed #ccc;padding-top:4px;">
             Total: ${totalStr}
           </div>
-          ${p.obs?`<div style="margin-top:4px;font-style:italic;color:#666;font-size:9px;"><b>Obs:</b> ${p.obs}</div>`:''}
+          ${p.obs?`<div style="margin-top:4px;font-style:italic;color:#666;font-size:9px;"><b>Obs:</b> ${esc(p.obs)}</div>`:''}
         </div>
       </div>`;
   });
@@ -2838,7 +2727,7 @@ function abrirA4(data, pedidosDia) {
         </h3>
 
         ${Object.entries(totaisMassas).map(([k,v]) =>
-          v > 0 ? `<div>${k}: <b>${v.toFixed(2)} UN</b></div>` : ''
+          v > 0 ? `<div>${esc(k)}: <b>${v.toFixed(2)} UN</b></div>` : ''
         ).join('')}
         ${!Object.values(totaisMassas).some(v=>v>0) ? '<div style="color:#aaa;font-size:10px;">Configure a receita nos produtos</div>' : ''}
         ${semReceita.size > 0 ? `<div style="color:#c07000;font-size:9px;margin-top:4px;">⚠️ Sem receita: ${[...semReceita].join(', ')}</div>` : ''}
@@ -2865,7 +2754,7 @@ function abrirA4(data, pedidosDia) {
           ${Object.entries(consolidadoDocesDia).map(([k,v]) => `
 
             <div>
-              ${k}: <b>${v}</b>
+              ${esc(k)}: <b>${v}</b>
             </div>
 
           `).join('')}
@@ -2896,9 +2785,9 @@ function abrirA4(data, pedidosDia) {
       const saldo = (p.total||0) - (p.entrada||0);
       return `
         <div class="card-entrega">
-          <div class="card-nome">${p.cliente}</div>
-          <div><b>Endereço:</b> ${clienteCadastro.end||'-'}</div>
-          <div style="margin-top:4px;"><b>Telefone:</b> ${clienteCadastro.tel||p.telefone||'-'}</div>
+          <div class="card-nome">${esc(p.cliente)}</div>
+          <div><b>Endereço:</b> ${esc(clienteCadastro.end||'-')}</div>
+          <div style="margin-top:4px;"><b>Telefone:</b> ${esc(clienteCadastro.tel||p.telefone||'-')}</div>
           <div class="card-saldo">Saldo a Receber: R$ ${saldo.toFixed(2).replace('.',',')}</div>
         </div>`;
     }).join('')}
@@ -2934,7 +2823,7 @@ function renderTiposInsumos() {
   if (tiposInsumos.length === 0) { cont.innerHTML = '<p style="color:#aaa;font-size:12px;text-align:center;">Nenhum tipo cadastrado.</p>'; return; }
   cont.innerHTML = tiposInsumos.map(t => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#fff5f0;border-radius:8px;margin-bottom:5px;font-size:13px;">
-      <span><b style="color:#8a5a34;">${t.nome}</b> <span style="color:#aaa;">(${t.unidade}${(t.fator&&t.fator!=1)?' · rende '+t.fator+' '+(t.unidade_uso||''):''})</span>${t.mao_de_obra?' <span style="color:#d94d7d;font-size:11px;">👷 mão de obra</span>':''}</span>
+      <span><b style="color:#8a5a34;">${esc(t.nome)}</b> <span style="color:#aaa;">(${esc(t.unidade)}${(t.fator&&t.fator!=1)?' · rende '+esc(t.fator)+' '+esc(t.unidade_uso||''):''})</span>${t.mao_de_obra?' <span style="color:#d94d7d;font-size:11px;">👷 mão de obra</span>':''}</span>
       <span><button class="btn btn-cinza" style="padding:3px 8px;font-size:11px;" onclick="editarTipoInsumo(${t.id})">✏️</button> <button class="btn btn-vermelho" style="padding:3px 8px;font-size:11px;" onclick="excluirTipoInsumo(${t.id})">✕</button></span>
     </div>`).join('');
 }
@@ -2958,7 +2847,7 @@ function filtrarTiposInsumo() {
   if (filtrados.length === 0) { lista.style.display = 'none'; return; }
   lista.innerHTML = filtrados.map(t => `
     <div class="autocomplete-item" onclick="selecionarTipoInsumo(${t.id})">
-      <strong>${t.nome}</strong> <span>(${t.unidade})</span>
+      <strong>${esc(t.nome)}</strong> <span>(${esc(t.unidade)})</span>
     </div>`).join('');
   lista.style.display = 'block';
 }
@@ -3049,8 +2938,8 @@ function renderInsumos() {
   document.getElementById('listaInsumos').innerHTML = filtrados.map(i => `
     <div class="insumo-item${i.id===_insumoDestaque?' insumo-novo':''}">
       <div class="insumo-info">
-        <strong>${i.nome}${i.id===_insumoDestaque?' <span class="tag-novo">✓ lançado agora</span>':''}</strong>
-        <span>📅 ${formatarData(i.data||_hoje())} &nbsp;|&nbsp; Qtde: ${i.estoque||0} (${i.unidade||'?'}) &nbsp;|&nbsp; Unit: R$ ${(i.preco||0).toFixed(2)} &nbsp;|&nbsp; <b>Total: R$ ${((i.estoque||0)*(i.preco||0)).toFixed(2)}</b></span>
+        <strong>${esc(i.nome)}${i.id===_insumoDestaque?' <span class="tag-novo">✓ lançado agora</span>':''}</strong>
+        <span>📅 ${formatarData(i.data||_hoje())} &nbsp;|&nbsp; Qtde: ${esc(i.estoque||0)} (${esc(i.unidade||'?')}) &nbsp;|&nbsp; Unit: R$ ${(i.preco||0).toFixed(2)} &nbsp;|&nbsp; <b>Total: R$ ${((i.estoque||0)*(i.preco||0)).toFixed(2)}</b></span>
       </div>
       <button class="btn btn-vermelho" style="padding:6px 12px;" onclick="excluirInsumo(${i.id})">🗑</button>
     </div>`).join('');
@@ -3069,7 +2958,7 @@ function renderInsumos() {
     let html = '';
     Object.entries(gastosPorNome).forEach(([nome, dados]) => {
       html += `<div style="margin-bottom:8px;padding:8px;background:white;border-radius:8px;border:1px solid #f5c5a3;">
-        <b style="color:#8a5a34;">${nome}</b><br>
+        <b style="color:#8a5a34;">${esc(nome)}</b><br>
         <span style="color:#666;">Compras registradas: <b>${dados.ocorrencias}</b> &nbsp;|&nbsp; Qtde total: <b>${dados.qtd.toFixed(2)}</b> &nbsp;|&nbsp; Gasto total: <b style="color:#d94d7d;">R$ ${dados.total.toFixed(2)}</b></span>
       </div>`;
     });
@@ -3125,7 +3014,7 @@ function editarTipoInsumo(id) {
 function popularSelectIngredientes() {
   const sel = document.getElementById('ingInsumoSelect'); if (!sel) return;
   sel.innerHTML = tiposInsumos.filter(t => !t.mao_de_obra).slice().sort((a,b)=>a.nome.localeCompare(b.nome))
-    .map(t => `<option value="${t.id}">${t.nome} (${t.unidade_uso || t.unidade})</option>`).join('');
+    .map(t => `<option value="${esc(t.id)}">${esc(t.nome)} (${esc(t.unidade_uso || t.unidade)})</option>`).join('');
 }
 function renderIngredientesLinhas(prodId) {
   const p = produtos.find(x => x.id === prodId); if (!p) return;
@@ -3136,7 +3025,7 @@ function renderIngredientesLinhas(prodId) {
   const linhas = ing.map((r, i) => {
     const t = _tipoInsumo(r.nome);
     const custo = r.qtd * _precoUsoInsumo(r.nome); total += custo;
-    return `<div class="receita-linha"><span>🧾 ${r.nome}</span><span style="color:#666;font-size:12px;">${r.qtd} ${(t && (t.unidade_uso || t.unidade)) || ''} · R$ ${custo.toFixed(2)}</span><button class="btn btn-vermelho" style="padding:2px 8px;font-size:11px;" onclick="removerIngrediente(${prodId},${i})">✕</button></div>`;
+    return `<div class="receita-linha"><span>🧾 ${esc(r.nome)}</span><span style="color:#666;font-size:12px;">${esc(r.qtd)} ${esc((t && (t.unidade_uso || t.unidade)) || '')} · R$ ${custo.toFixed(2)}</span><button class="btn btn-vermelho" style="padding:2px 8px;font-size:11px;" onclick="removerIngrediente(${prodId},${i})">✕</button></div>`;
   }).join('');
   div.innerHTML = linhas + `<div style="text-align:right;font-size:12px;margin-top:6px;"><b>Custo por 100 un: R$ ${total.toFixed(2)}</b></div>`;
 }
@@ -3202,9 +3091,9 @@ function atualizarMargemProdutos(pedidosFiltrados, insumosFiltrados, volumeDoces
   const cor = n => n >= 0 ? 'txt-verde' : 'txt-vermelho';
   const pct = (res, rec) => (rec ? (res/rec*100).toFixed(1).replace('.', ',') : '0,0') + '%';
   const linha = x => {
-    if (x.custo === null) return `<tr><td><b>${x.nome}</b></td><td>${Math.round(x.qtd)}</td><td>${n0(x.receita)}</td><td>—</td><td>—</td><td>—</td></tr>`;
+    if (x.custo === null) return `<tr><td><b>${esc(x.nome)}</b></td><td>${Math.round(x.qtd)}</td><td>${n0(x.receita)}</td><td>—</td><td>—</td><td>—</td></tr>`;
     const res = x.receita - x.custo;
-    return `<tr><td><b>${x.nome}</b></td><td>${Math.round(x.qtd)}</td><td>${n0(x.receita)}</td><td>${n0(x.custo)}</td><td class="${cor(res)}">${n0(res)}</td><td class="${cor(res)}"><b>${pct(res, x.receita)}</b></td></tr>`;
+    return `<tr><td><b>${esc(x.nome)}</b></td><td>${Math.round(x.qtd)}</td><td>${n0(x.receita)}</td><td>${n0(x.custo)}</td><td class="${cor(res)}">${n0(res)}</td><td class="${cor(res)}"><b>${pct(res, x.receita)}</b></td></tr>`;
   };
   if (!lista.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#c49070;padding:20px;">Sem vendas no período.</td></tr>'; return; }
   const tq = com.reduce((s,x)=>s+x.qtd,0), tr = com.reduce((s,x)=>s+x.receita,0), tc = com.reduce((s,x)=>s+x.custo,0), tres = tr - tc;
@@ -3299,11 +3188,11 @@ function renderProdutos() {
     html += lista.map(p => {
       const rec = p.receita || [];
       const recLabel = rec.length
-        ? rec.map(r=>`${r.nome} ${r.por100}UN`).join(' · ')
+        ? rec.map(r=>`${esc(r.nome)} ${esc(r.por100)}UN`).join(' · ')
         : '<span style="color:#ccc;">sem receita</span>';
       return `<div class="produto-item">
         <div class="produto-info">
-          <strong>${p.nome}</strong>
+          <strong>${esc(p.nome)}</strong>
           <span>R$ ${(p.preco||0).toFixed(2)} un &nbsp;
             <span style="${estilo};padding:1px 8px;border-radius:10px;font-size:10px;">${cat}</span>
           </span>
@@ -3484,7 +3373,7 @@ function atualizarDashboard() {
     : rankingGastos.map((item,index)=>`
         <div class="ranking-item">
           <div class="ranking-pos">${index+1}</div>
-          <div class="ranking-nome" title="${item.nome}"><b>${item.nome}</b></div>
+          <div class="ranking-nome" title="${esc(item.nome)}"><b>${esc(item.nome)}</b></div>
           <div class="ranking-qtd">R$ ${item.total.toFixed(2)}</div>
         </div>`).join('');
  
@@ -3496,7 +3385,7 @@ function atualizarDashboard() {
     : rankingDoces.map((item,index)=>`
         <div class="ranking-item">
           <div class="ranking-pos">${index+1}</div>
-          <div class="ranking-nome" title="${item.nome}"><b>${item.nome}</b></div>
+          <div class="ranking-nome" title="${esc(item.nome)}"><b>${esc(item.nome)}</b></div>
           <div class="ranking-qtd">${Math.round(item.qtd)} un</div>
         </div>`).join('');
  
@@ -3551,15 +3440,16 @@ function renderLogs() {
   lista.innerHTML = logs.map(l => {
     const cor = cores[l.acao] || '#888';
     return `<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-bottom:1px solid #f0f0f0;">
-      <span style="background:${cor};color:white;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:600;white-space:nowrap;flex-shrink:0;">${l.acao}</span>
+      <span style="background:${cor};color:white;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:600;white-space:nowrap;flex-shrink:0;">${esc(l.acao)}</span>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;color:#333;">${l.descricao}</div>
+        <div style="font-size:13px;color:#333;">${esc(l.descricao)}</div>
         <div style="font-size:11px;color:#aaa;margin-top:2px;">🕐 ${l.dataHora}</div>
       </div>
     </div>`;
   }).join('');
 }
 function fmtBRL(n){ return 'R$ '+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function formatarData(d){ if(!d) return ''; const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function gerarNovoId(arr){ return arr.length===0 ? 1 : Math.max(...arr.map(x=>x.id||0))+1; }
 function limparFiltros(){ document.getElementById('filtroBusca').value=''; document.getElementById('filtroStatus').value=''; document.getElementById('filtroData').value=''; renderPedidos(); }
@@ -3603,7 +3493,7 @@ function renderTiposMassa() {
   }
   cont.innerHTML = tiposMassa.map(t => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#fff5f0;border-radius:8px;margin-bottom:5px;font-size:13px;">
-      <span><b style="color:#8a5a34;">🍫 ${t.nome}</b></span>
+      <span><b style="color:#8a5a34;">🍫 ${esc(t.nome)}</b></span>
       <button class="btn btn-vermelho" style="padding:3px 8px;font-size:11px;" onclick="excluirTipoMassa(${t.id})">✕</button>
     </div>`).join('');
 }
@@ -3632,7 +3522,7 @@ function excluirTipoMassa(id) {
 function popularSelectTipoMassa() {
   const sel = document.getElementById('receitaTipoSelect');
   if (!sel) return;
-  sel.innerHTML = tiposMassa.map(t=>`<option value="${t.id}">${t.nome}</option>`).join('');
+  sel.innerHTML = tiposMassa.map(t=>`<option value="${esc(t.id)}">${esc(t.nome)}</option>`).join('');
 }
 function abrirReceita(prodId) {
   const p = produtos.find(x=>x.id===prodId); if(!p) return;
@@ -3655,7 +3545,7 @@ function renderReceitaLinhas(prodId) {
   if (!rec.length) { div.innerHTML='<p style="color:#aaa;font-size:12px;">Nenhuma massa configurada.</p>'; return; }
   div.innerHTML = rec.map((r,i)=>`
     <div class="receita-linha">
-      <span>🍫 ${r.nome}</span>
+      <span>🍫 ${esc(r.nome)}</span>
       <span style="color:#666;font-size:12px;">${r.por100} UN / 100 un</span>
       <button class="btn btn-vermelho" style="padding:2px 8px;font-size:11px;" onclick="removerLinhaReceita(${prodId},${i})">✕</button>
     </div>`).join('');
@@ -3737,7 +3627,7 @@ function renderMassasAgenda() {
       const saldo = prev - real;
       const cls   = saldo <= 0 ? 'massa-saldo-neg' : 'massa-saldo-pos';
       return `<tr>
-        <td><b style="color:#6b3f20;">🍫 ${nome}</b></td>
+        <td><b style="color:#6b3f20;">🍫 ${esc(nome)}</b></td>
         <td style="text-align:right;">${prev.toFixed(1)} UN</td>
         <td style="text-align:right;">${real.toFixed(1)} UN</td>
         <td style="text-align:right;" class="${cls}">${saldo.toFixed(1)} UN</td>
@@ -3759,7 +3649,7 @@ function renderMassasAgenda() {
   const docesLista = Object.entries(docesMap).sort((a,b) => b[1]-a[1]);
   const docesTotal = docesLista.reduce((s,[,q]) => s+q, 0);
   const docesPeriodo = docesLista.length
-    ? `<table class="massa-tabela"><thead><tr><th>Doce</th><th style="text-align:right;">Quantidade</th></tr></thead><tbody>${docesLista.map(([n,q]) => `<tr><td><b style="color:#6b3f20;">${n}</b></td><td style="text-align:right;">${Math.round(q)} un</td></tr>`).join('')}<tr><td><b>Total</b></td><td style="text-align:right;"><b>${Math.round(docesTotal)} un</b></td></tr></tbody></table>`
+    ? `<table class="massa-tabela"><thead><tr><th>Doce</th><th style="text-align:right;">Quantidade</th></tr></thead><tbody>${docesLista.map(([n,q]) => `<tr><td><b style="color:#6b3f20;">${esc(n)}</b></td><td style="text-align:right;">${Math.round(q)} un</td></tr>`).join('')}<tr><td><b>Total</b></td><td style="text-align:right;"><b>${Math.round(docesTotal)} un</b></td></tr></tbody></table>`
     : '<p style="color:#aaa;font-size:13px;">Sem pedidos no período.</p>';
 
   /* ── Diário por dia — todos os dias do período ── */
@@ -3809,7 +3699,7 @@ function renderMassasAgenda() {
       const sd  = pv - rl;
       const cls = sd<=0?'massa-saldo-neg':'massa-saldo-pos';
       return `<div class="massa-det-linha">
-        <span class="massa-det-nome">🍫 ${nome}</span>
+        <span class="massa-det-nome">🍫 ${esc(nome)}</span>
         <span class="massa-det-valor" style="color:#555;">prev <b>${pv.toFixed(1)}</b></span>
         <span class="massa-det-valor" style="color:#333;">prod <b>${rl.toFixed(1)}</b></span>
         <span class="massa-det-valor ${cls}">saldo <b>${sd.toFixed(1)}</b></span>
@@ -3819,7 +3709,7 @@ function renderMassasAgenda() {
     /* Linhas lançadas mesmo sem previsto (dias de produção pura) */
     const linhasProd = !temMassa && lancado ? prod.map(r=>`
       <div class="massa-det-linha">
-        <span class="massa-det-nome">🍫 ${r.nome}</span>
+        <span class="massa-det-nome">🍫 ${esc(r.nome)}</span>
         <span class="massa-det-valor" style="color:#28a745;">prod <b>${(r.quantidade||0).toFixed(1)}</b></span>
       </div>`).join('') : '';
 
@@ -3827,9 +3717,9 @@ function renderMassasAgenda() {
     const tiposForm = tiposMassa.length ? tiposMassa.map(t=>t.nome) : tipos;
     const inputsMassa = tiposForm.map(nome=>`
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-        <label style="flex:1;font-size:12px;color:#6b3f20;">🍫 ${nome}</label>
+        <label style="flex:1;font-size:12px;color:#6b3f20;">🍫 ${esc(nome)}</label>
         <input type="number" step="0.1" min="0" placeholder="0.0"
-          id="massaInput_${data}_${nome.replace(/\s/g,'_')}"
+          id="massaInput_${data}_${esc(nome.replace(/\s/g,'_'))}"
           style="width:80px;padding:6px;border-radius:8px;border:1px solid #ccc;font-size:12px;"
           value="${realDia[nome]||''}">
         <span style="font-size:11px;color:#aaa;">UN${prevDia[nome]?` (prev:${prevDia[nome].previsto.toFixed(1)})`:''}
