@@ -2680,6 +2680,11 @@ function calendarioDia(data) {
   if (lista.length) { _calSelecionado = null; renderCalendario(); mostrarPedidosDoDia(data, lista); return; }
   _calSelecionado = data; renderCalendario();
 }
+function novoPedidoNoDiaAberto() {          /* botão dentro do detalhe do dia */
+  const data = _agendaDiaData;
+  fecharAgendaMes();
+  novoPedidoNaData(data);
+}
 function novoPedidoNaData(data) {
   abrirNovoPedido();
   const el = document.getElementById('entrega'); if (el) el.value = data;
@@ -2815,6 +2820,8 @@ function mostrarPedidosDoDia(data, lista) {
   document.getElementById('agendaDiaConteudo').innerHTML = `
     <button class="btn btn-marrom" style="width:100%;margin-bottom:12px;padding:12px;font-size:14px;"
       onclick="abrirA4(_agendaDiaData,_agendaDiaPedidos)">🖨️ Imprimir Mapa do Dia (A4)</button>
+    <button class="btn btn-rosa" style="width:100%;margin-bottom:12px;padding:12px;font-size:14px;"
+      onclick="novoPedidoNoDiaAberto()">➕ Novo pedido neste dia</button>
     ${pedidosHtml}
     <div class="detalhe-secao" style="background:#fffaf5;border:1px dashed #8a5a34;margin-top:4px;">
       <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
