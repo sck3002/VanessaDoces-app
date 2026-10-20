@@ -143,6 +143,13 @@ table tr:hover td{background:var(--bg);}
 .cal-dia.n3 .dn{color:#6e2a43;}
 .cal-dia.fora{border-color:transparent;background:transparent;cursor:default;}
 .cal-dia.fora .dn{opacity:.35;}
+.cal-dia.fora.com{opacity:.6;cursor:pointer;}
+.cal-dia.fora.com .dn{opacity:1;}
+.cal-dia.fora.com.n1{background:#fdeef3;}
+.cal-dia.fora.com.n2{background:#f9cfdd;}
+.cal-dia.fora.com.n3{background:#ef94b3;}
+.cal-dia.fora.com.n4{background:var(--brand);}
+.cal-dia.fora.com.n0{background:var(--surface);border-color:var(--divider);}
 .cal-dia.hoje{box-shadow:0 0 0 2px var(--brown-dark,#6e4122) inset;}
 .cal-dia.sel{box-shadow:0 0 0 2px var(--brand) inset;}
 .cal-sem{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--brown-dark,#6e4122);border-left:1px solid var(--divider);}
@@ -2694,16 +2701,16 @@ function renderCalendario() {
   const cont = document.getElementById('agendaCalendario'); if (!cont) return;
   const ehBC = i => (i.produto||'').trim().toLowerCase() === 'bem casado';
   const prefixo = `${_calAno}-${_calP2(_calMes+1)}-`;
-  const porDia = {};
-  let totPed = 0, totDoces = 0, totBC = 0;
+  const porDia = {};                       /* todos os dias com pedido (inclusive os de meses vizinhos que aparecem na grade) */
+  let totPed = 0, totDoces = 0, totBC = 0; /* resumo do título: só o mês exibido */
   pedidos.forEach(p => {
-    if (p.status === 'cancelado' || !p.data || !p.data.startsWith(prefixo)) return;
+    if (p.status === 'cancelado' || !p.data) return;
     const it = p.itens || [];
     const dc = it.filter(i => !ehBC(i)).reduce((a,i) => a + (i.qtd||0), 0);
     const bc = it.filter(ehBC).reduce((a,i) => a + (i.qtd||0), 0);
     const r = porDia[p.data] || (porDia[p.data] = { n:0, doces:0, bc:0 });
     r.n++; r.doces += dc; r.bc += bc;
-    totPed++; totDoces += dc; totBC += bc;
+    if (p.data.startsWith(prefixo)) { totPed++; totDoces += dc; totBC += bc; }
   });
 
   const primeiro = new Date(_calAno, _calMes, 1);
@@ -2717,7 +2724,7 @@ function renderCalendario() {
     let t = 0;
     for (let c = 0; c < 7; c++) {
       const d = new Date(_calAno, _calMes, 1 - deslocamento + w*7 + c);
-      if (d.getMonth() === _calMes && porDia[_calKey(d)]) t += porDia[_calKey(d)].doces;
+      if (porDia[_calKey(d)]) t += porDia[_calKey(d)].doces;     /* semana inteira, mesmo atravessando o mês */
     }
     totaisSemana.push(t);
   }
@@ -2729,15 +2736,17 @@ function renderCalendario() {
   for (let w = 0; w < semanas; w++) {
     for (let c = 0; c < 7; c++) {
       const d = new Date(_calAno, _calMes, 1 - deslocamento + w*7 + c);
-      const k = _calKey(d), dentro = d.getMonth() === _calMes, r = dentro ? porDia[k] : null;
+      const k = _calKey(d), dentro = d.getMonth() === _calMes, r = porDia[k] || null;
       const cls = ['cal-dia'];
-      if (!dentro) cls.push('fora'); else cls.push('n' + _calNivel(r ? r.doces : 0));
+      if (!dentro) cls.push('fora');
+      if (dentro || r) cls.push('n' + _calNivel(r ? r.doces : 0));
+      if (!dentro && r) cls.push('com');
       if (k === hojeKey) cls.push('hoje');
       if (k === _calSelecionado) cls.push('sel');
       let inner = `<div class="dn">${d.getDate()}</div>`;
-      if (r) inner += `<div class="dq">${_calFmt(r.doces)}</div><div class="dp">${r.n}${r.bc>0?'<i></i>':''}</div>`;
+      if (r) inner += `<div class="dq"${r.doces===0&&r.bc>0?' style="color:var(--brown-dark,#6e4122)"':''}>${_calFmt(r.doces>0?r.doces:r.bc)}</div><div class="dp">${r.n}${r.bc>0?'<i></i>':''}</div>`;
       else if (dentro && c >= 5) inner += '<div class="livre">livre</div>';
-      grade += dentro ? `<div class="${cls.join(' ')}" onclick="calendarioDia('${k}')">${inner}</div>` : `<div class="${cls.join(' ')}">${inner}</div>`;
+      grade += (dentro || r) ? `<div class="${cls.join(' ')}" onclick="calendarioDia('${k}')">${inner}</div>` : `<div class="${cls.join(' ')}">${inner}</div>`;
     }
     const t = totaisSemana[w];
     grade += `<div class="cal-sem${t > 0 && t >= maxSemana*0.9 ? ' pesada' : ''}">${t > 0 ? _calFmt(t) : '—'}</div>`;
