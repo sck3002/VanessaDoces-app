@@ -117,6 +117,17 @@ table tr:hover td{background:var(--bg);}
 /* ━━━ AGENDA ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .agenda-secao{margin-bottom:20px;}
 .agenda-ano-titulo{color:var(--brown);font-size:13px;font-weight:700;padding:10px 14px;background:var(--brown-light);border-radius:var(--radius-sm);margin-bottom:10px;}
+.lote-botoes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+.lote{margin-top:10px;border-top:1px solid var(--divider);}
+.lote-titulo{font-size:10px;font-weight:700;letter-spacing:.4px;color:var(--text-3);text-transform:uppercase;padding:8px 0 2px;}
+.lote-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--divider);font-size:12px;}
+.lote-item .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-1);font-weight:600;}
+.lote-item .q{color:var(--text-3);font-size:11px;white-space:nowrap;}
+.lote-item b{color:var(--text-1);white-space:nowrap;}
+.lote-item button{border:0;background:transparent;color:var(--text-3);font-size:16px;line-height:1;padding:2px 6px;cursor:pointer;}
+.lote-total{display:flex;justify-content:space-between;padding:8px 0 0;font-size:12px;color:var(--text-2);}
+.lote-total b{color:var(--brand);font-size:14px;}
+.cartao-periodo{font-size:10px;color:var(--text-3);margin:-4px 0 8px;}
 .chk-cartao{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--text-1);cursor:pointer;}
 .chk-cartao input{width:18px;height:18px;accent-color:var(--brand);margin:0;}
 .btn-cartao{flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:0;background:transparent;font-size:16px;line-height:1;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;margin-right:4px;}
@@ -625,11 +636,13 @@ table tr:hover td{background:var(--bg);}
         <input type="text" inputmode="decimal" id="precoInsumo" value="0,00" oninput="calcularTotalInsumo()"></div>
       </div>
       <div style="margin-top:10px;padding:8px 12px;background:#f9f9f9;border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:11px;color:#666;">Total da Compra:</span>
+        <span style="font-size:11px;color:#666;">Total do item:</span>
         <span id="totalInsumoCalc" style="font-size:15px;font-weight:bold;color:#d94d7d;">R$ 0,00</span>
       </div>
-      <div class="botoes" style="margin-top:12px;">
-        <button class="btn btn-marrom" onclick="salvarInsumo()" style="padding:9px 14px;font-size:11px;border-radius:8px;">Registrar Gasto</button>
+      <div id="loteCompra"></div>
+      <div class="lote-botoes">
+        <button class="btn btn-cinza" onclick="adicionarAoLote()" style="padding:9px 14px;font-size:11px;border-radius:8px;">➕ Adicionar item</button>
+        <button class="btn btn-marrom" id="btnRegistrarGasto" onclick="salvarInsumo()" style="padding:9px 14px;font-size:11px;border-radius:8px;">Registrar Gasto</button>
       </div>
     </div>
 
@@ -3101,13 +3114,36 @@ function calcularTotalInsumo() {
   const qtd   = parseFloat((document.getElementById('estoqueInsumo').value||'').replace(',','.')) || 0;
   const preco = parseFloat((document.getElementById('precoInsumo').value||'').replace(',','.')) || 0;
   document.getElementById('totalInsumoCalc').textContent = 'R$ ' + (qtd * preco).toFixed(2).replace('.',',');
+  if (typeof atualizarRotuloRegistrar === 'function') atualizarRotuloRegistrar();
 }
  
 /* ===== INSUMOS (GASTOS) ===== */
-let _insumoDestaque = null;
-let _cartaoAno = new Date().getFullYear(), _cartaoMes = new Date().getMonth();   /* mês 0-11 do resumo do cartão */
+let _insumoDestaque = [];
+/* Fatura do cartão: fecha 1 dia antes do último dia do mês (29 em mês de 30 dias, 30 em mês de 31).
+   A fatura "de outubro" reúne as compras do dia seguinte ao fechamento de setembro até o fechamento de outubro. */
+const CARTAO_DIAS_ANTES_DO_FIM = 1;
+function _cartaoFechamento(ano, mes) {          /* mes 0-11 */
+  const ultimo = new Date(ano, mes + 1, 0).getDate();
+  return new Date(ano, mes, ultimo - CARTAO_DIAS_ANTES_DO_FIM);
+}
+function _cartaoPeriodo(ano, mes) {
+  const fim = _cartaoFechamento(ano, mes);
+  const ant = _cartaoFechamento(ano, mes - 1);
+  const ini = new Date(ant.getFullYear(), ant.getMonth(), ant.getDate() + 1);
+  return { ini: _dataLocal(ini), fim: _dataLocal(fim) };
+}
+let _cartaoAno, _cartaoMes;
+(function () {                                  /* abre na fatura em andamento: depois do fechamento já é a do mês seguinte */
+  const h = new Date();
+  const m = h.getDate() > _cartaoFechamento(h.getFullYear(), h.getMonth()).getDate() ? h.getMonth() + 1 : h.getMonth();
+  const d = new Date(h.getFullYear(), m, 1);
+  _cartaoAno = d.getFullYear(); _cartaoMes = d.getMonth();
+})();
 let _soCartaoMes = false;
-function _cartaoPrefixo() { return `${_cartaoAno}-${String(_cartaoMes+1).padStart(2,'0')}-`; }
+function _cartaoDoPeriodo(i) {
+  const { ini, fim } = _cartaoPeriodo(_cartaoAno, _cartaoMes);
+  return !!i.cartao && (i.data||'') >= ini && (i.data||'') <= fim;
+}
 function cartaoMes(delta) {
   const d = new Date(_cartaoAno, _cartaoMes + delta, 1);
   _cartaoAno = d.getFullYear(); _cartaoMes = d.getMonth();
@@ -3125,17 +3161,18 @@ async function alternarCartao(id) {
 }
 function renderResumoCartao() {
   const el = document.getElementById('resumoCartao'); if (!el) return;
-  const pre = _cartaoPrefixo();
-  const lista = insumos.filter(i => i.cartao && (i.data||'').startsWith(pre));
+  const { ini, fim } = _cartaoPeriodo(_cartaoAno, _cartaoMes);
+  const dm = k => k.split('-').reverse().slice(0,2).join('/');
+  const lista = insumos.filter(_cartaoDoPeriodo);
   const total = lista.reduce((a,i) => a + (i.estoque||0) * (i.preco||0), 0);
   const ano = _cartaoAno !== new Date().getFullYear() ? ` ${_cartaoAno}` : '';
-  el.innerHTML = `<div class="cartao-linha" title="${lista.length} compra${lista.length===1?'':'s'} no cartão">
+  el.innerHTML = `<div class="cartao-linha" title="Fatura com compras de ${dm(ini)} a ${dm(fim)} · ${lista.length} compra${lista.length===1?'':'s'}">
     <button class="seta" onclick="cartaoMes(-1)" aria-label="Mês anterior">‹</button>
     <span class="mes">${NOMES_MESES[_cartaoMes]}${ano}</span>
     <button class="seta" onclick="cartaoMes(1)" aria-label="Próximo mês">›</button>
     <span class="valor">💳 R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
     <span class="ver" onclick="alternarSoCartao()">${_soCartaoMes ? '✕ todos' : 'ver lançamentos'}</span>
-  </div>`;
+  </div>${_soCartaoMes ? `<div class="cartao-periodo">Compras de ${dm(ini)} a ${dm(fim)} (fechamento da fatura)</div>` : ''}`;
 }
 function mostrarAviso(msg) {
   let el = document.getElementById('avisoApp');
@@ -3143,23 +3180,19 @@ function mostrarAviso(msg) {
   el.textContent = msg; el.classList.add('on');
   clearTimeout(mostrarAviso._t); mostrarAviso._t = setTimeout(() => el.classList.remove('on'), 2600);
 }
-async function salvarInsumo() {
+/* ----- várias compras de uma vez (mesmo local, mesma data, mesma forma de pagamento) ----- */
+let _loteCompra = [];
+function _lerItemForm() {                        /* null = formulário vazio; false = incompleto (já avisou) */
   const nome = document.getElementById('insumoSelecionadoNome').value.trim() || document.getElementById('nomeInsumo').value.trim();
   const unidade = document.getElementById('insumoSelecionadoUnidade').value.trim() || 'un';
   const estoque = parseFloat((document.getElementById('estoqueInsumo').value||'').replace(',','.')) || 0;
   const preco   = parseFloat((document.getElementById('precoInsumo').value||'').replace(',','.')) || 0;
-  const dataCompra = document.getElementById('dataCompraInsumo').value || _hoje();
-  if (!nome) { alert('Selecione ou informe um insumo.'); return; }
-  if (estoque <= 0) { alert('Informe a quantidade.'); return; }
-  const cartao = !!document.getElementById('cartaoInsumo').checked;
-  const novo = { id: Date.now(), nome, unidade, estoque, preco, data: dataCompra, cartao };
-  const btn = document.querySelector('button[onclick="salvarInsumo()"]');
-  if (btn) btn.disabled = true;
-  const ok = await sbUpsert('insumos',[novo]);      /* só confirma depois que o banco respondeu */
-  if (btn) btn.disabled = false;
-  if (!ok) return;                                   /* sbUpsert já avisou o erro; o formulário continua preenchido */
-  insumos.push(novo);
-  registrarLog('INSUMO', `Compra lançada — ${nome} | Qtd: ${estoque} ${unidade} | Unit: R$ ${preco.toFixed(2)} | Total: R$ ${(estoque*preco).toFixed(2)}`);
+  if (!nome && estoque <= 0 && preco <= 0) return null;
+  if (!nome) { alert('Selecione ou informe um insumo.'); return false; }
+  if (estoque <= 0) { alert('Informe a quantidade.'); return false; }
+  return { nome, unidade, estoque, preco };
+}
+function _limparItemForm() {
   document.getElementById('nomeInsumo').value = '';
   document.getElementById('insumoSelecionadoNome').value = '';
   document.getElementById('insumoSelecionadoUnidade').value = '';
@@ -3167,21 +3200,73 @@ async function salvarInsumo() {
   document.getElementById('estoqueInsumo').value = '0';
   document.getElementById('precoInsumo').value = '0.00';
   document.getElementById('totalInsumoCalc').textContent = 'R$ 0,00';
+}
+function _brl(n) { return 'R$ ' + (n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function adicionarAoLote() {
+  const it = _lerItemForm();
+  if (it === false) return;
+  if (it === null) { alert('Preencha o insumo e a quantidade antes de adicionar.'); return; }
+  _loteCompra.push(it);
+  _limparItemForm();
+  renderLoteCompra();
+  document.getElementById('nomeInsumo').focus();
+}
+function removerDoLote(i) { _loteCompra.splice(i, 1); renderLoteCompra(); }
+function renderLoteCompra() {
+  const el = document.getElementById('loteCompra'); if (!el) return;
+  if (!_loteCompra.length) { el.innerHTML = ''; }
+  else {
+    const total = _loteCompra.reduce((a,x) => a + x.estoque * x.preco, 0);
+    el.innerHTML = `<div class="lote"><div class="lote-titulo">Itens desta compra</div>
+      ${_loteCompra.map((x,i) => `<div class="lote-item"><span class="n">${x.nome}</span><span class="q">${x.estoque} × ${x.preco.toFixed(2).replace('.',',')}</span><b>${_brl(x.estoque*x.preco)}</b><button onclick="removerDoLote(${i})" aria-label="Remover">✕</button></div>`).join('')}
+      <div class="lote-total"><span>Total da compra</span><b>${_brl(total)}</b></div></div>`;
+  }
+  atualizarRotuloRegistrar();
+}
+function atualizarRotuloRegistrar() {
+  const b = document.getElementById('btnRegistrarGasto'); if (!b) return;
+  const nome = (document.getElementById('insumoSelecionadoNome').value || document.getElementById('nomeInsumo').value || '').trim();
+  const qtd  = parseFloat((document.getElementById('estoqueInsumo').value||'').replace(',','.')) || 0;
+  const n = _loteCompra.length + (nome && qtd > 0 ? 1 : 0);
+  b.textContent = n > 1 ? `Registrar ${n} itens` : 'Registrar Gasto';
+}
+async function salvarInsumo() {
+  const atual = _lerItemForm();
+  if (atual === false) return;
+  const itens = _loteCompra.slice(); if (atual) itens.push(atual);
+  if (!itens.length) { alert('Selecione ou informe um insumo.'); return; }
+  const dataCompra = document.getElementById('dataCompraInsumo').value || _hoje();
+  const cartao = !!document.getElementById('cartaoInsumo').checked;
+  const base = Date.now();
+  const novos = itens.map((it, k) => ({ id: base + k, nome: it.nome, unidade: it.unidade, estoque: it.estoque, preco: it.preco, data: dataCompra, cartao }));
+  const btn = document.getElementById('btnRegistrarGasto');
+  if (btn) btn.disabled = true;
+  const ok = await sbUpsert('insumos', novos);      /* um único envio; só confirma depois que o banco respondeu */
+  if (btn) btn.disabled = false;
+  if (!ok) return;                                   /* sbUpsert já avisou o erro; o formulário continua preenchido */
+  novos.forEach(n => {
+    insumos.push(n);
+    registrarLog('INSUMO', `Compra lançada — ${n.nome} | Qtd: ${n.estoque} ${n.unidade} | Unit: R$ ${n.preco.toFixed(2)} | Total: R$ ${(n.estoque*n.preco).toFixed(2)}`);
+  });
+  _loteCompra = [];
+  _limparItemForm();
+  renderLoteCompra();
   document.getElementById('dataCompraInsumo').value = _hoje();
   document.getElementById('cartaoInsumo').checked = true;      /* volta marcado para a próxima compra */
   _soCartaoMes = false;
-  /* limpa os filtros para a compra nova não ficar escondida, mostra a lista e destaca a linha */
+  /* limpa os filtros para a compra nova não ficar escondida, mostra a lista e destaca as linhas */
   document.getElementById('filtroInsumoNome').value = '';
   atualizarFiltroAnoInsumos(); document.getElementById('filtroInsumoAno').value = '';
-  _insumoDestaque = novo.id;
+  _insumoDestaque = novos.map(n => n.id);
   renderInsumos();
   const linha = document.querySelector('#listaInsumos .insumo-novo');
   if (linha) {
     linha.scrollIntoView({ block: 'center', behavior: 'smooth' });
     document.getElementById('listaInsumos').closest('.card').scrollIntoView({ block: 'start', behavior: 'smooth' });
   }
-  mostrarAviso(`✓ ${nome} lançado — ${formatarData(dataCompra)}`);
-  setTimeout(() => { _insumoDestaque = null; renderInsumos(); }, 5000);
+  const totalLote = novos.reduce((a,n) => a + n.estoque * n.preco, 0);
+  mostrarAviso(novos.length === 1 ? `✓ ${novos[0].nome} lançado — ${formatarData(dataCompra)}` : `✓ ${novos.length} itens lançados — ${_brl(totalLote)}`);
+  setTimeout(() => { _insumoDestaque = []; renderInsumos(); }, 5000);
 }
  
 function atualizarFiltroAnoInsumos() {
@@ -3203,14 +3288,14 @@ function renderInsumos() {
   let filtrados = insumos.filter(i => {
     const nomeOk = !filtroNome || (i.nome||'').toLowerCase().includes(filtroNome);
     const anoOk  = !filtroAno  || (i.data||'').startsWith(filtroAno);
-    const cartaoOk = !_soCartaoMes || (i.cartao && (i.data||'').startsWith(_cartaoPrefixo()));
+    const cartaoOk = !_soCartaoMes || _cartaoDoPeriodo(i);
     return nomeOk && anoOk && cartaoOk;
   }).sort((a,b) => new Date(b.data||'2026-01-01') - new Date(a.data||'2026-01-01'));
  
   document.getElementById('listaInsumos').innerHTML = filtrados.map(i => `
-    <div class="insumo-item${i.id===_insumoDestaque?' insumo-novo':''}">
+    <div class="insumo-item${_insumoDestaque.includes(i.id)?' insumo-novo':''}">
       <div class="insumo-info">
-        <strong>${i.nome}${i.id===_insumoDestaque?' <span class="tag-novo">✓ lançado agora</span>':''}</strong>
+        <strong>${i.nome}${_insumoDestaque.includes(i.id)?' <span class="tag-novo">✓ lançado agora</span>':''}</strong>
         <span>📅 ${formatarData(i.data||_hoje())} &nbsp;|&nbsp; Qtde: ${i.estoque||0} (${i.unidade||'?'}) &nbsp;|&nbsp; Unit: R$ ${(i.preco||0).toFixed(2)} &nbsp;|&nbsp; <b>Total: R$ ${((i.estoque||0)*(i.preco||0)).toFixed(2)}</b></span>
       </div>
       <button class="btn-cartao ${i.cartao?'on':'off'}" onclick="alternarCartao(${i.id})" aria-label="${i.cartao?'Pago no cartão (tocar para desmarcar)':'Não é cartão (tocar para marcar)'}">💳</button>
