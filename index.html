@@ -164,7 +164,7 @@ table tr:hover td{background:var(--bg);}
 .cal-dia.n3 .dn{color:#6e2a43;}
 .cal-dia.fora{border-color:transparent;background:transparent;cursor:default;}
 .cal-dia.fora .dn{opacity:.35;}
-.cal-dia.fora.com{opacity:.30;cursor:pointer;}
+.cal-dia.fora.com{opacity:.85;cursor:pointer;}
 .cal-dia.fora.com .dn{opacity:1;}
 .cal-dia.fora.com.n1{background:#fdeef3;}
 .cal-dia.fora.com.n2{background:#f9cfdd;}
@@ -706,6 +706,12 @@ table tr:hover td{background:var(--bg);}
         <div class="botoes"><button class="btn btn-rosa" onclick="salvarProduto()">Salvar</button></div>
       </div>
       <div class="card">
+        <h2>Tabelas de Preço</h2>
+        <p style="font-size:12px;color:var(--text-3);margin-bottom:10px;">Cada pedido usa a tabela vigente na data de entrega. Sem tabela, vale o preço do produto.</p>
+        <div id="listaTabelasPreco"></div>
+        <div class="botoes"><button class="btn btn-rosa" onclick="abrirTabelaPreco(null)">➕ Nova tabela de preços</button></div>
+      </div>
+      <div class="card">
         <h2>Produtos no Cardápio</h2>
         <div id="listaProdutos"></div>
       </div>
@@ -1011,7 +1017,7 @@ table tr:hover td{background:var(--bg);}
         <div class="autocomplete-lista" id="listaAutocompleteNome" style="display:none;"></div>
       </div>
       <label>Endereço</label><input type="text" id="endereco">
-      <label>Data de entrega</label><input type="date" id="entrega">
+      <label>Data de entrega</label><input type="date" id="entrega" onchange="reprecarItensNovoPedido()">
       <div class="par">
         <div><label>Entrada (R$)</label>
         <input type="text" inputmode="decimal" id="valorEntrada" value="0.00" placeholder="0,00"></div>
@@ -1123,6 +1129,28 @@ table tr:hover td{background:var(--bg);}
       <div id="listaItensEditando"></div>
     </div>
     <button class="btn btn-verde" style="width:100%;" onclick="salvarItensPedido()">💾 Salvar Itens</button>
+  </div>
+</div>
+
+<!-- TABELA DE PREÇOS -->
+<div id="tabelaPrecoOverlay" class="nav-overlay nav-overlay-3">
+  <div class="nav-header">
+    <button class="nav-back" onclick="fecharTabelaPreco()">← Voltar</button>
+    <span class="nav-titulo" id="tabelaPrecoTitulo">Nova tabela</span>
+  </div>
+  <div class="nav-body" style="padding:14px 16px 90px;">
+    <label>Vale a partir de</label>
+    <input type="date" id="tpVigencia">
+    <div class="par" style="margin-top:10px;align-items:end;">
+      <div><label>Reajustar tudo em (%)</label><input type="text" inputmode="decimal" id="tpPercent" placeholder="ex.: 8"></div>
+      <div><button class="btn btn-cinza" style="width:100%;" onclick="aplicarReajusteTabela()">Aplicar</button></div>
+    </div>
+    <div class="dica">O reajuste soma ao preço base de cada doce; depois ainda dá para ajustar um a um.</div>
+    <div id="tpLista" style="margin-top:8px;"></div>
+  </div>
+  <div class="barra-acoes">
+    <button class="btn btn-vermelho" id="tpExcluir" style="display:none;" onclick="excluirTabelaPreco()">🗑 Excluir</button>
+    <button class="btn btn-rosa" onclick="salvarTabelaPreco()">Salvar tabela</button>
   </div>
 </div>
 
@@ -1320,6 +1348,7 @@ function salvarLS() {
 }
  
 let pedidos = [], produtos = [], insumos = [], clientes = [], tiposInsumos = [];
+let tabelasPreco = [];   /* [{id, vigencia:'AAAA-MM-DD', precos:{idProduto:preco}}] */
 let tiposMassa = [], massasDiario = [];
 let meuCadastro = null;
 let itensPedidoAtual = [], itensEditandoPedido = [];
@@ -1436,7 +1465,7 @@ const BANCO_INICIAL = {
  
 /* ===== BACKUP / RESTAURAÇÃO ===== */
 function exportarBackup() {
-  const dados = { pedidos, produtos, insumos, tiposInsumos };
+  const dados = { pedidos, produtos, insumos, tiposInsumos, tabelasPreco };
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dados));
   const a = document.createElement('a'); a.setAttribute("href", dataStr);
   a.setAttribute("download", `backup_vanessa_doces_${new Date().toISOString().slice(0,10)}.json`);
@@ -1460,13 +1489,14 @@ function importarBackup(input) {
  
 /* ===== CARREGAR SISTEMA ===== */
 async function carregarSistema() {
-  const [p, pr, ins, cli, ti, tm, md, mc] = await Promise.all([
+  const [p, pr, ins, cli, ti, tm, md, mc, tp] = await Promise.all([
     sbListar('pedidos'), sbListar('produtos'), sbListar('insumos'),
     sbListar('clientes'), sbListar('tipos_insumos'),
     sbListar('tipos_massa'), sbListar('massas_diario'),
-    sbListar('meu_cadastro')
+    sbListar('meu_cadastro'), sbListar('tabelas_preco')
   ]);
   meuCadastro = (mc && mc.length) ? mc[0] : null;
+  tabelasPreco = (tp || []).map(t => ({ ...t, precos: t.precos || {} }));
   if (p.length === 0 && pr.length === 0 && ins.length === 0) {
     pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
     produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
@@ -1505,7 +1535,7 @@ function alternarDashOculto() {
 function trocarAba(index) {
   ['novoPedidoOverlay','detalhePedidoOverlay','editClienteOverlay','editItensOverlay',
    'agendaMesOverlay','agendaDiaOverlay','clienteDetalheOverlay','clienteFormOverlay',
-   'seletorProdutoOverlay','modalCpfContrato']
+   'seletorProdutoOverlay','modalCpfContrato','tabelaPrecoOverlay']
     .forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('active'); });
   _histTrocarAba(index);
   document.getElementById('navBackdrop')?.classList.remove('active');
@@ -1549,6 +1579,7 @@ const _fechadores = {
   editClienteOverlay:   () => fecharEditarCliente(),
   editItensOverlay:     () => fecharEditarItens(),
   seletorProdutoOverlay:() => fecharSeletorProdutos(),
+  tabelaPrecoOverlay:   () => fecharTabelaPreco(),
   clienteDetalheOverlay:() => fecharDetalheCliente(),
   clienteFormOverlay:   () => fecharFormCliente(),
   agendaMesOverlay:     () => fecharAgendaMes(),
@@ -1890,6 +1921,35 @@ function selecionarClientePorTelefone(id) {
 /* ===== PRODUTOS / SELECT ===== */
 const ORDEM_CAT = ['Simples','Bombom','Copinho','Especial','Avulso'];
 
+/* ===== TABELA DE PREÇOS COM VIGÊNCIA ===== */
+function precoVigente(prod, data) {
+  if (!prod) return 0;
+  const d = data || _hoje();
+  let achada = null;
+  tabelasPreco.forEach(t => {
+    if (t.vigencia && t.vigencia <= d && t.precos && t.precos[prod.id] != null && (!achada || t.vigencia > achada.vigencia)) achada = t;
+  });
+  return achada ? Number(achada.precos[prod.id]) : (prod.preco || 0);
+}
+function _dataPedidoNovo() { const e = document.getElementById('entrega'); return (e && e.value) || _hoje(); }
+function _dataPedidoEdicao() {
+  const p = pedidos.find(x => x.id === overlayDetalhePedidoId);
+  const e = document.getElementById('editEntrega');
+  return (p && p.data) || (e && e.value) || _hoje();
+}
+function reprecarItensNovoPedido() {              /* mudou a data de entrega: refaz os preços dos itens já lançados */
+  const data = _dataPedidoNovo(); let mudou = 0;
+  itensPedidoAtual.forEach(it => {
+    const pr = produtos.find(x => x.nome === it.produto); if (!pr) return;
+    const novo = precoVigente(pr, data);
+    if (Math.abs(novo - it.valor) > 0.0001) { it.valor = novo; it.total = it.qtd * novo; mudou++; }
+  });
+  valorTotalAtual = itensPedidoAtual.reduce((a,i) => a + i.total, 0) + 0;
+  quantidadeTotalAtual = itensPedidoAtual.reduce((a,i) => a + i.qtd, 0);
+  if (typeof atualizarTotalComEntrega === 'function') atualizarTotalComEntrega();
+  renderItensTabela(); atualizarResumoAtual(); atualizarValor();
+  if (mudou) mostrarAviso(`Preços atualizados pela tabela de ${formatarData(data)} (${mudou} ite${mudou===1?'m':'ns'})`);
+}
 function popularSelectProduto() {
   const sel     = document.getElementById('produto');
   const selEdit = document.getElementById('editAdicionarDoceSelect');
@@ -1939,7 +1999,7 @@ function abrirSeletorProdutos(selectId) {
     return `<div class="picker-secao">${cat}</div>` + lista.map(p => `
       <div class="picker-item ${String(p.id)===selecionado?'picker-item-ativo':''}" onclick="escolherProduto(${p.id})">
         <span class="picker-item-nome">${p.nome}</span>
-        <span class="picker-item-preco">${(p.preco||0).toFixed(2).replace('.',',')}</span>
+        <span class="picker-item-preco">${precoVigente(p, selectId === 'produto' ? _dataPedidoNovo() : _dataPedidoEdicao()).toFixed(2).replace('.',',')}</span>
       </div>`).join('');
   }).join('');
   _ovAbrir('seletorProdutoOverlay');
@@ -1966,7 +2026,7 @@ function resetSeletorProduto() {
 function atualizarValor() {
   const selectElem = document.getElementById('produto'); if(!selectElem.value) return;
   const prod = produtos.find(p=>p.id===parseInt(selectElem.value)); if(!prod) return;
-  document.getElementById('valor').value = (prod.preco || 0).toFixed(2);
+  document.getElementById('valor').value = precoVigente(prod, _dataPedidoNovo()).toFixed(2);
   calcularTotalItem();
 }
 function calcularTotalItem() {
@@ -2491,9 +2551,10 @@ function adicionarDoceNoPedidoEditado() {
   const indexExistente = itensEditandoPedido.findIndex(i => i.produto.toLowerCase() === prodObj.nome.toLowerCase());
   if(indexExistente !== -1) {
     itensEditandoPedido[indexExistente].qtd += quantidade;
-    itensEditandoPedido[indexExistente].total = itensEditandoPedido[indexExistente].qtd * prodObj.preco;
+    itensEditandoPedido[indexExistente].total = itensEditandoPedido[indexExistente].qtd * itensEditandoPedido[indexExistente].valor;
   } else {
-    itensEditandoPedido.push({ produto: prodObj.nome, qtd: quantidade, valor: prodObj.preco, total: quantidade * prodObj.preco });
+    const pv = precoVigente(prodObj, _dataPedidoEdicao());
+    itensEditandoPedido.push({ produto: prodObj.nome, qtd: quantidade, valor: pv, total: quantidade * pv });
   }
   qtdInput.value = ''; atualizarItensTabelaModalEditar();
 }
@@ -3527,7 +3588,72 @@ const COR_CAT = {
   'Avulso'  : 'background:#e2e3e5;color:#383d41'
 };
 
+let _tpEditandoId = null, _tpBase = {};
+function renderTabelasPreco() {
+  const el = document.getElementById('listaTabelasPreco'); if (!el) return;
+  const hoje = _hoje();
+  const ord = tabelasPreco.slice().sort((a,b) => b.vigencia.localeCompare(a.vigencia));
+  const vigente = ord.find(t => t.vigencia <= hoje);
+  el.innerHTML = ord.length ? ord.map(t => {
+    const sit = t === vigente ? '<span style="color:#2e7d57;font-weight:600;">vigente</span>' : t.vigencia > hoje ? '<span style="color:var(--brand);font-weight:600;">agendada</span>' : '<span style="color:var(--text-3);">anterior</span>';
+    return `<div class="produto-item" style="cursor:pointer;" onclick="abrirTabelaPreco(${t.id})"><div class="produto-info"><strong>A partir de ${formatarData(t.vigencia)}</strong><span>${Object.keys(t.precos).length} preços · ${sit}</span></div><span style="color:var(--text-3);">›</span></div>`;
+  }).join('') : '<p style="color:#aaa;font-size:12px;margin-bottom:8px;">Nenhuma tabela cadastrada: valem os preços dos produtos.</p>';
+}
+function abrirTabelaPreco(id) {
+  const t = id ? tabelasPreco.find(x => x.id === id) : null;
+  _tpEditandoId = t ? t.id : null;
+  document.getElementById('tabelaPrecoTitulo').textContent = t ? 'Editar tabela' : 'Nova tabela';
+  document.getElementById('tpVigencia').value = t ? t.vigencia : '';
+  document.getElementById('tpPercent').value = '';
+  document.getElementById('tpExcluir').style.display = t ? '' : 'none';
+  _tpBase = {};
+  produtos.forEach(p => { _tpBase[p.id] = t && t.precos[p.id] != null ? Number(t.precos[p.id]) : precoVigente(p, _hoje()); });
+  renderTpLista();
+  _ovAbrir('tabelaPrecoOverlay');
+}
+function renderTpLista() {
+  const grupos = {}; ORDEM_CAT.forEach(c => grupos[c] = []);
+  produtos.forEach(p => { const c = p.categoria || 'Simples'; (grupos[c] = grupos[c] || []).push(p); });
+  document.getElementById('tpLista').innerHTML = ORDEM_CAT.filter(c => grupos[c].length).map(c => `
+    <div style="font-size:11px;font-weight:700;color:#8a5a34;text-transform:uppercase;margin:12px 0 4px;">${c}</div>` +
+    grupos[c].sort((a,b) => (a.nome||'').localeCompare(b.nome||'')).map(p => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--divider);">
+      <span style="font-size:13px;flex:1;">${p.nome}</span>
+      <input type="text" inputmode="decimal" id="tp_${p.id}" value="${(_tpBase[p.id]||0).toFixed(2).replace('.',',')}" style="width:80px;text-align:right;">
+    </div>`).join('')).join('');
+}
+function _tpLer() { const o = {}; produtos.forEach(p => { const el = document.getElementById('tp_' + p.id); if (el) o[p.id] = parseFloat((el.value||'').replace(',','.')) || 0; }); return o; }
+function aplicarReajusteTabela() {
+  const pc = parseFloat((document.getElementById('tpPercent').value||'').replace(',','.'));
+  if (isNaN(pc)) { alert('Informe o percentual.'); return; }
+  const atual = _tpLer();
+  produtos.forEach(p => {
+    const el = document.getElementById('tp_' + p.id); if (!el) return;
+    el.value = (Math.round(atual[p.id] * (1 + pc/100) * 100) / 100).toFixed(2).replace('.',',');
+  });
+}
+async function salvarTabelaPreco() {
+  const vig = document.getElementById('tpVigencia').value;
+  if (!vig) { alert('Informe a data de início da vigência.'); return; }
+  if (tabelasPreco.some(t => t.vigencia === vig && t.id !== _tpEditandoId)) { alert('Já existe uma tabela com essa data de início. Edite a existente.'); return; }
+  const precos = _tpLer();
+  const reg = { id: _tpEditandoId || Date.now(), vigencia: vig, precos };
+  if (!(await sbUpsert('tabelas_preco', [reg]))) return;
+  const i = tabelasPreco.findIndex(t => t.id === reg.id);
+  if (i >= 0) tabelasPreco[i] = reg; else tabelasPreco.push(reg);
+  registrarLog('PRODUTO', `Tabela de preços salva — vigência ${vig}`);
+  fecharTabelaPreco(); renderTabelasPreco(); mostrarAviso('✓ Tabela de preços salva');
+}
+async function excluirTabelaPreco() {
+  if (!_tpEditandoId || !confirm('Excluir esta tabela de preços? Pedidos já lançados não mudam.')) return;
+  const { error } = await sbClient.from('tabelas_preco').delete().eq('id', _tpEditandoId);
+  if (error) { alert('Erro ao excluir: ' + error.message); return; }
+  tabelasPreco = tabelasPreco.filter(t => t.id !== _tpEditandoId);
+  fecharTabelaPreco(); renderTabelasPreco();
+}
+function fecharTabelaPreco() { _ovFechar('tabelaPrecoOverlay'); }
 function renderProdutos() {
+  renderTabelasPreco();
   const grupos = {};
   ORDEM_CAT.forEach(c => grupos[c] = []);
   produtos.forEach(p => {
