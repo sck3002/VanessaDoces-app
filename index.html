@@ -716,7 +716,7 @@ table tr:hover td{background:var(--bg);}
         <div id="listaProdutos"></div>
       </div>
     </div>
-    <!-- Painel de receita inline --->
+    <!-- Painel de receita inline -->
     <div id="receitaPanel" style="display:none;" class="card" style="margin-top:0;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <h2 style="margin:0;">🍫 Receita: <span id="receitaProdutoNome" style="color:#d94d7d;"></span></h2>
@@ -2569,57 +2569,31 @@ function calcularBalançoModalEditar() {
 }
 function compartilharPedido() {
   const p = pedidos.find(x => x.id === overlayDetalhePedidoId); if (!p) return;
-  const W = 30;                                   /* largura do bloco monoespaçado */
   const brl = n => 'R$ ' + (n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-  /* linha estilo cardápio: texto à esquerda, pontilhado, valor à direita */
-  const linha = (esq, dir) => {
-    const partes = []; let atual = '';
-    esq.split(' ').forEach(w => {
-      if ((atual + ' ' + w).trim().length > W - 2) { partes.push(atual); atual = w; }
-      else atual = (atual + ' ' + w).trim();
-    });
-    let ult = atual;
-    if (ult.length + dir.length + 5 > W) { partes.push(ult); ult = ''; }   /* valor não cabe: desce para linha própria */
-    const miolo = W - ult.length - dir.length - (ult ? 2 : 1);
-    return partes.concat((ult ? ult + ' ' : '') + '·'.repeat(miolo) + ' ' + dir).join('\n');
-  };
-  const semana = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
   let dataFmt = '—';
-  if (p.data) { const [y,m,d] = p.data.split('-'); dataFmt = `${semana[new Date(+y,+m-1,+d).getDay()]}, ${d}/${m}/${y}`; }
-
-  const itens    = p.itens || [];
-  const taxa     = p.taxaEntrega || 0;
-  const total    = p.total || 0;
-  const entrada  = p.entrada || 0;
-  const saldo    = Math.max(0, total - entrada);
-  const doces    = itens.reduce((a,i) => a + (i.total||0), 0);
-  const ajuste   = Math.round((total - doces - taxa) * 100) / 100;   /* mantém a conta sempre fechada */
-
-  const blocoItens = itens.map(i => linha(`${i.qtd} ${i.produto}`, brl(i.total))).join('\n');
-  const conta = [linha('Doces', brl(doces))];
-  if (taxa > 0)           conta.push(linha('+ Entrega', brl(taxa)));
-  if (Math.abs(ajuste)>=0.01) conta.push(linha(ajuste>0?'+ Ajuste':'− Desconto', brl(Math.abs(ajuste))));
-  conta.push('─'.repeat(W), linha('TOTAL', brl(total)));
-  if (entrada > 0)        conta.push(linha('Entrada paga', '− ' + brl(entrada)));
-
-  const aviso = taxa > 0
-    ? `🚚 _Entrega de ${brl(taxa)} *já incluída* no total._`
-    : `🏠 _Retirada no local · sem taxa de entrega._`;
-  const destaque = saldo > 0 ? `💰 *Falta pagar: ${brl(saldo)}*` : `✅ *Pedido quitado*`;
+  if (p.data) { const [y,m,d] = p.data.split('-'); dataFmt = `${d}/${m}/${y}`; }
+  const itens   = p.itens || [];
+  const taxa    = p.taxaEntrega || 0;
+  const total   = p.total || 0;
+  const entrada = p.entrada || 0;
+  const saldo   = Math.max(0, total - entrada);
+  const lista   = itens.map(i => `• ${i.produto}: ${i.qtd} un — ${brl(i.total)}`).join('\n');
 
   const texto = [
-    `✦ *Vanessa Doces Finos* ✦`,
-    `_Pedido de ${p.cliente}_`,
+    `🍬 *Vanessa Doces Finos*`,
     ``,
-    `*Entrega*  ${dataFmt}`,
-    `*Local*  ${p.endereco || 'a combinar'}`,
+    `👤 Cliente: ${p.cliente}`,
+    `📅 Entrega: ${dataFmt}`,
+    `📍 Endereço: ${p.endereco || 'a combinar'}`,
     ``,
-    '```\n' + blocoItens + '\n' + '─'.repeat(W) + '\n' + conta.join('\n') + '\n```',
-    aviso,
-    destaque,
-    p.obs ? `\n📝 ${p.obs}` : '',
+    `*Itens do pedido:*`,
+    lista,
     ``,
-    `_Feito com carinho_ 🍫`
+    `💰 Total: ${brl(total)}`,
+    `🚚 Taxa de entrega: ${brl(taxa)}`,
+    `✅ Entrada: ${brl(entrada)}`,
+    `⏳ Saldo a pagar: ${brl(saldo)}`,
+    p.obs ? `\n📝 ${p.obs}` : ''
   ].join('\n').replace(/\n{3,}/g, '\n\n').trim();
 
   if (navigator.share) {
