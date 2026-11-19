@@ -1299,14 +1299,32 @@ verificarLogin().then(logado => {
     })
     .catch(err => {
       console.error('Erro ao carregar banco:', err);
-      alert('Erro ao carregar o banco de dados. Verifique o console.');
+      document.body.innerHTML = `<div style="padding:40px 24px;text-align:center;font-family:Poppins,sans-serif;color:#4a2c17;">
+        <div style="font-size:42px;">⚠️</div>
+        <h2 style="margin:12px 0 8px;">Não consegui carregar seus dados</h2>
+        <p style="font-size:14px;color:#777;margin-bottom:6px;">Nada foi alterado no banco. Verifique a internet e tente de novo.</p>
+        <p style="font-size:12px;color:#aaa;margin-bottom:20px;">${(err && err.message || '').replace(/</g,'&lt;')}</p>
+        <button onclick="location.reload()" style="padding:12px 22px;border:0;border-radius:10px;background:#b5527a;color:#fff;font-size:15px;">Tentar novamente</button>
+      </div>`;
     });
 });
  
-async function sbListar(tabela) {
-  const { data, error } = await sbClient.from(tabela).select('*');
-  if (error) { console.error(`Erro ao listar ${tabela}:`, error.message); return []; }
-  return data || [];
+/* Lê a tabela inteira em blocos de 1.000 (limite da API do Supabase).
+   obrigatoria=true: qualquer erro interrompe a carga (nunca devolve lista vazia por engano). */
+async function sbListar(tabela, obrigatoria) {
+  const PASSO = 1000, tudo = [];
+  for (let ini = 0; ; ini += PASSO) {
+    const { data, error } = await sbClient.from(tabela).select('*').order('id', { ascending: true }).range(ini, ini + PASSO - 1);
+    if (error) {
+      console.error(`Erro ao listar ${tabela}:`, error.message);
+      if (obrigatoria) throw new Error(`Não foi possível ler "${tabela}": ${error.message}`);
+      return [];
+    }
+    const lote = data || [];
+    tudo.push(...lote);
+    if (lote.length < PASSO) break;
+  }
+  return tudo;
 }
 async function sbUpsert(tabela, lista) {
   if (!lista || lista.length === 0) return true;
@@ -1326,7 +1344,9 @@ async function sbDeletar(tabela, id) {
     const msg = `Erro ao excluir de "${tabela}":\n${error.message}`;
     console.error(msg);
     alert(msg);
+    return false;
   }
+  return true;
 }
 
 /* ===== LOG ===== */
@@ -1364,105 +1384,6 @@ document.getElementById('dataAtual').innerText =
 
 document.getElementById('dataCompraInsumo').value = _hoje();   /* data local (toISOString usava UTC e virava o dia às 21h) */
  
-const BANCO_INICIAL = {
-  produtos: [
-    {id:1,nome:"Brigadeiro",preco:1.10},{id:2,nome:"Cajuzinho",preco:1.10},{id:3,nome:"Casadinho",preco:1.10},
-    {id:4,nome:"Brigadeiro de Churros",preco:1.10},{id:5,nome:"Beijinho",preco:1.10},{id:6,nome:"Chocobol",preco:1.10},
-    {id:7,nome:"Camafeu de Nozes",preco:1.25},{id:8,nome:"Olho de Sogra",preco:1.25},{id:9,nome:"Brigadeiro de Café",preco:1.25},
-    {id:10,nome:"Ninho com Nutella",preco:1.25},{id:11,nome:"Ferrero",preco:1.25},{id:12,nome:"Bombom de Uva",preco:1.30},
-    {id:13,nome:"Bombom de Coco",preco:1.30},{id:14,nome:"Bombom de Nozes",preco:1.30},{id:15,nome:"Bombom de Flocos",preco:1.30},
-    {id:16,nome:"Bombom de Cereja",preco:1.30},{id:17,nome:"Bombom Ouriço",preco:1.30},{id:18,nome:"Bombom de Brigadeiro",preco:1.30},
-    {id:19,nome:"Bombom de Amendoim",preco:1.30},{id:20,nome:"Bombom de Coco com Damasco",preco:1.30},
-    {id:21,nome:"Bombom de Abacaxi com Coco",preco:1.30},{id:22,nome:"Copinho de Limão",preco:1.50},
-    {id:23,nome:"Copinho de Maracujá",preco:1.50},{id:24,nome:"Gotas de Paçoca",preco:1.50},{id:25,nome:"Damasco Recheado",preco:1.50},
-    {id:26,nome:"Copinho de Cereja",preco:2.00},{id:27,nome:"Copinho de Morango",preco:1.70},{id:28,nome:"Mini Bolinho",preco:2.50},
-    {id:29,nome:"Bem Casado",preco:3.50}
-  ],
-  insumos: [
-    {id:101,nome:"Coco 5k",unidade:"un",estoque:1,preco:144.90,data:"2026-03-01"},
-    {id:105,nome:"Creme de leite",unidade:"un",estoque:27,preco:2.49,data:"2026-03-05"},
-    {id:122,nome:"Nutella 3k",unidade:"un",estoque:1,preco:189.00,data:"2026-04-02"},
-    {id:139,nome:"Gas",unidade:"un",estoque:1,preco:55.00,data:"2026-03-10"}
-  ],
-  pedidos: [
-    {id:1001,cliente:"Aline",data:"2026-03-01",status:"pago",entrada:180.00,total:180.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Camafeu de Nozes",qtd:66,valor:1.20,total:80.00}]},
-    {id:1002,cliente:"Emily",data:"2026-03-01",status:"pago",entrada:170.00,total:170.00,itens:[{produto:"Casadinho",qtd:170,valor:1.00,total:170.00}]},
-    {id:1003,cliente:"Hyolanda",data:"2026-05-10",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Beijinho",qtd:120,valor:1.00,total:120.00}]},
-    {id:1004,cliente:"Mariana",data:"2026-05-15",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro de Churros",qtd:120,valor:1.00,total:120.00}]},
-    {id:1005,cliente:"Rayane",data:"2026-06-20",status:"pago",entrada:110.00,total:110.00,itens:[{produto:"Chocobol",qtd:110,valor:1.00,total:110.00}]},
-    {id:1006,cliente:"Geiza Reis",data:"2026-03-04",status:"pago",entrada:132.00,total:132.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00},{produto:"Ferrero",qtd:26,valor:1.20,total:32.00}]},
-    {id:1007,cliente:"Mayara Marcolino",data:"2026-03-06",status:"pago",entrada:60.00,total:60.00,itens:[{produto:"Brigadeiro",qtd:30,valor:1.00,total:30.00},{produto:"Beijinho",qtd:30,valor:1.00,total:30.00}]},
-    {id:1008,cliente:"Bruna Luiza",data:"2026-03-07",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1009,cliente:"Bete",data:"2026-03-07",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1010,cliente:"Gisele",data:"2026-03-07",status:"pago",entrada:140.00,total:140.00,itens:[{produto:"Brigadeiro",qtd:140,valor:1.00,total:140.00}]},
-    {id:1011,cliente:"Duda",data:"2026-03-07",status:"pago",entrada:300.00,total:300.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Beijinho",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1012,cliente:"Carla Virginia",data:"2026-03-07",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1013,cliente:"Rafaela",data:"2026-03-07",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:30,valor:1.00,total:30.00},{produto:"Casadinho",qtd:30,valor:1.00,total:30.00},{produto:"Beijinho",qtd:30,valor:1.00,total:30.00},{produto:"Brigadeiro de Churros",qtd:30,valor:1.00,total:30.00}]},
-    {id:1014,cliente:"Sônia",data:"2026-03-08",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:30,valor:1.00,total:30.00},{produto:"Casadinho",qtd:30,valor:1.00,total:30.00},{produto:"Beijinho",qtd:30,valor:1.00,total:30.00},{produto:"Cajuzinho",qtd:30,valor:1.00,total:30.00}]},
-    {id:1015,cliente:"Marta",data:"2026-03-12",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00}]},
-    {id:1016,cliente:"Patrícia",data:"2026-03-14",status:"pago",entrada:220.00,total:220.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00},{produto:"Ninho com Nutella",qtd:16,valor:1.20,total:20.00}]},
-    {id:1017,cliente:"Marcos",data:"2026-03-14",status:"pago",entrada:200.00,total:200.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Beijinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1018,cliente:"Vivian",data:"2026-03-14",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1019,cliente:"Larissa",data:"2026-03-14",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro de Churros",qtd:100,valor:1.00,total:100.00},{produto:"Ferrero",qtd:16,valor:1.20,total:20.00}]},
-    {id:1020,cliente:"Kênia",data:"2026-03-14",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Beijinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1021,cliente:"Nivia",data:"2026-03-15",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1022,cliente:"Lúcia",data:"2026-03-17",status:"pago",entrada:50.00,total:50.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00}]},
-    {id:1023,cliente:"Renata Miranda",data:"2026-03-19",status:"pago",entrada:240.00,total:240.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00},{produto:"Bombom de Uva",qtd:33,valor:1.20,total:40.00}]},
-    {id:1024,cliente:"Thaís",data:"2026-03-21",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:60,valor:1.00,total:60.00},{produto:"Beijinho",qtd:60,valor:1.00,total:60.00}]},
-    {id:1025,cliente:"Carla",data:"2026-03-21",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1026,cliente:"Juliana Santos",data:"2026-03-21",status:"pago",entrada:180.00,total:180.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Ninho com Nutella",qtd:66,valor:1.20,total:80.00}]},
-    {id:1027,cliente:"Mônica",data:"2026-03-22",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1028,cliente:"Sílvia Reis",data:"2026-03-24",status:"pago",entrada:80.00,total:80.00,itens:[{produto:"Brigadeiro",qtd:40,valor:1.00,total:40.00},{produto:"Casadinho",qtd:40,valor:1.00,total:40.00}]},
-    {id:1029,cliente:"Andressa",data:"2026-03-26",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00}]},
-    {id:1030,cliente:"Letícia",data:"2026-03-28",status:"pago",entrada:200.00,total:200.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Beijinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1031,cliente:"Fernanda",data:"2026-03-28",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00},{produto:"Brigadeiro de Churros",qtd:50,valor:1.00,total:50.00}]},
-    {id:1032,cliente:"Mariane",data:"2026-03-28",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:60,valor:1.00,total:60.00},{produto:"Cajuzinho",qtd:60,valor:1.00,total:60.00}]},
-    {id:1033,cliente:"Isabela",data:"2026-03-28",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1034,cliente:"Gabriela",data:"2026-03-29",status:"pago",entrada:130.00,total:130.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Ferrero",qtd:66,valor:1.20,total:80.00}]},
-    {id:1035,cliente:"Priscila",data:"2026-03-31",status:"pago",entrada:90.00,total:90.00,itens:[{produto:"Brigadeiro",qtd:45,valor:1.00,total:45.00},{produto:"Beijinho",qtd:45,valor:1.00,total:45.00}]},
-    {id:1036,cliente:"Camila Mara",data:"2026-04-02",status:"pago",entrada:160.00,total:160.00,itens:[{produto:"Brigadeiro",qtd:80,valor:1.00,total:80.00},{produto:"Casadinho",qtd:80,valor:1.00,total:80.00}]},
-    {id:1037,cliente:"Tatiana",data:"2026-04-04",status:"pago",entrada:110.00,total:110.00,itens:[{produto:"Brigadeiro",qtd:55,valor:1.00,total:55.00},{produto:"Beijinho",qtd:55,valor:1.00,total:55.00}]},
-    {id:1038,cliente:"Sandra",data:"2026-04-04",status:"pago",entrada:200.00,total:200.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1039,cliente:"Soraia",data:"2026-04-04",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00},{produto:"Cajuzinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1040,cliente:"Amanda Reis",data:"2026-04-05",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro de Churros",qtd:120,valor:1.00,total:120.00}]},
-    {id:1041,cliente:"Cristiane",data:"2026-04-08",status:"pago",entrada:80.00,total:80.00,itens:[{produto:"Brigadeiro",qtd:40,valor:1.00,total:40.00},{produto:"Casadinho",qtd:40,valor:1.00,total:40.00}]},
-    {id:1042,cliente:"Regiane",data:"2026-04-11",status:"pago",entrada:210.00,total:210.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Ninho com Nutella",qtd:91,valor:1.20,total:110.00}]},
-    {id:1043,cliente:"Vanessa Torres",data:"2026-04-11",status:"pago",entrada:140.00,total:140.00,itens:[{produto:"Brigadeiro",qtd:70,valor:1.00,total:70.00},{produto:"Beijinho",qtd:70,valor:1.00,total:70.00}]},
-    {id:1044,cliente:"Aline Santos",data:"2026-04-11",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1045,cliente:"Milena",data:"2026-04-12",status:"pago",entrada:130.00,total:130.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Bombom de Uva",qtd:66,valor:1.20,total:80.00}]},
-    {id:1046,cliente:"Juliana Ferraz",data:"2026-04-15",status:"pago",entrada:90.00,total:90.00,itens:[{produto:"Brigadeiro",qtd:45,valor:1.00,total:45.00},{produto:"Cajuzinho",qtd:45,valor:1.00,total:45.00}]},
-    {id:1047,cliente:"Daniela",data:"2026-04-18",status:"pago",entrada:250.00,total:250.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00},{produto:"Ferrero",qtd:41,valor:1.20,total:50.00}]},
-    {id:1048,cliente:"Elaine",data:"2026-04-18",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00},{produto:"Brigadeiro de Churros",qtd:50,valor:1.00,total:50.00}]},
-    {id:1049,cliente:"Lilian",data:"2026-04-18",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1050,cliente:"Tânia",data:"2026-04-19",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:60,valor:1.00,total:60.00},{produto:"Beijinho",qtd:60,valor:1.00,total:60.00}]},
-    {id:1051,cliente:"Karina",data:"2026-04-22",status:"pago",entrada:70.00,total:70.00,itens:[{produto:"Brigadeiro",qtd:35,valor:1.00,total:35.00},{produto:"Casadinho",qtd:35,valor:1.00,total:35.00}]},
-    {id:1052,cliente:"Michele",data:"2026-04-25",status:"pago",entrada:180.00,total:180.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Ninho com Nutella",qtd:66,valor:1.20,total:80.00}]},
-    {id:1053,cliente:"Priscila Ramos",data:"2026-04-25",status:"pago",entrada:130.00,total:130.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Bombom de Coco",qtd:66,valor:1.20,total:80.00}]},
-    {id:1054,cliente:"Fabiana",data:"2026-04-25",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Beijinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1055,cliente:"Gisele Silva",data:"2026-04-26",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Casadinho",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1056,cliente:"Kelly",data:"2026-04-29",status:"pago",entrada:80.00,total:80.00,itens:[{produto:"Brigadeiro",qtd:40,valor:1.00,total:40.00},{produto:"Cajuzinho",qtd:40,valor:1.00,total:40.00}]},
-    {id:1057,cliente:"Úrsula",data:"2026-05-02",status:"pago",entrada:220.00,total:220.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00},{produto:"Ferrero",qtd:16,valor:1.20,total:20.00}]},
-    {id:1058,cliente:"Simone",data:"2026-05-02",status:"pago",entrada:140.00,total:140.00,itens:[{produto:"Brigadeiro",qtd:70,valor:1.00,total:70.00},{produto:"Beijinho",qtd:70,valor:1.00,total:70.00}]},
-    {id:1059,cliente:"Renata Reis",data:"2026-05-02",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Brigadeiro de Churros",qtd:100,valor:1.00,total:100.00}]},
-    {id:1060,cliente:"Talita",data:"2026-05-03",status:"pago",entrada:130.00,total:130.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Bombom de Nozes",qtd:66,valor:1.20,total:80.00}]},
-    {id:1061,cliente:"Sílvia",data:"2026-05-06",status:"pago",entrada:90.00,total:90.00,itens:[{produto:"Brigadeiro",qtd:45,valor:1.00,total:45.00},{produto:"Casadinho",qtd:45,valor:1.00,total:45.00}]},
-    {id:1062,cliente:"Lívia",data:"2026-05-09",status:"pago",entrada:200.00,total:200.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1063,cliente:"Cláudia",data:"2026-05-09",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00},{produto:"Cajuzinho",qtd:50,valor:1.00,total:50.00}]},
-    {id:1064,cliente:"Andreia",data:"2026-05-10",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro de Churros",qtd:120,valor:1.00,total:120.00}]},
-    {id:1065,cliente:"Antônia",data:"2026-05-13",status:"pago",entrada:80.00,total:80.00,itens:[{produto:"Brigadeiro",qtd:40,valor:1.00,total:40.00},{produto:"Casadinho",qtd:40,valor:1.00,total:40.00}]},
-    {id:1066,cliente:"Paula",data:"2026-05-16",status:"pago",entrada:180.00,total:180.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Ninho com Nutella",qtd:66,valor:1.20,total:80.00}]},
-    {id:1067,cliente:"Marisa",data:"2026-05-16",status:"pago",entrada:140.00,total:140.00,itens:[{produto:"Brigadeiro",qtd:70,valor:1.00,total:70.00},{produto:"Beijinho",qtd:70,valor:1.00,total:70.00}]},
-    {id:1068,cliente:"Beatriz",data:"2026-05-16",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1069,cliente:"Sueli",data:"2026-05-17",status:"pago",entrada:130.00,total:130.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Bombom de Flocos",qtd:66,valor:1.20,total:80.00}]},
-    {id:1070,cliente:"Regina",data:"2026-05-20",status:"pago",entrada:90.00,total:90.00,itens:[{produto:"Brigadeiro",qtd:45,valor:1.00,total:45.00},{produto:"Cajuzinho",qtd:45,valor:1.00,total:45.00}]},
-    {id:1071,cliente:"Solange",data:"2026-05-23",status:"pago",entrada:240.00,total:240.00,itens:[{produto:"Brigadeiro",qtd:100,valor:1.00,total:100.00},{produto:"Casadinho",qtd:100,valor:1.00,total:100.00},{produto:"Ferrero",qtd:33,valor:1.20,total:40.00}]},
-    {id:1072,cliente:"Jéssica",data:"2026-05-23",status:"pago",entrada:150.00,total:150.00,itens:[{produto:"Brigadeiro",qtd:50,valor:1.00,total:50.00},{produto:"Beijinho",qtd:50,valor:1.00,total:50.00},{produto:"Brigadeiro de Churros",qtd:50,valor:1.00,total:50.00}]},
-    {id:1073,cliente:"Luciana",data:"2026-05-23",status:"pago",entrada:100.00,total:100.00,itens:[{produto:"Casadinho",qtd:100,valor:1.00,total:100.00}]},
-    {id:1074,cliente:"Diana",data:"2026-05-24",status:"pago",entrada:120.00,total:120.00,itens:[{produto:"Brigadeiro",qtd:60,valor:1.00,total:60.00},{produto:"Beijinho",qtd:60,valor:1.00,total:60.00}]},
-    {id:1075,cliente:"Bruna",data:"2026-05-27",status:"pago",entrada:70.00,total:70.00,itens:[{produto:"Brigadeiro",qtd:35,valor:1.00,total:35.00},{produto:"Casadinho",qtd:35,valor:1.00,total:35.00}]}
-  ]
-};
- 
 /* ===== BACKUP / RESTAURAÇÃO ===== */
 function exportarBackup() {
   const dados = { pedidos, produtos, insumos, tiposInsumos, tabelasPreco };
@@ -1489,35 +1410,19 @@ function importarBackup(input) {
  
 /* ===== CARREGAR SISTEMA ===== */
 async function carregarSistema() {
-  const [p, pr, ins, cli, ti, tm, md, mc, tp] = await Promise.all([
-    sbListar('pedidos'), sbListar('produtos'), sbListar('insumos'),
-    sbListar('clientes'), sbListar('tipos_insumos'),
-    sbListar('tipos_massa'), sbListar('massas_diario'),
-    sbListar('meu_cadastro'), sbListar('tabelas_preco')
+  /* tabelas essenciais: se uma falhar, a carga inteira falha e NADA é gravado */
+  const [p, pr, ins, cli, ti, tm, md] = await Promise.all([
+    sbListar('pedidos', true), sbListar('produtos', true), sbListar('insumos', true),
+    sbListar('clientes', true), sbListar('tipos_insumos', true),
+    sbListar('tipos_massa', true), sbListar('massas_diario', true)
   ]);
+  /* opcionais: a tabela pode ainda não existir */
+  const [mc, tp] = await Promise.all([sbListar('meu_cadastro'), sbListar('tabelas_preco')]);
   meuCadastro = (mc && mc.length) ? mc[0] : null;
   tabelasPreco = (tp || []).map(t => ({ ...t, precos: t.precos || {} }));
-  if (p.length === 0 && pr.length === 0 && ins.length === 0) {
-    pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
-    produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
-    insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
-    clientes = []; tiposInsumos = []; tiposMassa = []; massasDiario = [];
-    await Promise.all([sbUpsert('pedidos',pedidos),sbUpsert('produtos',produtos),sbUpsert('insumos',insumos)]);
-  } else {
-    pedidos = p || []; produtos = pr || []; insumos = ins || [];
-    clientes = cli || []; tiposInsumos = ti || [];
-    tiposMassa = tm || []; massasDiario = md || [];
-  }
-}
- 
-function importarBancoCompleto() {
-  if (confirm("Deseja redefinir para as configurações iniciais do Banco de Dados?")) {
-    pedidos  = JSON.parse(JSON.stringify(BANCO_INICIAL.pedidos));
-    produtos = JSON.parse(JSON.stringify(BANCO_INICIAL.produtos));
-    insumos  = JSON.parse(JSON.stringify(BANCO_INICIAL.insumos));
-    tiposInsumos = [];
-    salvarLS(); atualizarTodasAsTelas(); alert("Sistema reiniciado com a base de dados original!");
-  }
+  pedidos = p; produtos = pr; insumos = ins;
+  clientes = cli; tiposInsumos = ti;
+  tiposMassa = tm; massasDiario = md;
 }
  
  
@@ -1744,6 +1649,7 @@ function fecharEditarCliente() { _ovFechar('editClienteOverlay'); }
 async function salvarClientePedido() {
   const id  = overlayDetalhePedidoId;
   const idx = pedidos.findIndex(x=>x.id===id); if(idx===-1) return;
+  const _antes = { ...pedidos[idx] };
   pedidos[idx].cliente  = document.getElementById('editCliente').value.trim();
   pedidos[idx].telefone = document.getElementById('editTelefone').value;
   pedidos[idx].data     = document.getElementById('editEntrega').value;
@@ -1751,7 +1657,7 @@ async function salvarClientePedido() {
   pedidos[idx].obs      = document.getElementById('editObs').value;
   pedidos[idx].status   = document.getElementById('editStatus').value;
   const ok = await sbUpsert('pedidos',[pedidos[idx]]);
-  if(!ok) return;
+  if(!ok) { pedidos[idx] = _antes; return; }
   registrarLog('PEDIDO',`Cliente alterado — ${pedidos[idx].cliente}`);
   fecharEditarCliente();
   renderDetalhePedido(id);
@@ -1781,13 +1687,14 @@ async function salvarItensPedido() {
   const totalCalc = itensEditandoPedido.reduce((acc,i)=>acc+i.total,0) + taxa;
   const entrada   = parseFloat((document.getElementById('editValorEntrada').value||'0').replace(',','.'))||0;
   const saldo     = totalCalc - entrada;
+  const _antesI = { ...pedidos[idx] };
   pedidos[idx].itens   = [...itensEditandoPedido];
   pedidos[idx].total   = totalCalc;
   pedidos[idx].taxaEntrega = taxa;
   pedidos[idx].entrada = entrada;
   if(pedidos[idx].status!=='cancelado') pedidos[idx].status = saldo<=0?'pago':'pendente';
   const ok = await sbUpsert('pedidos',[pedidos[idx]]);
-  if(!ok) return;
+  if(!ok) { pedidos[idx] = _antesI; return; }
   registrarLog('PEDIDO',`Itens alterados — ${pedidos[idx].cliente} | R$ ${totalCalc.toFixed(2)}`);
   fecharEditarItens();
   renderDetalhePedido(id);
@@ -1796,10 +1703,10 @@ async function salvarItensPedido() {
 }
 
 /* — Excluir do detalhe — */
-function excluirPedidoDetalhe(id) {
+async function excluirPedidoDetalhe(id) {
   if(!confirm('Excluir este pedido permanentemente?')) return;
   const p = pedidos.find(x=>x.id===id);
-  sbDeletar('pedidos',id);
+  if (!(await sbDeletar('pedidos',id))) return;
   pedidos = pedidos.filter(x=>x.id!==id);
   registrarLog('PEDIDO',`Excluído — ${p?p.cliente:'?'}`);
   fecharDetalhePedido();
@@ -2074,7 +1981,7 @@ function atualizarTotalComEntrega() {
 }
 
 /* ===== FINALIZAR PEDIDO ===== */
-function finalizarPedido() {
+async function finalizarPedido() {
   const telefone = document.getElementById('telefone').value.trim();
   const cliente  = document.getElementById('cliente').value.trim();
   const dataEntrega = document.getElementById('entrega').value;
@@ -2089,18 +1996,21 @@ function finalizarPedido() {
   const totalFinal = itensPedidoAtual.reduce((s,i)=>s+i.total,0) + taxa;
   const statusPedido = (totalFinal - entrada > 0) ? 'pendente' : 'pago';
   const novoPedido = { id: Date.now(), cliente, telefone, data: dataEntrega, endereco, obs: observacoes, itens: [...itensPedidoAtual], status: statusPedido, entrada, total: totalFinal, taxaEntrega: taxa };
+  const btn = document.getElementById('btnSalvarPedido');
+  if (btn) btn.disabled = true;                           /* evita duplo toque enquanto grava */
+  const ok = await sbUpsert('pedidos', [novoPedido]);     /* só confirma depois que o banco respondeu */
+  if (!ok) { if (btn) btn.disabled = false; return; }     /* o formulário continua preenchido */
   pedidos.push(novoPedido);
-  try {
-    sbUpsert('pedidos', [novoPedido]);
-    registrarLog('PEDIDO', `Pedido lançado — Cliente: ${cliente} | Entrega: ${dataEntrega} | Total: R$ ${totalFinal.toFixed(2)}`);
-    const telefoneLimpo = telefone.replace(/\D/g,'');
-    const clienteExiste = clientes.find(c => (c.tel||'').toString().replace(/\D/g,'') === telefoneLimpo || (c.id||'').toString().replace(/\D/g,'') === telefoneLimpo);
-    if(!clienteExiste && telefoneLimpo) {
-      const novoCliente = { id: telefoneLimpo, nome: cliente, tel: telefoneLimpo, end: endereco };
-      clientes.push(novoCliente); sbUpsert('clientes', [novoCliente]);
+  registrarLog('PEDIDO', `Pedido lançado — Cliente: ${cliente} | Entrega: ${dataEntrega} | Total: R$ ${totalFinal.toFixed(2)}`);
+  const telefoneLimpo = telefone.replace(/\D/g,'');
+  const clienteExiste = clientes.find(c => (c.tel||'').toString().replace(/\D/g,'') === telefoneLimpo || (c.id||'').toString().replace(/\D/g,'') === telefoneLimpo);
+  if (!clienteExiste && telefoneLimpo) {
+    const novoCliente = { id: telefoneLimpo, nome: cliente, tel: telefoneLimpo, end: endereco };
+    if (await sbUpsert('clientes', [novoCliente])) {
+      clientes.push(novoCliente);
       registrarLog('CLIENTE', `Cliente cadastrado — ${cliente} | Tel: ${telefone}`);
     }
-  } catch(e){ console.error('Erro ao salvar:', e); }
+  }
   alert('Pedido salvo com sucesso!');
   fecharNovoPedido();
   try { atualizarTodasAsTelas(); } catch(e) { console.error('Erro ao atualizar telas:', e); }
@@ -2442,9 +2352,9 @@ async function salvarClienteForm() {
   alert('✅ Cliente salvo!');
 }
 
-function excluirClienteOverlay(id) {
+async function excluirClienteOverlay(id) {
   if (!confirm('Excluir este cliente permanentemente?')) return;
-  sbDeletar('clientes', id);
+  if (!(await sbDeletar('clientes', id))) return;
   clientes = clientes.filter(c=>String(c.id)!==String(id));
   fecharDetalheCliente();
   renderizarClientes();
@@ -3082,7 +2992,7 @@ function abrirA4(data, pedidosDia) {
 }
  
 /* ===== TIPOS DE INSUMOS ===== */
-function salvarTipoInsumo() {
+async function salvarTipoInsumo() {
   const nome = document.getElementById('nomeNovoTipoInsumo').value.trim();
   const unidade = document.getElementById('unidadeNovoTipoInsumo').value;
   if (!nome) { alert('Informe o nome do insumo.'); return; }
@@ -3092,8 +3002,8 @@ function salvarTipoInsumo() {
   const unidade_uso = document.getElementById('usoNovoTipoInsumo').value.trim() || unidade;
   const mao_de_obra = document.getElementById('maoObraNovoTipoInsumo').checked;
   const novo = { id: Date.now(), nome, unidade, fator, unidade_uso, mao_de_obra };
+  if (!(await sbUpsert('tipos_insumos', [novo]))) return;
   tiposInsumos.push(novo);
-  sbUpsert('tipos_insumos', [novo]);
   document.getElementById('nomeNovoTipoInsumo').value = '';
   document.getElementById('fatorNovoTipoInsumo').value = '1';
   document.getElementById('usoNovoTipoInsumo').value = '';
@@ -3110,9 +3020,9 @@ function renderTiposInsumos() {
       <span><button class="btn btn-cinza" style="padding:3px 8px;font-size:11px;" onclick="editarTipoInsumo(${t.id})">✏️</button> <button class="btn btn-vermelho" style="padding:3px 8px;font-size:11px;" onclick="excluirTipoInsumo(${t.id})">✕</button></span>
     </div>`).join('');
 }
-function excluirTipoInsumo(id) {
+async function excluirTipoInsumo(id) {
   if (confirm('Excluir este tipo de insumo?')) {
-    sbDeletar('tipos_insumos', id);
+    if (!(await sbDeletar('tipos_insumos', id))) return;
     tiposInsumos = tiposInsumos.filter(t => t.id !== id);
     renderTiposInsumos();
   }
@@ -3362,9 +3272,9 @@ function renderInsumos() {
     resumoDiv.style.display = 'none';
   }
 }
-function excluirInsumo(id) { 
+async function excluirInsumo(id) { 
   const ins = insumos.find(x=>x.id===id);
-  sbDeletar('insumos',id); 
+  if (!(await sbDeletar('insumos',id))) return; 
   insumos=insumos.filter(x=>x.id!==id); 
   registrarLog('INSUMO', `Compra EXCLUÍDA — ${ins?ins.nome:'?'} | Data: ${ins?ins.data:'?'}`);
   renderInsumos(); 
@@ -3689,10 +3599,10 @@ function mudarCategoriaProduto(id) {
 
 /* ===== EXCLUIR PRODUTO ===== */
 
-function excluirProduto(id) {
+async function excluirProduto(id) {
   const p = produtos.find(x => x.id === id);
   if (!confirm(`Excluir o produto "${p ? p.nome : ''}" permanentemente?`)) return;
-  sbDeletar('produtos', id);
+  if (!(await sbDeletar('produtos', id))) return;
   produtos = produtos.filter(x => x.id !== id);
   renderProdutos();
   popularSelectProduto();
@@ -3967,9 +3877,9 @@ async function salvarTipoMassa() {
   popularSelectTipoMassa();
   alert(`✅ Tipo "${nome}" cadastrado com sucesso!`);
 }
-function excluirTipoMassa(id) {
+async function excluirTipoMassa(id) {
   if (!confirm('Excluir este tipo de massa?')) return;
-  sbDeletar('tipos_massa', id);
+  if (!(await sbDeletar('tipos_massa', id))) return;
   tiposMassa = tiposMassa.filter(t=>t.id!==id);
   renderTiposMassa();
   popularSelectTipoMassa();
@@ -4264,7 +4174,7 @@ async function salvarMassaDiario(data) {
   const novoId    = existente ? existente.id : gerarNovoId(massasDiario);
   const registro  = { id: novoId, data, producao };
   if (existente) { Object.assign(existente, registro); } else { massasDiario.push(registro); }
-  await sbUpsert('massas_diario', [registro]);
+  if (!(await sbUpsert('massas_diario', [registro]))) return;
   alert(`✅ Produção de ${formatarData(data)} salva com sucesso!`);
   renderMassasAgenda();
 }
