@@ -72,6 +72,9 @@ body{background:var(--bg);color:var(--t1);display:flex;flex-direction:column;ove
   .dia b{min-width:104px;font-size:14px;}
 }
 
+#aviso{display:none;position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:var(--brown);color:#fff;border-radius:14px;padding:12px 22px;text-align:center;font-size:16px;line-height:1.35;box-shadow:0 6px 24px rgba(0,0,0,.35);z-index:10;max-width:90%;}
+#aviso b{font-size:28px;letter-spacing:.02em;}
+#aviso small{display:block;font-size:12px;opacity:.85;}
 /* login */
 .login{grid-column:1/-1;max-width:420px;margin:30px auto;background:#fff;border-radius:14px;padding:22px;border:1px solid #e8eaee;display:flex;flex-direction:column;gap:12px;user-select:text;-webkit-user-select:text;}
 .login h2{font-size:18px;color:var(--brown);}
@@ -89,6 +92,7 @@ body{background:var(--bg);color:var(--t1);display:flex;flex-direction:column;ove
   <button class="tb" id="bRef" aria-label="Atualizar">↻</button>
 </div>
 <div id="lista"></div>
+<div id="aviso" role="status"></div>
 
 <script>
 /* ===== configuração (a mesma do app principal) ===== */
@@ -120,7 +124,7 @@ function hhmm(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
 function linkMapa(end) {
   var q = end.trim();
   if (CIDADE_PADRAO && !/campos|goytacazes|,\s*rj\b|\brj\b/i.test(q)) q += CIDADE_PADRAO;
-  return 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + encodeURIComponent(q);
+  return 'https://www.google.com/maps/dir/?api=1&travelmode=driving&dir_action=navigate&destination=' + encodeURIComponent(q);   /* dir_action=navigate: já inicia a navegação */
 }
 
 /* ===== "entregue": guardado só neste aparelho, por dia ===== */
@@ -203,7 +207,23 @@ function usarCache(d) {
 }
 
 /* ===== tela ===== */
-function btnLigar(c) { return c.tel ? '<a class="btn" href="tel:' + esc(c.tel) + '"><i>📞</i><span>Ligar</span></a>' : '<span class="btn off"><i>📞</i><span>Ligar</span></span>'; }
+function btnLigar(c) {
+  /* intent DIAL: abre o discador do aparelho (na multimídia, o do Bluetooth, se ele aceitar). O aviso com o número serve de reserva. */
+  return c.tel ? '<a class="btn" data-acao="lig" data-tel="' + esc(c.tel) + '" href="intent://' + esc(c.tel) + '#Intent;scheme=tel;action=android.intent.action.DIAL;end"><i>📞</i><span>Ligar</span></a>'
+               : '<span class="btn off"><i>📞</i><span>Ligar</span></span>';
+}
+function fmtTel(t) {
+  t = dig(t); if (t.length > 11 && t.indexOf('55') === 0) t = t.slice(2);
+  if (t.length === 11) return '(' + t.slice(0, 2) + ') ' + t.slice(2, 7) + '-' + t.slice(7);
+  if (t.length === 10) return '(' + t.slice(0, 2) + ') ' + t.slice(2, 6) + '-' + t.slice(6);
+  return t;
+}
+var _tTimer = null;
+function avisoTel(nome, tel) {
+  var a = document.getElementById('aviso');
+  a.innerHTML = '📞 ' + esc(nome) + '<br><b>' + esc(fmtTel(tel)) + '</b><small>se a ligação não abrir, disque este número</small>';
+  a.style.display = 'block'; clearTimeout(_tTimer); _tTimer = setTimeout(function () { a.style.display = 'none'; }, 12000);
+}
 function htmlEnd(c) {
   if (!c.end) return '<div class="end ret">🏠 Retirada no local — sem endereço</div>';
   return '<a class="end" href="' + esc(linkMapa(c.end)) + '" target="_blank" rel="noopener">📍 ' + esc(c.end) + (c.obs ? '<small>' + esc(c.obs) + '</small>' : '') + '</a>';
@@ -254,6 +274,10 @@ function desenhar() {
 /* ===== eventos ===== */
 document.getElementById('lista').addEventListener('click', function (e) {
   var b = e.target.closest ? e.target.closest('[data-acao]') : null; if (!b) return;
+  if (b.getAttribute('data-acao') === 'lig') {          /* deixa o link abrir o discador e mostra o número */
+    var cc = e.target.closest('.c'), nm = cc ? cc.querySelector('.nome').textContent : '';
+    avisoTel(nm, b.getAttribute('data-tel')); return;
+  }
   var ent = lerEnt(dia), id = b.getAttribute('data-id');
   if (b.getAttribute('data-acao') === 'ent') ent[id] = 1; else delete ent[id];
   gravarEnt(dia, ent); desenhar();
@@ -272,13 +296,16 @@ document.getElementById('bAnt').onclick = function () { irDia(somaDias(dia, -1))
 document.getElementById('bProx').onclick = function () { irDia(somaDias(dia, 1)); };
 document.getElementById('rotDia').onclick = function () { irDia(hoje()); };
 document.getElementById('bRef').onclick = function () { carregar(); };
-document.getElementById('bTela').onclick = function () {
-  var el = document.documentElement;
-  try {
-    if (document.fullscreenElement || document.webkitFullscreenElement) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-    else (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
-  } catch (e) {}
+var querCheia = false;
+function emCheia() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+function entrarCheia() { var el = document.documentElement; try { var f = el.requestFullscreen || el.webkitRequestFullscreen; if (f) { var r = f.call(el); if (r && r.catch) r.catch(function () {}); } } catch (e) {} }
+function sairCheia() { try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) {} }
+document.getElementById('bTela').onclick = function (e) {
+  e.stopPropagation();
+  if (emCheia()) { querCheia = false; sairCheia(); } else { querCheia = true; entrarCheia(); }
 };
+/* o primeiro toque em qualquer lugar entra em tela cheia; ao voltar do Maps, o próximo toque entra de novo */
+document.addEventListener('click', function () { if (querCheia === false && !window._cheiaIniciada) { window._cheiaIniciada = true; querCheia = true; } if (querCheia && !emCheia()) entrarCheia(); }, true);
 document.addEventListener('visibilitychange', function () { if (!document.hidden && Date.now() - ultimaCarga > 60000) carregar(); });
 setInterval(function () { if (!document.hidden && !precisaLogin) carregar(); }, ATUALIZA_MS);
 
