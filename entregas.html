@@ -75,6 +75,20 @@ body{background:var(--bg);color:var(--t1);display:flex;flex-direction:column;ove
 #aviso{display:none;position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:var(--brown);color:#fff;border-radius:14px;padding:12px 22px;text-align:center;font-size:16px;line-height:1.35;box-shadow:0 6px 24px rgba(0,0,0,.35);z-index:10;max-width:90%;}
 #aviso b{font-size:28px;letter-spacing:.02em;}
 #aviso small{display:block;font-size:12px;opacity:.85;}
+#aviso .an{font-size:15px;opacity:.9;}
+#aviso .ar{display:flex;gap:10px;justify-content:center;margin:8px 0 4px;}
+#aviso .ab,#aviso .fx{height:46px;padding:0 18px;border-radius:10px;border:0;font-size:16px;font-weight:700;display:flex;align-items:center;text-decoration:none;}
+#aviso .ab{background:#fff;color:var(--brown);} #aviso .fx{background:rgba(255,255,255,.18);color:#fff;}
+#cfg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:20;align-items:center;justify-content:center;}
+.cfg-box{background:#fff;border-radius:14px;width:min(640px,94%);max-height:92%;display:flex;flex-direction:column;padding:14px;gap:8px;}
+.cfg-top{display:flex;justify-content:space-between;align-items:center;font-size:17px;}
+.cfg-top .fx{height:40px;padding:0 14px;border-radius:10px;border:1.5px solid #d1d5db;background:#fff;font-size:15px;font-weight:600;}
+#cfgBusca{height:46px;border:1.5px solid #d1d5db;border-radius:10px;padding:0 12px;font-size:16px;user-select:text;-webkit-user-select:text;}
+#cfgLista{flex:1;min-height:120px;overflow-y:auto;border:1px solid #eee;border-radius:10px;}
+#cfgLista button{display:block;width:100%;text-align:left;padding:12px 14px;border:0;border-bottom:1px solid #f0f2f5;background:#fff;font-size:16px;}
+#cfgLista button small{display:block;color:var(--t3);font-size:11px;}
+#cfgLista button.sel{background:#fdf2f6;color:var(--brand);font-weight:700;}
+#cfgInfo{color:var(--t3);font-size:11px;}
 /* login */
 .login{grid-column:1/-1;max-width:420px;margin:30px auto;background:#fff;border-radius:14px;padding:22px;border:1px solid #e8eaee;display:flex;flex-direction:column;gap:12px;user-select:text;-webkit-user-select:text;}
 .login h2{font-size:18px;color:var(--brown);}
@@ -88,11 +102,15 @@ body{background:var(--bg);color:var(--t1);display:flex;flex-direction:column;ove
   <h1>🚚 Entregas</h1>
   <div class="dia"><button id="bAnt" aria-label="Dia anterior">‹</button><b id="rotDia" title="Voltar para hoje">—</b><button id="bProx" aria-label="Próximo dia">›</button></div>
   <div class="resumo"><small id="sub">carregando…</small><b id="areceber"></b></div>
+  <button class="tb" id="bCfg" aria-label="Configurar" style="display:none">⚙</button>
   <button class="tb" id="bTela" aria-label="Tela cheia">⛶</button>
   <button class="tb" id="bRef" aria-label="Atualizar">↻</button>
 </div>
 <div id="lista"></div>
 <div id="aviso" role="status"></div>
+<div id="cfg"><div class="cfg-box"><div class="cfg-top"><b>📞 App de telefone do carro</b><button class="fx" id="cfgFechar">Fechar</button></div>
+  <input id="cfgBusca" type="text" placeholder="Filtrar (ex.: bluetooth, telefone, BT)" autocomplete="off">
+  <div id="cfgLista"></div><small id="cfgInfo"></small></div></div>
 
 <script>
 /* ===== configuração (a mesma do app principal) ===== */
@@ -103,6 +121,9 @@ var CIDADE_PADRAO = ', Campos dos Goytacazes, RJ';
 var LIMITE_GRANDE = 6;            /* até 6 entregas no dia: cartões grandes; 7 ou mais: compacto */
 var ATUALIZA_MS = 3 * 60 * 1000;
 
+/* dentro do APK (Capacitor) existem funções nativas; no navegador tudo continua funcionando sem elas */
+var NATIVO = !!(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'android');
+var Nativo = (NATIVO && window.Capacitor.registerPlugin) ? window.Capacitor.registerPlugin('Nativo') : null;
 var sb = (window.supabase && window.supabase.createClient) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 var dia = hoje(), cards = [], clientes = null, clientesEm = 0, ultimaCarga = 0;
 var offline = false, atualizadoEm = '', carregando = false, precisaLogin = false, carregouDia = '';
@@ -208,8 +229,7 @@ function usarCache(d) {
 
 /* ===== tela ===== */
 function btnLigar(c) {
-  /* intent DIAL: abre o discador do aparelho (na multimídia, o do Bluetooth, se ele aceitar). O aviso com o número serve de reserva. */
-  return c.tel ? '<a class="btn" data-acao="lig" data-tel="' + esc(c.tel) + '" href="intent://' + esc(c.tel) + '#Intent;scheme=tel;action=android.intent.action.DIAL;end"><i>📞</i><span>Ligar</span></a>'
+  return c.tel ? '<button class="btn" data-acao="lig" data-tel="' + esc(c.tel) + '"><i>📞</i><span>Ligar</span></button>'
                : '<span class="btn off"><i>📞</i><span>Ligar</span></span>';
 }
 function fmtTel(t) {
@@ -218,15 +238,19 @@ function fmtTel(t) {
   if (t.length === 10) return '(' + t.slice(0, 2) + ') ' + t.slice(2, 6) + '-' + t.slice(6);
   return t;
 }
-var _tTimer = null;
+function discadorAtual() { try { return JSON.parse(localStorage.getItem('vdf_discador') || 'null'); } catch (e) { return null; } }
 function avisoTel(nome, tel) {
-  var a = document.getElementById('aviso');
-  a.innerHTML = '📞 ' + esc(nome) + '<br><b>' + esc(fmtTel(tel)) + '</b><small>se a ligação não abrir, disque este número</small>';
-  a.style.display = 'block'; clearTimeout(_tTimer); _tTimer = setTimeout(function () { a.style.display = 'none'; }, 12000);
+  var a = document.getElementById('aviso'), d = discadorAtual(), abrir;
+  if (NATIVO && d && d.pacote) abrir = '<button class="ab" data-acao="abrirtel">📞 Abrir ' + esc(d.nome || 'telefone') + '</button>';
+  else if (NATIVO) abrir = '<a class="ab" href="tel:' + esc(tel) + '">📞 Abrir telefone</a>';
+  else abrir = '<a class="ab" href="intent://' + esc(tel) + '#Intent;scheme=tel;action=android.intent.action.DIAL;end">📞 Abrir telefone</a>';
+  a.innerHTML = '<div class="an">' + esc(nome) + '</div><b>' + esc(fmtTel(tel)) + '</b><div class="ar">' + abrir + '<button class="fx" data-acao="fechaviso">Fechar</button></div>' +
+    '<small>' + (NATIVO && !(d && d.pacote) ? 'Toque em ⚙ no topo para escolher o app de telefone do carro' : 'disque este número no telefone do carro') + '</small>';
+  a.style.display = 'block';
 }
 function htmlEnd(c) {
   if (!c.end) return '<div class="end ret">🏠 Retirada no local — sem endereço</div>';
-  return '<a class="end" href="' + esc(linkMapa(c.end)) + '" target="_blank" rel="noopener">📍 ' + esc(c.end) + (c.obs ? '<small>' + esc(c.obs) + '</small>' : '') + '</a>';
+  return '<a class="end" href="' + esc(linkMapa(c.end)) + '"' + (NATIVO ? '' : ' target="_blank" rel="noopener"') + '>📍 ' + esc(c.end) + (c.obs ? '<small>' + esc(c.obs) + '</small>' : '') + '</a>';
 }
 function htmlSaldo(c, feito) {
   return (c.pago && !feito) ? '<span class="saldo pago">Pago ✓</span>' : '<span class="saldo">' + (c.pago ? 'Pago ✓' : brl(c.saldo)) + '</span>';
@@ -274,13 +298,23 @@ function desenhar() {
 /* ===== eventos ===== */
 document.getElementById('lista').addEventListener('click', function (e) {
   var b = e.target.closest ? e.target.closest('[data-acao]') : null; if (!b) return;
-  if (b.getAttribute('data-acao') === 'lig') {          /* deixa o link abrir o discador e mostra o número */
-    var cc = e.target.closest('.c'), nm = cc ? cc.querySelector('.nome').textContent : '';
-    avisoTel(nm, b.getAttribute('data-tel')); return;
+  var acao = b.getAttribute('data-acao');
+  if (acao === 'lig') {
+    var cc = b.closest('.c');
+    avisoTel(cc ? cc.querySelector('.nome').textContent : '', b.getAttribute('data-tel')); return;
   }
   var ent = lerEnt(dia), id = b.getAttribute('data-id');
-  if (b.getAttribute('data-acao') === 'ent') ent[id] = 1; else delete ent[id];
+  if (acao === 'ent') ent[id] = 1; else delete ent[id];
   gravarEnt(dia, ent); desenhar();
+});
+document.getElementById('aviso').addEventListener('click', function (e) {
+  var b = e.target.closest ? e.target.closest('[data-acao]') : null; if (!b) return;
+  var acao = b.getAttribute('data-acao');
+  if (acao === 'fechaviso') document.getElementById('aviso').style.display = 'none';
+  else if (acao === 'abrirtel') {
+    var d = discadorAtual();
+    if (Nativo && d) Nativo.abrirApp({ pacote: d.pacote }).catch(function () { alert('Não consegui abrir ' + (d.nome || 'o app') + '. Escolha de novo em ⚙.'); });
+  }
 });
 document.getElementById('lista').addEventListener('submit', async function (e) {
   if (!e.target || e.target.id !== 'fLogin') return;
@@ -296,6 +330,35 @@ document.getElementById('bAnt').onclick = function () { irDia(somaDias(dia, -1))
 document.getElementById('bProx').onclick = function () { irDia(somaDias(dia, 1)); };
 document.getElementById('rotDia').onclick = function () { irDia(hoje()); };
 document.getElementById('bRef').onclick = function () { carregar(); };
+if (NATIVO) { document.getElementById('bCfg').style.display = ''; document.getElementById('bTela').style.display = 'none'; }
+var _appsCache = null;
+function desenharCfg() {
+  var f = (document.getElementById('cfgBusca').value || '').trim().toLowerCase(), d = discadorAtual(), sel = d && d.pacote;
+  var h = '<button data-p="" class="' + (!sel ? 'sel' : '') + '">Nenhum — usar o discador padrão do Android<small>abre tel:</small></button>';
+  (_appsCache || []).filter(function (a) { return !f || a.nome.toLowerCase().indexOf(f) >= 0 || a.pacote.toLowerCase().indexOf(f) >= 0; })
+    .forEach(function (a) { h += '<button data-p="' + esc(a.pacote) + '" data-n="' + esc(a.nome) + '" class="' + (a.pacote === sel ? 'sel' : '') + '">' + esc(a.nome) + '<small>' + esc(a.pacote) + '</small></button>'; });
+  document.getElementById('cfgLista').innerHTML = h;
+}
+document.getElementById('bCfg').onclick = async function () {
+  document.getElementById('cfg').style.display = 'flex';
+  document.getElementById('cfgInfo').textContent = 'APK v1 · ' + (/Chrome\/[\d.]+/.exec(navigator.userAgent) || ['WebView ?'])[0];
+  document.getElementById('cfgLista').innerHTML = '<button disabled>Carregando apps…</button>';
+  try {
+    var r = await Nativo.apps();
+    _appsCache = (r.apps || []).sort(function (a, b) { return a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }); });
+  } catch (e) { _appsCache = []; }
+  desenharCfg();
+};
+document.getElementById('cfgBusca').oninput = desenharCfg;
+document.getElementById('cfgFechar').onclick = function () { document.getElementById('cfg').style.display = 'none'; };
+document.getElementById('cfgLista').addEventListener('click', function (e) {
+  var b = e.target.closest ? e.target.closest('button[data-p]') : null; if (!b) return;
+  try {
+    if (b.getAttribute('data-p')) localStorage.setItem('vdf_discador', JSON.stringify({ pacote: b.getAttribute('data-p'), nome: b.getAttribute('data-n') }));
+    else localStorage.removeItem('vdf_discador');
+  } catch (x) {}
+  desenharCfg();
+});
 var querCheia = false;
 function emCheia() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
 function entrarCheia() { var el = document.documentElement; try { var f = el.requestFullscreen || el.webkitRequestFullscreen; if (f) { var r = f.call(el); if (r && r.catch) r.catch(function () {}); } } catch (e) {} }

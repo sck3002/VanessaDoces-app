@@ -1,0 +1,12 @@
+{
+  "name": "vdf-entregas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "APK da tela de Entregas (Vanessa Doces Finos)",
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@supabase/supabase-js": "^2.45.0"
+  }
+}
