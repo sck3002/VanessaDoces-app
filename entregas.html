@@ -88,7 +88,9 @@ body{background:var(--bg);color:var(--t1);display:flex;flex-direction:column;ove
 #cfgLista button{display:block;width:100%;text-align:left;padding:12px 14px;border:0;border-bottom:1px solid #f0f2f5;background:#fff;font-size:16px;}
 #cfgLista button small{display:block;color:var(--t3);font-size:11px;}
 #cfgLista button.sel{background:#fdf2f6;color:var(--brand);font-weight:700;}
-#cfgInfo{color:var(--t3);font-size:11px;}
+#cfgInfo{color:var(--t3);font-size:11px;word-break:break-word;}
+.cfg-man{display:flex;gap:8px;} .cfg-man input{flex:1;height:42px;border:1.5px solid #d1d5db;border-radius:10px;padding:0 12px;font-size:14px;user-select:text;-webkit-user-select:text;}
+.cfg-man button{height:42px;padding:0 16px;border-radius:10px;border:0;background:var(--brand);color:#fff;font-weight:700;font-size:14px;}
 /* login */
 .login{grid-column:1/-1;max-width:420px;margin:30px auto;background:#fff;border-radius:14px;padding:22px;border:1px solid #e8eaee;display:flex;flex-direction:column;gap:12px;user-select:text;-webkit-user-select:text;}
 .login h2{font-size:18px;color:var(--brown);}
@@ -110,7 +112,9 @@ body{background:var(--bg);color:var(--t1);display:flex;flex-direction:column;ove
 <div id="aviso" role="status"></div>
 <div id="cfg"><div class="cfg-box"><div class="cfg-top"><b>📞 App de telefone do carro</b><button class="fx" id="cfgFechar">Fechar</button></div>
   <input id="cfgBusca" type="text" placeholder="Filtrar (ex.: bluetooth, telefone, BT)" autocomplete="off">
-  <div id="cfgLista"></div><small id="cfgInfo"></small></div></div>
+  <div id="cfgLista"></div>
+  <div class="cfg-man"><input id="cfgPac" type="text" placeholder="ou digite o pacote do app (avançado)" autocomplete="off"><button id="cfgUsar">Usar</button></div>
+  <small id="cfgInfo"></small></div></div>
 
 <script>
 /* ===== configuração (a mesma do app principal) ===== */
@@ -339,14 +343,23 @@ function desenharCfg() {
     .forEach(function (a) { h += '<button data-p="' + esc(a.pacote) + '" data-n="' + esc(a.nome) + '" class="' + (a.pacote === sel ? 'sel' : '') + '">' + esc(a.nome) + '<small>' + esc(a.pacote) + '</small></button>'; });
   document.getElementById('cfgLista').innerHTML = h;
 }
+var _cfgErro = '';
 document.getElementById('bCfg').onclick = async function () {
   document.getElementById('cfg').style.display = 'flex';
-  document.getElementById('cfgInfo').textContent = 'APK v1 · ' + (/Chrome\/[\d.]+/.exec(navigator.userAgent) || ['WebView ?'])[0];
+  var ua = (/Chrome\/[\d.]+/.exec(navigator.userAgent) || ['WebView ?'])[0];
+  document.getElementById('cfgInfo').textContent = 'APK v2 · ' + ua;
   document.getElementById('cfgLista').innerHTML = '<button disabled>Carregando apps…</button>';
+  _cfgErro = '';
   try {
     var r = await Nativo.apps();
     _appsCache = (r.apps || []).sort(function (a, b) { return a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }); });
-  } catch (e) { _appsCache = []; }
+  } catch (e) { _appsCache = []; _cfgErro = (e && (e.message || e.errorMessage || e.code)) || String(e); }
+  document.getElementById('cfgInfo').textContent = 'APK v2 · ' + ua + ' · ' + _appsCache.length + ' apps' + (_cfgErro ? ' · erro: ' + _cfgErro : '');
+  desenharCfg();
+};
+document.getElementById('cfgUsar').onclick = function () {
+  var p = (document.getElementById('cfgPac').value || '').trim(); if (!p) return;
+  try { localStorage.setItem('vdf_discador', JSON.stringify({ pacote: p, nome: p })); } catch (x) {}
   desenharCfg();
 };
 document.getElementById('cfgBusca').oninput = desenharCfg;
