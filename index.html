@@ -249,6 +249,11 @@ table tr:hover td{background:var(--bg);}
 .fg-row{min-height:30px;padding-top:1px;padding-bottom:1px;border-bottom:1px solid var(--divider);font-size:13px;}
 .fg-row .fg-n{line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .fg-u{font-size:11.5px;color:var(--text-3);}
+.fg-qv{text-align:center;font-size:13px;}
+.nav-header.ed{background:#92400e;}
+.nav-back.nav-salvar{background:#fff;color:#92400e;border-color:#fff;font-weight:700;}
+.nav-back:disabled{opacity:.6;}
+.fr-acoes button:disabled{opacity:.6;}
 .fg-x{border:0;background:transparent;color:#b91c1c;font-size:14px;padding:0;height:28px;width:22px;cursor:pointer;}
 .fg-add{border:1px solid var(--brand);background:#fff;color:var(--brand);border-radius:12px;font-size:11px;font-weight:600;padding:2px 9px;margin-left:8px;text-transform:none;cursor:pointer;font-family:inherit;}
 .ficha-rod{flex:none;border-top:1px solid var(--divider);padding:8px 14px 10px;background:#fff;}
@@ -1545,6 +1550,11 @@ window.addEventListener('popstate', () => {
   if (id) {                                  /* 1) fecha a tela/janela de cima */
     _fechandoPorGesto = true;
     try { (_fechadores[id] || (() => {}))(); } finally { _fechandoPorGesto = false; }
+    if (_naoFechar) {                          /* gesto de voltar recusado: repõe o passo no histórico e mantém a tela */
+      _naoFechar = false;
+      try { history.pushState({ tela: id }, ''); } catch(e) {}
+      return;
+    }
     _pilhaTelas = _pilhaTelas.filter(x => x !== id);
     return;
   }
@@ -1595,8 +1605,10 @@ function fichaAbrir(tipo, ref) {
   _ovAbrir(id);
   _fichaFoco();
 }
+let _naoFechar = false;                         /* o usuário recusou descartar: a tela fica aberta */
 function fichaFechar(id) {
   const i = _fichas.findIndex(f => f.id === id); if (i < 0) return;
+  if (_fichaSujo(_fichas[i]) && !confirm('Há alterações não salvas neste pedido. Descartar e sair?')) { if (_fechandoPorGesto) _naoFechar = true; return; }
   const el = document.getElementById(id);
   _ovFechar(id);
   _fichas.splice(i, 1);
@@ -1622,7 +1634,7 @@ function _fichaRender(id) {
   const f = _fichas.find(x => x.id === id), el = document.getElementById(id); if (!f || !el) return;
   const ant = el.querySelector('.ficha-lista'); const rolagem = ant ? ant.scrollTop : 0;
   const html = f.tipo === 'pedido' ? _fichaPedidoHtml(f) : f.tipo === 'dash' ? _fichaDashHtml(f) : _fichaClienteHtml(f);
-  if (html == null) { fichaFechar(id); return; }
+  if (html == null) { f.rasc = null; fichaFechar(id); return; }
   el.innerHTML = html;
   const dep = el.querySelector('.ficha-lista'); if (dep) dep.scrollTop = rolagem;
 }
@@ -1642,43 +1654,53 @@ function _resumoPedido(p) {
   const subt = itens.reduce((a, i) => a + (i.total || 0), 0);
   return `${Math.round(doces)} un${bc ? ` + ${Math.round(bc)} BC` : ''} · Doces R$ ${_n2(subt)}`;
 }
+function _fichaSujo(f) {                       /* há alterações no rascunho que ainda não foram salvas? */
+  if (!f || !f.rasc) return false;
+  const p = pedidos.find(x => x.id === f.ref);
+  return !p || JSON.stringify(f.rasc) !== JSON.stringify(p);
+}
 function _fichaPedidoHtml(f) {
-  const p = pedidos.find(x => x.id === f.ref); if (!p) return null;
+  const orig = pedidos.find(x => x.id === f.ref); if (!orig) return null;
+  const ed = !!f.rasc, p = ed ? f.rasc : orig;     /* em edição, tudo vem do rascunho */
   const itens = p.itens || [], total = p.total || 0, entrada = p.entrada || 0, taxa = p.taxaEntrega || 0;
   const saldo = Math.max(0, total - entrada);
   const stCls = { pendente:'badge-pendente', pago:'badge-pago', cancelado:'badge-cancelado' }[p.status || 'pendente'];
-  const idp = p.id;
+  const idp = orig.id, fid = f.id;
   const linhas = itens.map((i, k) => `
     <div class="fg-row" data-row="${k}">
       <span class="fg-n">${_esc(i.produto)}</span>
-      <input class="fr-in fg-q" type="text" inputmode="numeric" value="${_esc(i.qtd || 0)}" onfocus="this.select()" onchange="fichaItemQtd(${idp},${k},this)" aria-label="Quantidade">
+      ${ed ? `<input class="fr-in fg-q" type="text" inputmode="numeric" value="${_esc(i.qtd || 0)}" onfocus="this.select()" onchange="fichaItemQtd('${fid}',${k},this)" aria-label="Quantidade">`
+           : `<b class="fg-qv">${_esc(i.qtd || 0)}</b>`}
       <span class="fg-u">${_n2(i.valor)}</span>
       <b data-k="rowtot">${_n2(i.total)}</b>
-      <button class="fg-x" onclick="fichaItemRemover(${idp},${k})" aria-label="Remover item">✕</button>
+      ${ed ? `<button class="fg-x" onclick="fichaItemRemover('${fid}',${k})" aria-label="Remover item">✕</button>` : '<span></span>'}
     </div>`).join('') || '<p style="color:#aaa;font-size:12px;padding:14px;">Sem itens</p>';
-  return `
+  const cabecalho = ed ? `
+    <div class="nav-header ed">
+      <button class="nav-back" onclick="fichaCancelar('${fid}')">✕ Cancelar</button>
+      <span class="nav-titulo">✏️ Editando</span>
+      <button class="nav-back nav-salvar" data-k="btnsalvar" onclick="fichaSalvar('${fid}')">💾 Salvar</button>
+    </div>` : `
     <div class="nav-header">
-      <button class="nav-back" onclick="fichaFechar('${f.id}')">← Voltar</button>
-      <span class="nav-titulo">Pedido · ${_esc(formatarData(p.data))}</span>
+      <button class="nav-back" onclick="fichaFechar('${fid}')">← Voltar</button>
+      <span class="nav-titulo">Pedido</span>
+      <button class="nav-back" onclick="fichaEditar('${fid}')">✏️ Editar</button>
       <button class="nav-back" onclick="excluirPedidoDetalhe(${idp})" aria-label="Excluir pedido">🗑</button>
-    </div>
-    <div class="ficha-sub">
-      <div class="fs-l1">
-        <button class="fs-cli" onclick="fichaAbrirClienteDoPedido(${idp})"><b>${_esc(p.cliente || '—')}</b><i>›</i></button>
-        <span class="badge ${stCls}" data-k="badge">${(p.status || 'pendente').toUpperCase()}</span>
-      </div>
-      <div class="fs-l2"><span>📅 ${_diaSemana(p.data)} ${_esc(formatarData(p.data))} · ${_quando(p.data)}</span>
-        ${p.telefone ? `<a class="fs-tel" href="${_linkZap(p.telefone)}" target="_blank" rel="noopener">📱 ${_esc(p.telefone)}</a>` : ''}</div>
-      ${p.endereco ? `<a class="fs-end" href="${_linkMapa(p.endereco)}" target="_blank" rel="noopener">📍 ${_esc(p.endereco)}</a>` : ''}
-      ${p.obs ? `<div class="fs-obs">📝 ${_esc(p.obs)}</div>` : ''}
-    </div>
-    <div class="fg-cab"><span>Doce <button class="fg-add" onclick="fichaAddItem(${idp})">＋ Adicionar</button></span><span>Qtd</span><span>Unit.</span><span>Total</span><span></span></div>
-    <div class="ficha-lista">${linhas}</div>
-    <div class="ficha-rod">
-      <div class="fr-mini" data-k="mini">${_resumoPedido(p)}</div>
+    </div>`;
+  const totais = ed ? `
       <div class="fr-tot4">
-        <div><small>Entrega</small><input class="fr-in" type="text" inputmode="decimal" value="${_in2(taxa)}" onfocus="this.select()" onchange="fichaPedidoCampo(${idp},'taxaEntrega',this)"></div>
-        <div><small>Entrada</small><input class="fr-in" type="text" inputmode="decimal" value="${_in2(entrada)}" onfocus="this.select()" onchange="fichaPedidoCampo(${idp},'entrada',this)"></div>
+        <div><small>Entrega</small><input class="fr-in" type="text" inputmode="decimal" value="${_in2(taxa)}" onfocus="this.select()" onchange="fichaPedidoCampo('${fid}','taxaEntrega',this)"></div>
+        <div><small>Entrada</small><input class="fr-in" type="text" inputmode="decimal" value="${_in2(entrada)}" onfocus="this.select()" onchange="fichaPedidoCampo('${fid}','entrada',this)"></div>
+        <div><small>Total</small><b data-k="total">${_n2(total)}</b></div>
+        <div data-k="saldobox" class="${saldo > 0 ? 'fr-aberto' : 'fr-ok'}"><small>Saldo</small><b data-k="saldo">${_n2(saldo)}</b></div>
+      </div>
+      <div class="fr-acoes">
+        <button onclick="fichaCancelar('${fid}')">✕ Cancelar</button>
+        <button class="prim" data-k="btnsalvar2" onclick="fichaSalvar('${fid}')">💾 Salvar alterações</button>
+      </div>` : `
+      <div class="fr-tot4">
+        <div><small>Entrega</small><b>${_n2(taxa)}</b></div>
+        <div><small>Entrada</small><b>${_n2(entrada)}</b></div>
         <div><small>Total</small><b data-k="total">${_n2(total)}</b></div>
         <div data-k="saldobox" class="${saldo > 0 ? 'fr-aberto' : 'fr-ok'}"><small>Saldo</small><b data-k="saldo">${_n2(saldo)}</b></div>
       </div>
@@ -1686,7 +1708,23 @@ function _fichaPedidoHtml(f) {
         <button class="prim" onclick="fichaPedidoAcao('compartilhar',${idp})"><span>📱</span>Compartilhar</button>
         <button onclick="fichaPedidoAcao('dados',${idp})"><span>👤</span>Dados</button>
         <button onclick="fichaPedidoAcao('contrato',${idp})"><span>📄</span>Contrato</button>
+      </div>`;
+  return `${cabecalho}
+    <div class="ficha-sub">
+      <div class="fs-l1">
+        <button class="fs-cli" onclick="fichaAbrirClienteDoPedido(${idp})"><b>${_esc(orig.cliente || '—')}</b><i>›</i></button>
+        <span class="badge ${stCls}" data-k="badge">${(p.status || 'pendente').toUpperCase()}</span>
       </div>
+      <div class="fs-l2"><span>📅 ${_diaSemana(orig.data)} ${_esc(formatarData(orig.data))} · ${_quando(orig.data)}</span>
+        ${orig.telefone ? `<a class="fs-tel" href="${_linkZap(orig.telefone)}" target="_blank" rel="noopener">📱 ${_esc(orig.telefone)}</a>` : ''}</div>
+      ${orig.endereco ? `<a class="fs-end" href="${_linkMapa(orig.endereco)}" target="_blank" rel="noopener">📍 ${_esc(orig.endereco)}</a>` : ''}
+      ${orig.obs ? `<div class="fs-obs">📝 ${_esc(orig.obs)}</div>` : ''}
+    </div>
+    <div class="fg-cab"><span>Doce ${ed ? `<button class="fg-add" onclick="fichaAddItem('${fid}')">＋ Adicionar</button>` : ''}</span><span>Qtd</span><span>Unit.</span><span>Total</span><span></span></div>
+    <div class="ficha-lista">${linhas}</div>
+    <div class="ficha-rod">
+      <div class="fr-mini" data-k="mini">${_resumoPedido(p)}</div>
+      ${totais}
     </div>`;
 }
 function fichaPedidoAcao(acao, id) {
@@ -1696,88 +1734,104 @@ function fichaPedidoAcao(acao, id) {
   else if (acao === 'contrato') abrirContrato(id);
 }
 
-/* edição imediata: a tela muda na hora e o banco é atualizado em seguida (em fila); se o banco recusar, volta ao último estado salvo */
-const _pedSalvo = {};                          /* id → cópia do último estado confirmado no banco */
-let _filaSave = Promise.resolve(), _timerGeral = null;
+/* edição segura: "Editar" cria um rascunho (cópia); nada vai ao banco até "Salvar"; "Cancelar" descarta o rascunho */
 function _recalcPedido(p) {
   p.total = Math.round(((p.itens || []).reduce((a, i) => a + (i.total || 0), 0) + (p.taxaEntrega || 0)) * 100) / 100;
   if (p.status !== 'cancelado') p.status = (p.total - (p.entrada || 0)) <= 0 ? 'pago' : 'pendente';
 }
-function _atualizarGeralDepois() {              /* lista, agenda, produção e dashboard, sem recriar as telas abertas */
-  clearTimeout(_timerGeral);
-  _timerGeral = setTimeout(() => {
-    [renderPedidos, atualizarAgenda, atualizarProducao, atualizarDashboard].forEach(fn => { try { fn(); } catch(e) { console.error(e); } });
-  }, 400);
+function _atualizarGeralDepois() {              /* lista, agenda, produção e dashboard */
+  [renderPedidos, atualizarAgenda, atualizarProducao, atualizarDashboard].forEach(fn => { try { fn(); } catch(e) { console.error(e); } });
 }
-function _pedidoEditar(id, fn, logMsg, estrutural) {
-  const idx = pedidos.findIndex(x => x.id === id); if (idx < 0) return;
-  if (!_pedSalvo[id]) _pedSalvo[id] = JSON.parse(JSON.stringify(pedidos[idx]));
-  fn(pedidos[idx]); _recalcPedido(pedidos[idx]);
-  if (estrutural) fichaRefrescar(); else _fichaPedidoPintar(id);
-  _filaSave = _filaSave.then(async () => {
-    const atual = pedidos.find(x => x.id === id); if (!atual) return;
-    if (await sbUpsert('pedidos', [atual])) {
-      _pedSalvo[id] = JSON.parse(JSON.stringify(atual));
-      registrarLog('PEDIDO', `${logMsg} — ${atual.cliente} | R$ ${(atual.total || 0).toFixed(2)}`);
-    } else {
-      const i = pedidos.findIndex(x => x.id === id);
-      if (i >= 0) pedidos[i] = JSON.parse(JSON.stringify(_pedSalvo[id]));
-      fichaRefrescar();
-    }
-    _atualizarGeralDepois();
-  });
+function fichaEditar(fid) {
+  const f = _fichas.find(x => x.id === fid); if (!f || f.rasc) return;
+  const p = pedidos.find(x => x.id === f.ref); if (!p) return;
+  const outra = _fichas.find(x => x.id !== fid && x.tipo === 'pedido' && x.ref === f.ref && x.rasc);
+  if (outra) { mostrarAviso('Este pedido já está sendo editado em outra tela'); return; }
+  f.rasc = JSON.parse(JSON.stringify(p));
+  _fichaRender(fid);
 }
-function _fichaPedidoPintar(id) {               /* atualiza só os números, sem recriar os campos (o teclado não fecha) */
-  const p = pedidos.find(x => x.id === id); if (!p) return;
-  const saldo = Math.max(0, (p.total || 0) - (p.entrada || 0));
-  _fichas.filter(f => f.tipo === 'pedido' && f.ref === id).forEach(f => {
-    const el = document.getElementById(f.id); if (!el) return;
-    const set = (k, v) => { const n = el.querySelector(`[data-k="${k}"]`); if (n) n.textContent = v; };
-    (p.itens || []).forEach((it, k) => { const r = el.querySelector(`[data-row="${k}"] [data-k="rowtot"]`); if (r) r.textContent = _n2(it.total); });
-    set('total', _n2(p.total)); set('saldo', _n2(saldo)); set('mini', _resumoPedido(p));
-    const sb = el.querySelector('[data-k="saldobox"]'); if (sb) sb.className = saldo > 0 ? 'fr-aberto' : 'fr-ok';
-    const bd = el.querySelector('[data-k="badge"]');
-    if (bd) { bd.className = 'badge ' + ({ pendente:'badge-pendente', pago:'badge-pago', cancelado:'badge-cancelado' }[p.status || 'pendente']); bd.textContent = (p.status || 'pendente').toUpperCase(); }
-  });
+function fichaCancelar(fid) {
+  const f = _fichas.find(x => x.id === fid); if (!f || !f.rasc) return;
+  if (_fichaSujo(f) && !confirm('Descartar as alterações deste pedido?')) return;
+  f.rasc = null;
+  _fichaRender(fid);
 }
-function fichaItemQtd(id, k, el) {
-  const p = pedidos.find(x => x.id === id); const it = p && p.itens[k]; if (!it) return;
+async function fichaSalvar(fid) {
+  const f = _fichas.find(x => x.id === fid); if (!f || !f.rasc || f.salvando) return;
+  if (!_fichaSujo(f)) { f.rasc = null; _fichaRender(fid); mostrarAviso('Nenhuma alteração'); return; }
+  const idx = pedidos.findIndex(x => x.id === f.ref); if (idx < 0) return;
+  if (!(f.rasc.itens || []).length) { alert('O pedido não pode ficar sem itens. Para apagar tudo, use a lixeira (fora da edição).'); return; }
+  const novo = JSON.parse(JSON.stringify(f.rasc)); _recalcPedido(novo);
+  f.salvando = true;
+  document.querySelectorAll(`#${fid} [data-k="btnsalvar"],#${fid} [data-k="btnsalvar2"]`).forEach(b => { b.disabled = true; b.textContent = 'Salvando…'; });
+  let ok = false;
+  try { ok = await sbUpsert('pedidos', [novo]); } catch (e) { console.error(e); }
+  f.salvando = false;
+  if (!ok) {                                   /* o rascunho continua na tela: nada se perde */
+    document.querySelectorAll(`#${fid} [data-k="btnsalvar"]`).forEach(b => { b.disabled = false; b.textContent = '💾 Salvar'; });
+    document.querySelectorAll(`#${fid} [data-k="btnsalvar2"]`).forEach(b => { b.disabled = false; b.textContent = '💾 Salvar alterações'; });
+    mostrarAviso('Não foi possível salvar — suas alterações continuam na tela');
+    return;
+  }
+  const i2 = pedidos.findIndex(x => x.id === f.ref); if (i2 >= 0) pedidos[i2] = novo;
+  registrarLog('PEDIDO', `Pedido editado — ${novo.cliente} | R$ ${(novo.total || 0).toFixed(2)}`);
+  f.rasc = null;
+  fichaRefrescar();
+  _atualizarGeralDepois();
+  mostrarAviso('Pedido salvo');
+}
+function _fichaPedidoPintar(fid) {               /* atualiza só os números, sem recriar os campos (o teclado não fecha) */
+  const f = _fichas.find(x => x.id === fid); const el = document.getElementById(fid); if (!f || !f.rasc || !el) return;
+  const p = f.rasc, saldo = Math.max(0, (p.total || 0) - (p.entrada || 0));
+  const set = (k, v) => { const n = el.querySelector(`[data-k="${k}"]`); if (n) n.textContent = v; };
+  (p.itens || []).forEach((it, k) => { const r = el.querySelector(`[data-row="${k}"] [data-k="rowtot"]`); if (r) r.textContent = _n2(it.total); });
+  set('total', _n2(p.total)); set('saldo', _n2(saldo)); set('mini', _resumoPedido(p));
+  const sb = el.querySelector('[data-k="saldobox"]'); if (sb) sb.className = saldo > 0 ? 'fr-aberto' : 'fr-ok';
+  const bd = el.querySelector('[data-k="badge"]');
+  if (bd) { bd.className = 'badge ' + ({ pendente:'badge-pendente', pago:'badge-pago', cancelado:'badge-cancelado' }[p.status || 'pendente']); bd.textContent = (p.status || 'pendente').toUpperCase(); }
+}
+function _rascEditar(fid, fn, estrutural) {
+  const f = _fichas.find(x => x.id === fid); if (!f || !f.rasc) return;
+  fn(f.rasc); _recalcPedido(f.rasc);
+  if (estrutural) _fichaRender(fid); else _fichaPedidoPintar(fid);
+}
+function fichaItemQtd(fid, k, el) {
+  const f = _fichas.find(x => x.id === fid); const it = f && f.rasc && f.rasc.itens[k]; if (!it) return;
   const q = _num(el.value);
   if (!(q > 0)) { el.value = it.qtd; mostrarAviso('Quantidade inválida — use ✕ para remover o item'); return; }
   el.value = q;
   if (q === it.qtd) return;
-  _pedidoEditar(id, ped => { const x = ped.itens[k]; x.qtd = q; x.total = Math.round(q * (x.valor || 0) * 100) / 100; }, `Quantidade alterada (${it.produto})`, false);
+  _rascEditar(fid, ped => { const x = ped.itens[k]; x.qtd = q; x.total = Math.round(q * (x.valor || 0) * 100) / 100; }, false);
 }
-function fichaItemRemover(id, k) {
-  const p = pedidos.find(x => x.id === id); const it = p && p.itens[k]; if (!it) return;
-  if (p.itens.length <= 1) { alert('O pedido não pode ficar sem itens. Para apagar tudo, use a lixeira do topo.'); return; }
-  if (!confirm(`Remover "${it.produto}" do pedido?`)) return;
-  _pedidoEditar(id, ped => { ped.itens.splice(k, 1); }, `Item removido (${it.produto})`, true);
+function fichaItemRemover(fid, k) {
+  const f = _fichas.find(x => x.id === fid); const it = f && f.rasc && f.rasc.itens[k]; if (!it) return;
+  if (f.rasc.itens.length <= 1) { alert('O pedido não pode ficar sem itens. Para apagar tudo, cancele a edição e use a lixeira.'); return; }
+  _rascEditar(fid, ped => { ped.itens.splice(k, 1); }, true);   /* só no rascunho: dá para cancelar */
 }
-function fichaPedidoCampo(id, campo, el) {
-  const p = pedidos.find(x => x.id === id); if (!p) return;
+function fichaPedidoCampo(fid, campo, el) {
+  const f = _fichas.find(x => x.id === fid); if (!f || !f.rasc) return;
   const v = _num(el.value);
-  if (isNaN(v) || v < 0) { el.value = _in2(p[campo]); mostrarAviso('Valor inválido'); return; }
+  if (isNaN(v) || v < 0) { el.value = _in2(f.rasc[campo]); mostrarAviso('Valor inválido'); return; }
   el.value = _in2(v);
-  if (Math.abs(v - (p[campo] || 0)) < 0.005) return;
-  _pedidoEditar(id, ped => { ped[campo] = v; }, campo === 'taxaEntrega' ? 'Taxa de entrega alterada' : 'Entrada alterada', false);
+  if (Math.abs(v - (f.rasc[campo] || 0)) < 0.005) return;
+  _rascEditar(fid, ped => { ped[campo] = v; }, false);
 }
-function fichaAddItem(id) {
-  overlayDetalhePedidoId = id;                 /* o seletor mostra os preços da data deste pedido */
+function fichaAddItem(fid) {
+  const f = _fichas.find(x => x.id === fid); if (!f || !f.rasc) return;
+  overlayDetalhePedidoId = f.ref;              /* o seletor mostra os preços da data deste pedido */
   const sel = document.getElementById('fichaAddSelect');
   sel.innerHTML = produtos.map(p => `<option value="${p.id}">${_esc(p.nome)}</option>`).join('');
   sel.selectedIndex = -1;
   sel.onchange = () => {
     sel.onchange = null;
     const prod = produtos.find(x => String(x.id) === String(sel.value)); if (!prod) return;
-    const p = pedidos.find(x => x.id === id); if (!p) return;
-    let k = (p.itens || []).findIndex(i => (i.produto || '').trim().toLowerCase() === prod.nome.trim().toLowerCase());
+    const ff = _fichas.find(x => x.id === fid); if (!ff || !ff.rasc) return;
+    let k = ff.rasc.itens.findIndex(i => (i.produto || '').trim().toLowerCase() === prod.nome.trim().toLowerCase());
     if (k < 0) {
-      _pedidoEditar(id, ped => { const v = precoVigente(prod, ped.data); ped.itens.push({ produto: prod.nome, qtd: 1, valor: v, total: v }); }, `Doce adicionado (${prod.nome})`, true);
-      k = p.itens.length - 1;
+      _rascEditar(fid, ped => { const v = precoVigente(prod, ped.data); ped.itens.push({ produto: prod.nome, qtd: 1, valor: v, total: v }); }, true);
+      k = ff.rasc.itens.length - 1;
     } else mostrarAviso('Esse doce já está no pedido: ajuste a quantidade');
-    const topo = [..._fichas].reverse().find(f => f.tipo === 'pedido' && f.ref === id);
-    const el = topo && document.getElementById(topo.id);
+    const el = document.getElementById(fid);
     const inp = el && el.querySelector(`[data-row="${k}"] .fg-q`);
     if (inp) { const l = el.querySelector('.ficha-lista'); if (l) l.scrollTop = inp.offsetTop - 40; inp.focus(); inp.select(); }
   };
