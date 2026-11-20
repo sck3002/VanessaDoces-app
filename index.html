@@ -235,26 +235,38 @@ table tr:hover td{background:var(--bg);}
 .fs-cli{background:none;border:0;padding:0;font:inherit;display:flex;align-items:center;gap:6px;min-width:0;color:var(--text-1);text-align:left;cursor:pointer;}
 .fs-cli b{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .fs-cli i{font-style:normal;color:var(--brand);font-size:20px;line-height:1;}
-.fs-l2{font-size:12.5px;color:var(--text-2);margin-top:3px;}
+.fs-l2{font-size:12.5px;color:var(--text-2);margin-top:3px;display:flex;justify-content:space-between;gap:8px;align-items:baseline;}
+.fs-tel{white-space:nowrap;color:var(--brand);text-decoration:none;font-weight:600;}
+.fs-end{display:block;font-size:12.5px;color:var(--text-2);margin-top:3px;text-decoration:none;line-height:1.3;}
 .fs-chips{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
 .fs-chips.um{grid-template-columns:1fr;}
 .fs-chip{display:block;padding:7px 10px;border:1px solid var(--divider);border-radius:10px;font-size:12px;color:var(--text-1);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:var(--surface);}
 .fs-obs{font-size:11.5px;color:var(--text-3);margin-top:6px;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .ficha-lista{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.fg-cab,.fg-row{display:grid;grid-template-columns:1fr 34px 46px 58px;gap:5px;align-items:center;padding:0 14px;}
+.fg-cab,.fg-row{display:grid;grid-template-columns:1fr 46px 42px 56px 22px;gap:5px;align-items:center;padding:0 14px;}
 .fg-cab{flex:none;font-size:10.5px;font-weight:700;color:var(--text-3);text-transform:uppercase;background:var(--bg);padding-top:5px;padding-bottom:5px;}
-.fg-cab span:nth-child(n+2),.fg-row span:nth-child(n+2),.fg-row b{text-align:right;}
-.fg-row{min-height:30px;border-bottom:1px solid var(--divider);font-size:12.5px;}
-.fg-row .fg-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fg-cab span:nth-child(n+2),.fg-row .fg-u,.fg-row b{text-align:right;}
+.fg-row{min-height:30px;padding-top:1px;padding-bottom:1px;border-bottom:1px solid var(--divider);font-size:13px;}
+.fg-row .fg-n{line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.fg-u{font-size:11.5px;color:var(--text-3);}
+.fg-x{border:0;background:transparent;color:#b91c1c;font-size:14px;padding:0;height:28px;width:22px;cursor:pointer;}
+.fg-add{border:1px solid var(--brand);background:#fff;color:var(--brand);border-radius:12px;font-size:11px;font-weight:600;padding:2px 9px;margin-left:8px;text-transform:none;cursor:pointer;font-family:inherit;}
 .ficha-rod{flex:none;border-top:1px solid var(--divider);padding:8px 14px 10px;background:#fff;}
 .fr-mini{font-size:11px;color:var(--text-3);}
 .fr-tot{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 8px;}
+.fr-tot4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:4px 0 8px;align-items:end;}
+.fr-tot4 small{display:block;font-size:10.5px;color:var(--text-3);text-transform:uppercase;font-weight:600;}
+.fr-tot4 b{font-size:15px;display:block;line-height:30px;}
+.fr-tot4 .fr-aberto b{color:#b45309;}.fr-tot4 .fr-ok b{color:#15803d;}
+.ficha input.fr-in.fr-in{width:100%;min-height:30px !important;height:30px;padding:2px 4px !important;font-size:14px !important;font-weight:600;text-align:right;border:0 !important;border-bottom:1.5px solid #cfd4da !important;border-radius:0 !important;background:transparent !important;font-family:inherit;color:var(--text-1);}
+.ficha input.fr-in.fr-in:focus{border-bottom-color:var(--brand) !important;outline:none;}
+.ficha input.fr-in.fg-q{height:26px;min-height:26px !important;text-align:center;background:var(--bg) !important;border-radius:6px !important;border-bottom:0 !important;padding:0 2px !important;font-size:13px !important;}
 .fr-tot small{display:block;font-size:10.5px;color:var(--text-3);text-transform:uppercase;font-weight:600;}
 .fr-tot b{font-size:15px;}
 .fr-tot .fr-aberto b{color:#b45309;}.fr-tot .fr-ok b{color:#15803d;}
 .fr-acoes{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;}
-.fr-acoes button,.fr-acoes a{padding:8px 4px;border:1px solid var(--divider);background:var(--surface);border-radius:10px;font-size:11.5px;color:var(--text-1);display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;font-family:inherit;cursor:pointer;}
-.fr-acoes span{font-size:17px;line-height:1;}
+.fr-acoes button,.fr-acoes a{padding:8px 4px;border:1px solid var(--divider);background:var(--surface);border-radius:10px;font-size:12px;color:var(--text-1);display:flex;flex-direction:row;justify-content:center;align-items:center;gap:6px;text-decoration:none;font-family:inherit;cursor:pointer;}
+.fr-acoes span{font-size:16px;line-height:1;}
 .fr-acoes .prim{background:var(--brand);border-color:var(--brand);color:#fff;}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px;}
 .kpis div{text-align:center;padding:6px 2px;background:var(--bg);border-radius:8px;min-width:0;}
@@ -266,6 +278,23 @@ table tr:hover td{background:var(--bg);}
 .fh-row .fh-t{font-weight:700;}
 .fh-row i{font-style:normal;color:var(--text-3);}
 .fh-canc{opacity:.5;text-decoration:line-through;}
+.dash-atalhos{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:4px 0 16px;}
+@media(min-width:769px){.dash-atalhos{grid-template-columns:repeat(4,1fr);}}
+.dash-atalho{display:flex;align-items:center;gap:10px;text-align:left;background:var(--surface);border:1.5px solid var(--divider);border-radius:var(--radius-md);padding:11px 12px;cursor:pointer;font-family:inherit;color:var(--text-1);min-width:0;}
+.dash-atalho .da-ic{font-size:22px;line-height:1;}
+.dash-atalho .da-tx{min-width:0;flex:1;}
+.dash-atalho b{display:block;font-size:13px;}
+.dash-atalho .da-sub{display:block;font-size:11px;color:var(--text-3);margin-top:2px;line-height:1.3;}
+.dash-atalho .da-tx{color:var(--text-1);}
+.dash-atalho i{font-style:normal;color:var(--brand);font-size:18px;}
+.ficha-sub.fs-periodo{padding:6px 14px;font-size:11.5px;color:var(--text-3);}
+.ficha .ranking-item{padding:7px 14px;font-size:13px;}
+.ficha .ranking-nome{font-size:13px;}
+.ficha .ranking-pos{width:20px;height:20px;}
+.ficha .tabela-premium{width:100%;border-collapse:collapse;}
+.ficha .tabela-premium th{position:sticky;top:0;background:var(--bg);padding:6px 8px;font-size:10.5px;}
+.ficha .tabela-premium td{padding:7px 8px;font-size:12.5px;}
+.lista-mini{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 
 /* ━━━ DETALHE PEDIDO ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .detalhe-secao{background:var(--surface);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow-sm);}
@@ -533,7 +562,7 @@ table tr:hover td{background:var(--bg);}
   body,.conteudo,.nav-overlay{background:#fff;}
   .nav-overlay,.nav-overlay-2,.nav-overlay-3{left:0 !important;right:0 !important;bottom:58px !important;border-radius:0 !important;box-shadow:none !important;}
   .nav-header{border-radius:0 !important;padding:8px 14px;}
-  .ficha{top:0 !important;}                       /* a ficha usa a tela toda: mais linhas sem rolar */
+  .nav-overlay,.nav-overlay-2,.nav-overlay-3{top:0 !important;}   /* telas abertas usam a altura toda: nada de cabeçalho duplicado */                       /* a ficha usa a tela toda: mais linhas sem rolar */
   .nav-body{padding:6px 16px 16px;}
   .card,.detalhe-secao{background:transparent !important;box-shadow:none !important;border-radius:0 !important;padding:4px 0 8px !important;margin-bottom:6px !important;border-bottom:1px solid var(--divider);}
   .card h2{font-size:14px;margin-bottom:4px;}
@@ -542,9 +571,12 @@ table tr:hover td{background:var(--bg);}
   input:not([type=checkbox]):focus,select:focus,textarea:focus{border-bottom-color:var(--brand) !important;box-shadow:0 1px 0 0 var(--brand) !important;}
   textarea{height:40px !important;}
   input[type=checkbox]{width:auto !important;min-height:0 !important;}
-  .pedido-item,.produto-item,.insumo-item{background:transparent !important;box-shadow:none !important;border:0 !important;border-bottom:1px solid var(--divider) !important;border-radius:0 !important;padding:9px 2px !important;margin:0 !important;}
-  .pedido-info strong{font-size:14px;font-weight:600;}
-  .pedido-info span{color:var(--text-3);font-size:12px;}
+  .pedido-item,.produto-item,.insumo-item{background:transparent !important;box-shadow:none !important;border:0 !important;border-bottom:1px solid var(--divider) !important;border-radius:0 !important;padding:6px 2px !important;margin:0 !important;}
+  .pedido-info strong,.produto-info strong,.insumo-info strong{font-size:13.5px;font-weight:600;}
+  .pedido-info span,.produto-info span,.insumo-info span{color:var(--text-3);font-size:11.5px;line-height:1.3;margin-top:0;}
+  .pedido-lado b{font-size:13.5px;line-height:1.25;}
+  .pedido-lado small{display:block;line-height:1.2;margin:0;}
+  .pedido-info strong,.produto-info strong,.insumo-info strong{line-height:1.3;}
   #listaInsumos{border:0 !important;background:transparent !important;padding:0 !important;}
   .filtros{gap:2px;margin-bottom:6px;}
   .btn{min-height:36px;padding:8px 14px;font-size:13px;border-radius:10px;letter-spacing:0;}
@@ -939,30 +971,23 @@ table tr:hover td{background:var(--bg);}
       </div>
     </div>
 
-    <div class="dash-layout-corpo-trio">
-      <div>
-        <div class="section-titulo-interna">🏆 Ranking de Gastos por Insumo</div>
-        <div class="tabela-premium-wrapper" id="containerRankingGastos"></div>
-      </div>
-      <div>
-        <div class="section-titulo-interna">🍬 Doces Mais Pedidos</div>
-        <div class="tabela-premium-wrapper" id="containerRankingDoces"></div>
-      </div>
-      <div>
-        <div class="section-titulo-interna">📋 Detalhamento Mensal</div>
-        <div class="tabela-premium-wrapper" style="height:auto;max-height:260px;">
-          <table class="tabela-premium tabela-compacta">
+    <div class="dash-atalhos">
+      <button type="button" class="dash-atalho" onclick="dashAbrir('gastos')"><span class="da-ic">🏆</span><span class="da-tx"><b>Gastos por insumo</b><span class="da-sub" id="daGastos">—</span></span><i>›</i></button>
+      <button type="button" class="dash-atalho" onclick="dashAbrir('doces')"><span class="da-ic">🍬</span><span class="da-tx"><b>Doces mais pedidos</b><span class="da-sub" id="daDoces">—</span></span><i>›</i></button>
+      <button type="button" class="dash-atalho" onclick="dashAbrir('mensal')"><span class="da-ic">📋</span><span class="da-tx"><b>Detalhamento mensal</b><span class="da-sub" id="daMensal">—</span></span><i>›</i></button>
+      <button type="button" class="dash-atalho" onclick="dashAbrir('margem')"><span class="da-ic">💰</span><span class="da-tx"><b>Margem por produto</b><span class="da-sub" id="daMargem">—</span></span><i>›</i></button>
+    </div>
+    <!-- fontes dos detalhamentos: continuam sendo preenchidas por atualizarDashboard e aparecem nas telas dos cards -->
+    <div id="dashFontes" style="display:none;">
+      <div id="containerRankingGastos"></div>
+      <div id="containerRankingDoces"></div>
+      <table class="tabela-premium tabela-compacta" id="dashTabMensal">
             <thead>
               <tr><th>Mês</th><th>Entradas</th><th>Saídas</th><th>Resultado</th></tr>
             </thead>
             <tbody id="tbodyDetalhamentoMensal"></tbody>
           </table>
-        </div>
-      </div>
-    </div>
-    <div class="section-titulo-interna" style="margin-top:8px;">💰 Margem por Produto (R$)</div>
-    <div class="tabela-premium-wrapper" style="height:auto;max-height:none;overflow:visible;">
-      <table class="tabela-premium tabela-margem">
+      <table class="tabela-premium tabela-margem" id="dashTabMargem">
         <colgroup><col style="width:25%"><col style="width:11%"><col style="width:16%"><col style="width:15%"><col style="width:17%"><col style="width:16%"></colgroup>
         <thead><tr><th data-c="nome" data-l="Produto" onclick="ordenarMargem('nome')">Produto</th><th data-c="qtd" data-l="Vend." onclick="ordenarMargem('qtd')">Vend.</th><th data-c="receita" data-l="Receita" onclick="ordenarMargem('receita')">Receita</th><th data-c="custo" data-l="Custo" onclick="ordenarMargem('custo')">Custo</th><th data-c="resultado" data-l="Result." onclick="ordenarMargem('resultado')">Result.</th><th data-c="margem" data-l="Margem" onclick="ordenarMargem('margem')">Margem</th></tr></thead>
         <tbody id="tbodyMargemProdutos"></tbody>
@@ -982,6 +1007,7 @@ table tr:hover td{background:var(--bg);}
 </div>
 <!-- ========== OVERLAYS DE NAVEGAÇÃO ========== -->
 <div id="navBackdrop" onclick="fecharDetalhePedido()"></div>
+<select id="fichaAddSelect" style="display:none;"></select>
 
 <!-- OVERLAY CLIENTE: DETALHE -->
 
@@ -1120,44 +1146,6 @@ table tr:hover td{background:var(--bg);}
 </div>
 
 <!-- OVERLAY 3B: EDITAR ITENS DO PEDIDO -->
-<div id="editItensOverlay" class="nav-overlay nav-overlay-3">
-  <div class="nav-header">
-    <button class="nav-back" onclick="fecharEditarItens()">← Voltar</button>
-    <span class="nav-titulo">Editar Itens</span>
-  </div>
-  <div class="nav-body">
-    <div class="card" style="background:#fbf6f0;border:1px dashed #8a5a34;margin-bottom:10px;">
-      <p style="font-size:11px;font-weight:700;color:#8a5a34;margin-bottom:10px;">💰 BALANÇO FINANCEIRO</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div><label style="font-size:12px;">Total (R$)</label>
-          <input type="text" id="editValorTotal" readonly style="background:#eee;font-weight:700;color:#d94d7d;font-size:16px;"></div>
-        <div><label style="font-size:12px;">Entrada / Pagamento (R$)</label>
-          <input type="text" inputmode="decimal" id="editValorEntrada" placeholder="0,00" oninput="calcularBalançoModalEditar()"></div>
-      </div>
-      <div style="margin-top:8px;">
-        <label style="font-size:12px;">Taxa de entrega (R$)</label>
-        <input type="text" inputmode="decimal" id="editTaxaEntrega" value="0.00" placeholder="0,00" oninput="atualizarItensTabelaModalEditar()">
-        <div class="dica">0 = retirada</div>
-      </div>
-      <div style="margin-top:10px;text-align:right;border-top:1px solid #e8d5c0;padding-top:8px;">
-        <span style="font-size:11px;color:#555;">SALDO A PAGAR:</span>
-        <div id="editSaldoAPagar" style="font-size:22px;font-weight:700;color:#28a745;">R$ 0,00</div>
-      </div>
-    </div>
-    <div class="card" style="margin-bottom:10px;">
-      <p style="font-size:11px;font-weight:700;color:#8a5a34;margin-bottom:10px;">🍬 DOCES DA ENCOMENDA</p>
-      <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end;margin-bottom:10px;">
-        <div><label style="font-size:12px;">Doce / Sabor</label><button type="button" class="picker-trigger" style="font-size:13px;" onclick="abrirSeletorProdutos('editAdicionarDoceSelect')"><span id="pickerEditLabel">Selecione o doce…</span><span class="picker-caret">▾</span></button>
-          <select id="editAdicionarDoceSelect" style="display:none;"></select></div>
-        <div><label style="font-size:12px;">Qtd</label><input type="number" id="editAdicionarDoceQtd" min="1" style="width:65px;"></div>
-        <button class="btn btn-rosa" style="padding:10px 14px;" onclick="adicionarDoceNoPedidoEditado()">+ Add</button>
-      </div>
-      <div id="listaItensEditando"></div>
-    </div>
-    <button class="btn btn-verde" style="width:100%;" onclick="salvarItensPedido()">💾 Salvar Itens</button>
-  </div>
-</div>
-
 <!-- TABELA DE PREÇOS -->
 <div id="tabelaPrecoOverlay" class="nav-overlay nav-overlay-3">
   <div class="nav-header">
@@ -1397,7 +1385,7 @@ let pedidos = [], produtos = [], insumos = [], clientes = [], tiposInsumos = [];
 let tabelasPreco = [];   /* [{id, vigencia:'AAAA-MM-DD', precos:{idProduto:preco}}] */
 let tiposMassa = [], massasDiario = [];
 let meuCadastro = null;
-let itensPedidoAtual = [], itensEditandoPedido = [];
+let itensPedidoAtual = [];
 let totalItensAtual = 0, quantidadeTotalAtual = 0, valorTotalAtual = 0;
 let anoFiltroSelecionado = "Todos";
 let mesFiltroSelecionado = "Todos";
@@ -1464,7 +1452,7 @@ function alternarDashOculto() {
 
 /* ===== ABAS ===== */
 function trocarAba(index) {
-  ['novoPedidoOverlay','editClienteOverlay','editItensOverlay',
+  ['novoPedidoOverlay','editClienteOverlay',
    'agendaMesOverlay','agendaDiaOverlay','clienteFormOverlay',
    'seletorProdutoOverlay','modalCpfContrato','tabelaPrecoOverlay']
     .forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('active'); });
@@ -1508,7 +1496,6 @@ let _filaHist = [];            /* ações que precisam esperar o history.go term
 const _fechadores = {
   novoPedidoOverlay:    () => fecharNovoPedido(),
   editClienteOverlay:   () => fecharEditarCliente(),
-  editItensOverlay:     () => fecharEditarItens(),
   seletorProdutoOverlay:() => fecharSeletorProdutos(),
   tabelaPrecoOverlay:   () => fecharTabelaPreco(),
   clienteFormOverlay:   () => fecharFormCliente(),
@@ -1630,36 +1617,45 @@ function _fichaFoco() {                        /* as telas de edição usam o pe
   overlayDetalhePedidoId = t ? t.ref : null;
 }
 function fichaRefrescar() { _fichas.slice().forEach(f => _fichaRender(f.id)); }
+function fichaRefrescarTipo(tipo) { _fichas.filter(f => f.tipo === tipo).forEach(f => _fichaRender(f.id)); }
 function _fichaRender(id) {
   const f = _fichas.find(x => x.id === id), el = document.getElementById(id); if (!f || !el) return;
   const ant = el.querySelector('.ficha-lista'); const rolagem = ant ? ant.scrollTop : 0;
-  const html = f.tipo === 'pedido' ? _fichaPedidoHtml(f) : _fichaClienteHtml(f);
+  const html = f.tipo === 'pedido' ? _fichaPedidoHtml(f) : f.tipo === 'dash' ? _fichaDashHtml(f) : _fichaClienteHtml(f);
   if (html == null) { fichaFechar(id); return; }
   el.innerHTML = html;
   const dep = el.querySelector('.ficha-lista'); if (dep) dep.scrollTop = rolagem;
 }
 
-/* ---- ficha do pedido ---- */
+/* ---- ficha do pedido (edição direta: quantidade, remover, adicionar, entrega e entrada) ---- */
+const _num = str => {                          /* aceita "1.234,50", "10,5", "10.5" */
+  let t = String(str == null ? '' : str).trim().replace(/[^\d.,-]/g, '');
+  if (t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');
+  const n = parseFloat(t); return isNaN(n) ? NaN : n;
+};
+const _in2 = n => (n || 0).toFixed(2).replace('.', ',');
+function _resumoPedido(p) {
+  const itens = p.itens || [];
+  const ehBC = i => (i.produto || '').trim().toLowerCase() === 'bem casado';
+  const doces = itens.filter(i => !ehBC(i)).reduce((a, i) => a + (i.qtd || 0), 0);
+  const bc = itens.filter(ehBC).reduce((a, i) => a + (i.qtd || 0), 0);
+  const subt = itens.reduce((a, i) => a + (i.total || 0), 0);
+  return `${Math.round(doces)} un${bc ? ` + ${Math.round(bc)} BC` : ''} · Doces R$ ${_n2(subt)}`;
+}
 function _fichaPedidoHtml(f) {
   const p = pedidos.find(x => x.id === f.ref); if (!p) return null;
   const itens = p.itens || [], total = p.total || 0, entrada = p.entrada || 0, taxa = p.taxaEntrega || 0;
   const saldo = Math.max(0, total - entrada);
-  const subt = itens.reduce((a, i) => a + (i.total || 0), 0);
-  const ehBC = i => (i.produto || '').trim().toLowerCase() === 'bem casado';
-  const doces = itens.filter(i => !ehBC(i)).reduce((a, i) => a + (i.qtd || 0), 0);
-  const bc = itens.filter(ehBC).reduce((a, i) => a + (i.qtd || 0), 0);
   const stCls = { pendente:'badge-pendente', pago:'badge-pago', cancelado:'badge-cancelado' }[p.status || 'pendente'];
-  const zap = _linkZap(p.telefone), mapa = _linkMapa(p.endereco);
-  const chips = [
-    p.telefone ? `<a class="fs-chip" href="${zap}" target="_blank" rel="noopener">📱 ${_esc(p.telefone)}</a>` : '',
-    p.endereco ? `<a class="fs-chip" href="${mapa}" target="_blank" rel="noopener">📍 ${_esc(p.endereco)}</a>` : ''
-  ].filter(Boolean);
-  const linhas = itens.map(i => `
-    <div class="fg-row"><span class="fg-n">${_esc(i.produto)}</span><span>${i.qtd || 0}</span><span>${_n2(i.valor)}</span><b>${_n2(i.total)}</b></div>`).join('')
-    || '<p style="color:#aaa;font-size:12px;padding:14px;">Sem itens</p>';
-  const resumo = [`${Math.round(doces)} un${bc ? ` + ${Math.round(bc)} BC` : ''}`, `Doces R$ ${_n2(subt)}`];
-  if (taxa > 0) resumo.push(`Entrega R$ ${_n2(taxa)}`);
   const idp = p.id;
+  const linhas = itens.map((i, k) => `
+    <div class="fg-row" data-row="${k}">
+      <span class="fg-n">${_esc(i.produto)}</span>
+      <input class="fr-in fg-q" type="text" inputmode="numeric" value="${_esc(i.qtd || 0)}" onfocus="this.select()" onchange="fichaItemQtd(${idp},${k},this)" aria-label="Quantidade">
+      <span class="fg-u">${_n2(i.valor)}</span>
+      <b data-k="rowtot">${_n2(i.total)}</b>
+      <button class="fg-x" onclick="fichaItemRemover(${idp},${k})" aria-label="Remover item">✕</button>
+    </div>`).join('') || '<p style="color:#aaa;font-size:12px;padding:14px;">Sem itens</p>';
   return `
     <div class="nav-header">
       <button class="nav-back" onclick="fichaFechar('${f.id}')">← Voltar</button>
@@ -1669,24 +1665,25 @@ function _fichaPedidoHtml(f) {
     <div class="ficha-sub">
       <div class="fs-l1">
         <button class="fs-cli" onclick="fichaAbrirClienteDoPedido(${idp})"><b>${_esc(p.cliente || '—')}</b><i>›</i></button>
-        <span class="badge ${stCls}">${(p.status || 'pendente').toUpperCase()}</span>
+        <span class="badge ${stCls}" data-k="badge">${(p.status || 'pendente').toUpperCase()}</span>
       </div>
-      <div class="fs-l2">📅 ${_diaSemana(p.data)} ${_esc(formatarData(p.data))} · ${_quando(p.data)}</div>
-      ${chips.length ? `<div class="fs-chips${chips.length === 1 ? ' um' : ''}">${chips.join('')}</div>` : ''}
+      <div class="fs-l2"><span>📅 ${_diaSemana(p.data)} ${_esc(formatarData(p.data))} · ${_quando(p.data)}</span>
+        ${p.telefone ? `<a class="fs-tel" href="${_linkZap(p.telefone)}" target="_blank" rel="noopener">📱 ${_esc(p.telefone)}</a>` : ''}</div>
+      ${p.endereco ? `<a class="fs-end" href="${_linkMapa(p.endereco)}" target="_blank" rel="noopener">📍 ${_esc(p.endereco)}</a>` : ''}
       ${p.obs ? `<div class="fs-obs">📝 ${_esc(p.obs)}</div>` : ''}
     </div>
-    <div class="fg-cab"><span>Doce</span><span>Qtd</span><span>Unit.</span><span>Total</span></div>
+    <div class="fg-cab"><span>Doce <button class="fg-add" onclick="fichaAddItem(${idp})">＋ Adicionar</button></span><span>Qtd</span><span>Unit.</span><span>Total</span><span></span></div>
     <div class="ficha-lista">${linhas}</div>
     <div class="ficha-rod">
-      <div class="fr-mini">${resumo.join(' · ')}</div>
-      <div class="fr-tot">
-        <div><small>Total</small><b>${_n2(total)}</b></div>
-        <div><small>Entrada</small><b>${_n2(entrada)}</b></div>
-        <div class="${saldo > 0 ? 'fr-aberto' : 'fr-ok'}"><small>Saldo</small><b>${_n2(saldo)}</b></div>
+      <div class="fr-mini" data-k="mini">${_resumoPedido(p)}</div>
+      <div class="fr-tot4">
+        <div><small>Entrega</small><input class="fr-in" type="text" inputmode="decimal" value="${_in2(taxa)}" onfocus="this.select()" onchange="fichaPedidoCampo(${idp},'taxaEntrega',this)"></div>
+        <div><small>Entrada</small><input class="fr-in" type="text" inputmode="decimal" value="${_in2(entrada)}" onfocus="this.select()" onchange="fichaPedidoCampo(${idp},'entrada',this)"></div>
+        <div><small>Total</small><b data-k="total">${_n2(total)}</b></div>
+        <div data-k="saldobox" class="${saldo > 0 ? 'fr-aberto' : 'fr-ok'}"><small>Saldo</small><b data-k="saldo">${_n2(saldo)}</b></div>
       </div>
       <div class="fr-acoes">
         <button class="prim" onclick="fichaPedidoAcao('compartilhar',${idp})"><span>📱</span>Compartilhar</button>
-        <button onclick="fichaPedidoAcao('itens',${idp})"><span>✏️</span>Itens</button>
         <button onclick="fichaPedidoAcao('dados',${idp})"><span>👤</span>Dados</button>
         <button onclick="fichaPedidoAcao('contrato',${idp})"><span>📄</span>Contrato</button>
       </div>
@@ -1695,9 +1692,96 @@ function _fichaPedidoHtml(f) {
 function fichaPedidoAcao(acao, id) {
   overlayDetalhePedidoId = id;                 /* as telas de edição trabalham sobre este pedido */
   if (acao === 'compartilhar') compartilharPedido();
-  else if (acao === 'itens') abrirEditarItens();
   else if (acao === 'dados') abrirEditarCliente();
   else if (acao === 'contrato') abrirContrato(id);
+}
+
+/* edição imediata: a tela muda na hora e o banco é atualizado em seguida (em fila); se o banco recusar, volta ao último estado salvo */
+const _pedSalvo = {};                          /* id → cópia do último estado confirmado no banco */
+let _filaSave = Promise.resolve(), _timerGeral = null;
+function _recalcPedido(p) {
+  p.total = Math.round(((p.itens || []).reduce((a, i) => a + (i.total || 0), 0) + (p.taxaEntrega || 0)) * 100) / 100;
+  if (p.status !== 'cancelado') p.status = (p.total - (p.entrada || 0)) <= 0 ? 'pago' : 'pendente';
+}
+function _atualizarGeralDepois() {              /* lista, agenda, produção e dashboard, sem recriar as telas abertas */
+  clearTimeout(_timerGeral);
+  _timerGeral = setTimeout(() => {
+    [renderPedidos, atualizarAgenda, atualizarProducao, atualizarDashboard].forEach(fn => { try { fn(); } catch(e) { console.error(e); } });
+  }, 400);
+}
+function _pedidoEditar(id, fn, logMsg, estrutural) {
+  const idx = pedidos.findIndex(x => x.id === id); if (idx < 0) return;
+  if (!_pedSalvo[id]) _pedSalvo[id] = JSON.parse(JSON.stringify(pedidos[idx]));
+  fn(pedidos[idx]); _recalcPedido(pedidos[idx]);
+  if (estrutural) fichaRefrescar(); else _fichaPedidoPintar(id);
+  _filaSave = _filaSave.then(async () => {
+    const atual = pedidos.find(x => x.id === id); if (!atual) return;
+    if (await sbUpsert('pedidos', [atual])) {
+      _pedSalvo[id] = JSON.parse(JSON.stringify(atual));
+      registrarLog('PEDIDO', `${logMsg} — ${atual.cliente} | R$ ${(atual.total || 0).toFixed(2)}`);
+    } else {
+      const i = pedidos.findIndex(x => x.id === id);
+      if (i >= 0) pedidos[i] = JSON.parse(JSON.stringify(_pedSalvo[id]));
+      fichaRefrescar();
+    }
+    _atualizarGeralDepois();
+  });
+}
+function _fichaPedidoPintar(id) {               /* atualiza só os números, sem recriar os campos (o teclado não fecha) */
+  const p = pedidos.find(x => x.id === id); if (!p) return;
+  const saldo = Math.max(0, (p.total || 0) - (p.entrada || 0));
+  _fichas.filter(f => f.tipo === 'pedido' && f.ref === id).forEach(f => {
+    const el = document.getElementById(f.id); if (!el) return;
+    const set = (k, v) => { const n = el.querySelector(`[data-k="${k}"]`); if (n) n.textContent = v; };
+    (p.itens || []).forEach((it, k) => { const r = el.querySelector(`[data-row="${k}"] [data-k="rowtot"]`); if (r) r.textContent = _n2(it.total); });
+    set('total', _n2(p.total)); set('saldo', _n2(saldo)); set('mini', _resumoPedido(p));
+    const sb = el.querySelector('[data-k="saldobox"]'); if (sb) sb.className = saldo > 0 ? 'fr-aberto' : 'fr-ok';
+    const bd = el.querySelector('[data-k="badge"]');
+    if (bd) { bd.className = 'badge ' + ({ pendente:'badge-pendente', pago:'badge-pago', cancelado:'badge-cancelado' }[p.status || 'pendente']); bd.textContent = (p.status || 'pendente').toUpperCase(); }
+  });
+}
+function fichaItemQtd(id, k, el) {
+  const p = pedidos.find(x => x.id === id); const it = p && p.itens[k]; if (!it) return;
+  const q = _num(el.value);
+  if (!(q > 0)) { el.value = it.qtd; mostrarAviso('Quantidade inválida — use ✕ para remover o item'); return; }
+  el.value = q;
+  if (q === it.qtd) return;
+  _pedidoEditar(id, ped => { const x = ped.itens[k]; x.qtd = q; x.total = Math.round(q * (x.valor || 0) * 100) / 100; }, `Quantidade alterada (${it.produto})`, false);
+}
+function fichaItemRemover(id, k) {
+  const p = pedidos.find(x => x.id === id); const it = p && p.itens[k]; if (!it) return;
+  if (p.itens.length <= 1) { alert('O pedido não pode ficar sem itens. Para apagar tudo, use a lixeira do topo.'); return; }
+  if (!confirm(`Remover "${it.produto}" do pedido?`)) return;
+  _pedidoEditar(id, ped => { ped.itens.splice(k, 1); }, `Item removido (${it.produto})`, true);
+}
+function fichaPedidoCampo(id, campo, el) {
+  const p = pedidos.find(x => x.id === id); if (!p) return;
+  const v = _num(el.value);
+  if (isNaN(v) || v < 0) { el.value = _in2(p[campo]); mostrarAviso('Valor inválido'); return; }
+  el.value = _in2(v);
+  if (Math.abs(v - (p[campo] || 0)) < 0.005) return;
+  _pedidoEditar(id, ped => { ped[campo] = v; }, campo === 'taxaEntrega' ? 'Taxa de entrega alterada' : 'Entrada alterada', false);
+}
+function fichaAddItem(id) {
+  overlayDetalhePedidoId = id;                 /* o seletor mostra os preços da data deste pedido */
+  const sel = document.getElementById('fichaAddSelect');
+  sel.innerHTML = produtos.map(p => `<option value="${p.id}">${_esc(p.nome)}</option>`).join('');
+  sel.selectedIndex = -1;
+  sel.onchange = () => {
+    sel.onchange = null;
+    const prod = produtos.find(x => String(x.id) === String(sel.value)); if (!prod) return;
+    const p = pedidos.find(x => x.id === id); if (!p) return;
+    let k = (p.itens || []).findIndex(i => (i.produto || '').trim().toLowerCase() === prod.nome.trim().toLowerCase());
+    if (k < 0) {
+      _pedidoEditar(id, ped => { const v = precoVigente(prod, ped.data); ped.itens.push({ produto: prod.nome, qtd: 1, valor: v, total: v }); }, `Doce adicionado (${prod.nome})`, true);
+      k = p.itens.length - 1;
+    } else mostrarAviso('Esse doce já está no pedido: ajuste a quantidade');
+    const topo = [..._fichas].reverse().find(f => f.tipo === 'pedido' && f.ref === id);
+    const el = topo && document.getElementById(topo.id);
+    const inp = el && el.querySelector(`[data-row="${k}"] .fg-q`);
+    if (inp) { const l = el.querySelector('.ficha-lista'); if (l) l.scrollTop = inp.offsetTop - 40; inp.focus(); inp.select(); }
+  };
+  abrirSeletorProdutos('fichaAddSelect');
 }
 function fichaAbrirClienteDoPedido(idPedido) {
   const p = pedidos.find(x => x.id === idPedido); if (!p) return;
@@ -1727,10 +1811,6 @@ function _fichaClienteHtml(f) {
   const gasto = validos.reduce((a, p) => a + (p.total || 0), 0);
   const ticket = validos.length ? gasto / validos.length : 0;
   const ultimo = validos[0] ? formatarData(validos[0].data).slice(0, 5) : '—';
-  const chips = [
-    tel ? `<a class="fs-chip" href="${_linkZap(tel)}" target="_blank" rel="noopener">📱 ${_esc(tel)}</a>` : '',
-    end ? `<a class="fs-chip" href="${_linkMapa(end)}" target="_blank" rel="noopener">📍 ${_esc(end)}</a>` : ''
-  ].filter(Boolean);
   const resumoItens = p => {
     const it = (p.itens || []); if (!it.length) return '—';
     const a = it.slice(0, 2).map(i => `${i.produto} ${i.qtd}`).join(', ');
@@ -1750,7 +1830,8 @@ function _fichaClienteHtml(f) {
     </div>
     <div class="ficha-sub">
       <div class="fs-l1"><b style="font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_esc(nome)}</b></div>
-      ${chips.length ? `<div class="fs-chips${chips.length === 1 ? ' um' : ''}">${chips.join('')}</div>` : ''}
+      ${tel ? `<div class="fs-l2"><a class="fs-tel" href="${_linkZap(tel)}" target="_blank" rel="noopener">📱 ${_esc(tel)}</a></div>` : ''}
+      ${end ? `<a class="fs-end" href="${_linkMapa(end)}" target="_blank" rel="noopener">📍 ${_esc(end)}</a>` : ''}
       <div class="kpis">
         <div><small>Pedidos</small><b>${validos.length}</b></div>
         <div><small>Total gasto</small><b>${_n2(gasto)}</b></div>
@@ -1768,6 +1849,28 @@ function _fichaClienteHtml(f) {
       </div>
     </div>`;
 }
+/* ---- telas dos cards do dashboard ---- */
+const DASH_TELAS = {
+  gastos: { t: '🏆 Gastos por insumo',   fonte: () => document.getElementById('containerRankingGastos').innerHTML },
+  doces:  { t: '🍬 Doces mais pedidos',  fonte: () => document.getElementById('containerRankingDoces').innerHTML },
+  mensal: { t: '📋 Detalhamento mensal', fonte: () => (document.getElementById('dashTabMensal') || {}).outerHTML || '' },
+  margem: { t: '💰 Margem por produto',  fonte: () => (document.getElementById('dashTabMargem') || {}).outerHTML || '' }
+};
+function dashAbrir(chave) { fichaAbrir('dash', chave); }
+function _fichaDashHtml(f) {
+  const d = DASH_TELAS[f.ref]; if (!d) return null;
+  const ano = anoFiltroSelecionado === 'Todos' ? 'Todos os anos' : anoFiltroSelecionado;
+  const mes = mesFiltroSelecionado !== 'Todos' ? ' · ' + NOMES_MESES[parseInt(mesFiltroSelecionado, 10) - 1] : '';
+  const corpo = d.fonte().replace(/\sid="[^"]*"/g, '');       /* o conteúdo original continua no dashboard; aqui vai uma cópia */
+  return `
+    <div class="nav-header">
+      <button class="nav-back" onclick="fichaFechar('${f.id}')">← Voltar</button>
+      <span class="nav-titulo">${d.t}</span>
+    </div>
+    <div class="ficha-sub fs-periodo">Período: ${ano}${mes}</div>
+    <div class="ficha-lista">${corpo}</div>`;
+}
+
 function fichaClienteNovoPedido(idFicha) {
   const f = _fichas.find(x => x.id === idFicha); if (!f) return;
   const reg = _clienteRegistro(f.ref);
@@ -1850,41 +1953,6 @@ async function salvarClientePedido() {
 }
 
 /* — Editar Itens — */
-function abrirEditarItens() {
-  const p = pedidos.find(x=>x.id===overlayDetalhePedidoId); if(!p) return;
-  itensEditandoPedido = JSON.parse(JSON.stringify(p.itens||[]));
-  document.getElementById('editTaxaEntrega').value = (p.taxaEntrega||0).toFixed(2);
-  atualizarItensTabelaModalEditar();
-  document.getElementById('editValorEntrada').value = (p.entrada||0).toFixed(2);
-  calcularBalançoModalEditar();
-  const sel = document.getElementById('editAdicionarDoceSelect');
-  sel.innerHTML = produtos.map(pr=>`<option value="${pr.id}">${pr.nome} (R$ ${(pr.preco||0).toFixed(2)}/un)</option>`).join('');
-  resetSeletorProduto();
-  _ovAbrir('editItensOverlay');
-}
-function fecharEditarItens() { _ovFechar('editItensOverlay'); }
-async function salvarItensPedido() {
-  const id  = overlayDetalhePedidoId;
-  const idx = pedidos.findIndex(x=>x.id===id); if(idx===-1) return;
-  if(!itensEditandoPedido.length){ alert('O pedido não pode ficar vazio!'); return; }
-  const taxa      = parseFloat((document.getElementById('editTaxaEntrega').value||'0').replace(',','.'))||0;
-  const totalCalc = itensEditandoPedido.reduce((acc,i)=>acc+i.total,0) + taxa;
-  const entrada   = parseFloat((document.getElementById('editValorEntrada').value||'0').replace(',','.'))||0;
-  const saldo     = totalCalc - entrada;
-  const _antesI = { ...pedidos[idx] };
-  pedidos[idx].itens   = [...itensEditandoPedido];
-  pedidos[idx].total   = totalCalc;
-  pedidos[idx].taxaEntrega = taxa;
-  pedidos[idx].entrada = entrada;
-  if(pedidos[idx].status!=='cancelado') pedidos[idx].status = saldo<=0?'pago':'pendente';
-  const ok = await sbUpsert('pedidos',[pedidos[idx]]);
-  if(!ok) { pedidos[idx] = _antesI; return; }
-  registrarLog('PEDIDO',`Itens alterados — ${pedidos[idx].cliente} | R$ ${totalCalc.toFixed(2)}`);
-  fecharEditarItens();
-  renderDetalhePedido(id);
-  renderPedidos();
-  alert('✅ Itens salvos!');
-}
 
 /* — Excluir do detalhe — */
 async function excluirPedidoDetalhe(id) {
@@ -2227,10 +2295,6 @@ function fecharModalCpf() {
   document.getElementById('modalCpfContrato').classList.remove('active');
   _histFechar('modalCpfContrato');
 }
-function abrirContratoDoModal() {
-  if(!overlayDetalhePedidoId) return;
-  abrirContrato(overlayDetalhePedidoId);
-}
 function gerarContrato() {
   const cpf = document.getElementById('cpfContratante').value.trim();
   if(!cpf){ alert('Informe o CPF do cliente.'); return; }
@@ -2421,22 +2485,6 @@ function gerarContrato() {
 
  
 /* ===== CLIENTES ===== */
-async function adicionarCliente() {
-  const id   = document.getElementById('telCliente').value.trim();
-  const nome = document.getElementById('nomeCliente').value.trim();
-  const rua  = document.getElementById('rua').value.trim();
-  const num  = document.getElementById('numero').value.trim();
-  const bairro = document.getElementById('bairro').value.trim();
-  const ref  = document.getElementById('referencia').value.trim();
-  if (!nome || !id) { alert('Preencha o nome e o telefone!'); return; }
-  const endCompleto = `${rua}${num?', '+num:''}${bairro?' - '+bairro:''}${ref?' (Ref: '+ref+')':''}`;
-  const novoCliente = { id, nome, tel: id, end: endCompleto };
-  const { error } = await sbClient.from('clientes').upsert([novoCliente], { onConflict: 'id' });
-  if (error) { alert('Erro ao salvar cliente: ' + error.message); return; }
-  const idx = clientes.findIndex(c => String(c.id) === String(id));
-  if (idx !== -1) clientes[idx] = novoCliente; else clientes.push(novoCliente);
-  renderizarClientes(); limparCamposCliente(); alert('Cliente salvo com sucesso!');
-}
  
 function renderizarClientes(filtroExterno) {
   const campo = document.getElementById('filtroCliente');
@@ -2569,85 +2617,6 @@ function renderPedidos() {
 }
  
 /* ===== EDITAR PEDIDO ===== */
-function abrirEditar(id) {
-  abrirDetalhePedido(id); return;
-  const p = pedidos.find(x=>x.id===id); if(!p) return;
-  document.getElementById('editCliente').value = p.cliente;
-  document.getElementById('editEndereco').value = p.endereco||'';
-  document.getElementById('editTelefone').value = p.telefone||'';
-  document.getElementById('editEntrega').value = p.data||'';
-  document.getElementById('editObs').value = p.obs||'';
-  document.getElementById('editStatus').value = p.status;
-  document.getElementById('editValorEntrada').value = (p.entrada||0).toFixed(2);
-  itensEditandoPedido = JSON.parse(JSON.stringify(p.itens));
-  atualizarItensTabelaModalEditar();
-  document.getElementById('modalEditarPedido').classList.add('active');
-}
-function verificarMudancaStatusModal() {
-  const status = document.getElementById('editStatus').value;
-  const total  = parseFloat(document.getElementById('editValorTotal').value) || 0;
-  if (status === 'pago') document.getElementById('editValorEntrada').value = total.toFixed(2);
-  calcularBalançoModalEditar();
-}
-function atualizarItensTabelaModalEditar() {
-  const lista = document.getElementById('listaItensEditando');
-  let totalAcumulado = 0;
-  if (!itensEditandoPedido.length) {
-    lista.innerHTML = '<p style="text-align:center;color:#aaa;padding:20px;font-size:13px;">Nenhum item adicionado</p>';
-  } else {
-    lista.innerHTML = itensEditandoPedido.map((item, idx) => {
-      const unitario = item.valor || 1.00;
-      const subtotal = item.qtd * unitario;
-      totalAcumulado += subtotal;
-      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:white;border-radius:10px;margin-bottom:6px;border:1px solid #eee;gap:8px;">
-        <div style="flex:1;min-width:0;">
-          <div style="font-weight:600;font-size:13px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.produto}</div>
-          <div style="font-size:11px;color:#888;">R$ ${unitario.toFixed(2)} un · Total: <b style="color:#d94d7d;">R$ ${subtotal.toFixed(2)}</b></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-          <input type="number" min="1" value="${item.qtd}" style="width:60px;text-align:center;font-weight:600;font-size:14px;padding:6px 4px;border:1px solid #ddd;border-radius:8px;" onchange="alterarQtdItemModalEditar(${idx}, this.value)">
-          <span style="font-size:11px;color:#999;">un</span>
-          <button onclick="removerItemModalEditar(${idx})" style="width:30px;height:36px;border:none;border-radius:8px;background:#ffe0e0;color:#c0392b;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
-        </div>
-      </div>`;
-    }).join('');
-  }
-  const taxaEd = parseFloat(((document.getElementById('editTaxaEntrega')||{}).value||'0').replace(',','.')) || 0;
-  document.getElementById('editValorTotal').value = (totalAcumulado + taxaEd).toFixed(2);
-  calcularBalançoModalEditar();
-}
-function alterarQtdItemModalEditar(idx, novaQtd) {
-  const quantidade = parseInt(novaQtd) || 1;
-  itensEditandoPedido[idx].qtd = quantidade;
-  itensEditandoPedido[idx].total = quantidade * (itensEditandoPedido[idx].valor || 1.00);
-  atualizarItensTabelaModalEditar();
-}
-function removerItemModalEditar(idx) { itensEditandoPedido.splice(idx,1); atualizarItensTabelaModalEditar(); }
-function adicionarDoceNoPedidoEditado() {
-  const select = document.getElementById('editAdicionarDoceSelect');
-  const qtdInput = document.getElementById('editAdicionarDoceQtd');
-  const quantidade = parseInt(qtdInput.value) || 0;
-  if(quantidade <= 0) { alert("Digite uma quantidade válida!"); return; }
-  const prodObj = produtos.find(p => p.id === parseInt(select.value)); if(!prodObj){ alert('Selecione o doce.'); return; }
-  const indexExistente = itensEditandoPedido.findIndex(i => i.produto.toLowerCase() === prodObj.nome.toLowerCase());
-  if(indexExistente !== -1) {
-    itensEditandoPedido[indexExistente].qtd += quantidade;
-    itensEditandoPedido[indexExistente].total = itensEditandoPedido[indexExistente].qtd * itensEditandoPedido[indexExistente].valor;
-  } else {
-    const pv = precoVigente(prodObj, _dataPedidoEdicao());
-    itensEditandoPedido.push({ produto: prodObj.nome, qtd: quantidade, valor: pv, total: quantidade * pv });
-  }
-  qtdInput.value = ''; atualizarItensTabelaModalEditar();
-}
-function calcularBalançoModalEditar() {
-  const total   = parseFloat(document.getElementById('editValorTotal').value) || 0;
-  const rawEnt  = (document.getElementById('editValorEntrada').value||'').replace(',','.');
-  const entrada = parseFloat(rawEnt) || 0;
-  const saldo   = total - entrada;
-  const divSaldo = document.getElementById('editSaldoAPagar');
-  divSaldo.innerText = 'R$ ' + (saldo < 0 ? 0.00 : saldo).toFixed(2).replace('.',',');
-  divSaldo.style.color = saldo > 0 ? '#ff9800' : '#28a745';
-}
 function compartilharPedido() {
   const p = pedidos.find(x => x.id === overlayDetalhePedidoId); if (!p) return;
   const brl = n => 'R$ ' + (n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -2681,38 +2650,6 @@ function compartilharPedido() {
     navigator.share({ title: 'Pedido — ' + p.cliente, text: texto });
   } else {
     navigator.clipboard.writeText(texto).then(() => alert('Pedido copiado para a área de transferência!'));
-  }
-}
-function salvarEdicaoPedido() {
-  const id = overlayDetalhePedidoId;
-  const idx = pedidos.findIndex(x=>x.id===id); if(idx===-1) return;
-  if(itensEditandoPedido.length === 0) { alert("O pedido não pode ficar vazio!"); return; }
-  const totalCalculado = itensEditandoPedido.reduce((acc,i) => acc+i.total, 0);
-  const entradaInformada = parseFloat((document.getElementById('editValorEntrada').value||'').replace(',','.')) || 0;
-  let statusInformado = document.getElementById('editStatus').value;
-  if (totalCalculado - entradaInformada > 0) statusInformado = 'pendente';
-  else if (statusInformado === 'pendente' && entradaInformada >= totalCalculado) statusInformado = 'pago';
-  pedidos[idx].cliente  = document.getElementById('editCliente').value.trim();
-  pedidos[idx].endereco = document.getElementById('editEndereco').value;
-  pedidos[idx].telefone = document.getElementById('editTelefone').value;
-  pedidos[idx].data     = document.getElementById('editEntrega').value;
-  pedidos[idx].obs      = document.getElementById('editObs').value;
-  pedidos[idx].status   = statusInformado;
-  pedidos[idx].entrada  = entradaInformada;
-  pedidos[idx].itens    = [...itensEditandoPedido];
-  pedidos[idx].total    = totalCalculado;
-  sbUpsert('pedidos',[pedidos[idx]]); 
-  registrarLog('PEDIDO', `Pedido alterado — Cliente: ${pedidos[idx].cliente} | Entrega: ${pedidos[idx].data} | Total: R$ ${pedidos[idx].total.toFixed(2)}`);
-  atualizarTodasAsTelas(); fecharModalEditar();
-}
-function fecharModalEditar() { fecharDetalhePedido(); }
-function excluirPedido(id) {
-  if(confirm('Excluir este pedido permanentemente?')){ 
-    const p = pedidos.find(x=>x.id===id);
-    sbDeletar('pedidos',id); 
-    pedidos=pedidos.filter(x=>x.id!==id); 
-    registrarLog('PEDIDO', `Pedido EXCLUÍDO — Cliente: ${p?p.cliente:'?'} | Entrega: ${p?p.data:'?'} | Total: R$ ${p?p.total.toFixed(2):'?'}`);
-    atualizarTodasAsTelas(); 
   }
 }
  
@@ -2953,35 +2890,26 @@ function mostrarPedidosDoDia(data, lista) {
     const doc = it.filter(i=>i.produto.trim().toLowerCase()!=='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
     const bc  = it.filter(i=>i.produto.trim().toLowerCase()==='bem casado').reduce((s,i)=>s+(i.qtd||0),0);
     const st  = p.status||'pendente';
-    return `<div class="detalhe-secao" style="margin-bottom:8px;cursor:pointer;"
-        onclick="abrirDetalhePedidoDeAgenda(${p.id})">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <strong style="font-size:13px;color:#8a5a34;">${p.cliente||''}</strong>
-          <div style="font-size:11px;color:#666;margin-top:2px;">
-            🍬 ${Math.round(doc)} un${bc>0?` · 💍 ${Math.round(bc)} BC`:''}
-            &nbsp;·&nbsp; R$ ${(p.total||0).toFixed(2)}
-          </div>
-        </div>
-        <span class="badge badge-${st}" style="font-size:10px;padding:2px 8px;">${st.toUpperCase()}</span>
+    return `<div class="pedido-item" style="cursor:pointer;" onclick="abrirDetalhePedidoDeAgenda(${p.id})">
+      <div class="pedido-info">
+        <strong>${_esc(p.cliente||'')}</strong>
+        <span>${Math.round(doc)} un${bc>0?` + ${Math.round(bc)} BC`:''}${p.endereco?` · ${_esc(p.endereco)}`:''}</span>
       </div>
+      <div class="pedido-lado"><b>${fmtBRL(p.total||0)}</b><small class="st-${st}">${st}</small></div>
     </div>`;
   }).join('');
 
   document.getElementById('agendaDiaConteudo').innerHTML = `
-    <button class="btn btn-marrom" style="width:100%;margin-bottom:12px;padding:12px;font-size:14px;"
-      onclick="abrirA4(_agendaDiaData,_agendaDiaPedidos)">🖨️ Imprimir Mapa do Dia (A4)</button>
-    <button class="btn btn-rosa" style="width:100%;margin-bottom:12px;padding:12px;font-size:14px;"
-      onclick="novoPedidoNoDiaAberto()">➕ Novo pedido neste dia</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
+      <button class="btn btn-marrom" style="padding:8px 6px;font-size:13px;min-height:38px;"
+        onclick="abrirA4(_agendaDiaData,_agendaDiaPedidos)">🖨️ Mapa do dia (A4)</button>
+      <button class="btn btn-rosa" style="padding:8px 6px;font-size:13px;min-height:38px;"
+        onclick="novoPedidoNoDiaAberto()">➕ Novo pedido</button>
+    </div>
     ${pedidosHtml}
-    <div class="detalhe-secao" style="background:#fffaf5;border:1px dashed #8a5a34;margin-top:4px;">
-      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
-        <span>Total doces</span>
-        <b>${Math.round(totalDoces)} un${totalBC>0?` + ${Math.round(totalBC)} BC`:''}</b>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:13px;">
-        <span>Valor do dia</span><b style="color:#d94d7d;">R$ ${totalVal.toFixed(2)}</b>
-      </div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 2px 0;font-size:13px;">
+      <span style="color:var(--text-3);">Total do dia · ${Math.round(totalDoces)} un${totalBC>0?` + ${Math.round(totalBC)} BC`:''}</span>
+      <b style="color:var(--brand);font-size:14px;">${fmtBRL(totalVal)}</b>
     </div>`;
 
   _ovAbrir('agendaDiaOverlay');
@@ -3565,6 +3493,8 @@ function atualizarMargemProdutos(pedidosFiltrados, insumosFiltrados, volumeDoces
     const res = x.receita - x.custo;
     return `<tr><td><b>${x.nome}</b></td><td>${Math.round(x.qtd)}</td><td>${n0(x.receita)}</td><td>${n0(x.custo)}</td><td class="${cor(res)}">${n0(res)}</td><td class="${cor(res)}"><b>${pct(res, x.receita)}</b></td></tr>`;
   };
+  const _dm = document.getElementById('daMargem');
+  if (_dm) { const _c = com.filter(x => x.receita > 0).sort((a,b) => (b.receita-b.custo)/b.receita - (a.receita-a.custo)/a.receita)[0]; _dm.textContent = _c ? `Maior: ${_c.nome} · ${((_c.receita-_c.custo)/_c.receita*100).toFixed(1).replace('.',',')}%` : 'Sem vendas com receita'; }
   if (!lista.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#c49070;padding:20px;">Sem vendas no período.</td></tr>'; return; }
   const tq = com.reduce((s,x)=>s+x.qtd,0), tr = com.reduce((s,x)=>s+x.receita,0), tc = com.reduce((s,x)=>s+x.custo,0), tres = tr - tc;
   const total = com.length ? `<tr style="background:var(--bg);"><td><b>Total c/ receita</b></td><td><b>${Math.round(tq)}</b></td><td><b>${n0(tr)}</b></td><td><b>${n0(tc)}</b></td><td class="${cor(tres)}"><b>${n0(tres)}</b></td><td class="${cor(tres)}"><b>${pct(tres, tr)}</b></td></tr>` : '';
@@ -3911,6 +3841,7 @@ function atualizarDashboard() {
           <div class="ranking-nome" title="${item.nome}"><b>${item.nome}</b></div>
           <div class="ranking-qtd">R$ ${item.total.toFixed(2)}</div>
         </div>`).join('');
+  document.getElementById('daGastos').textContent = rankingGastos.length ? `${rankingGastos[0].nome} · R$ ${Math.round(rankingGastos[0].total).toLocaleString('pt-BR')}` : 'Sem gastos no período';
  
   // Ranking Doces
   const rankingDoces = Object.entries(contagemSabores).map(([nome,qtd])=>({nome,qtd})).sort((a,b)=>b.qtd-a.qtd);
@@ -3923,6 +3854,7 @@ function atualizarDashboard() {
           <div class="ranking-nome" title="${item.nome}"><b>${item.nome}</b></div>
           <div class="ranking-qtd">${Math.round(item.qtd)} un</div>
         </div>`).join('');
+  document.getElementById('daDoces').textContent = rankingDoces.length ? `${rankingDoces[0].nome} · ${Math.round(rankingDoces[0].qtd).toLocaleString('pt-BR')} un` : 'Sem vendas no período';
  
   // Detalhamento mensal
   const mesesChave = ["01","02","03","04","05","06","07","08","09","10","11","12"];
@@ -3943,10 +3875,12 @@ function atualizarDashboard() {
     if(dadosMensais[mes]) dadosMensais[mes].saidas += (i.estoque*i.preco);
   });
   const tbody = document.getElementById('tbodyDetalhamentoMensal'); tbody.innerHTML = '';
+  let melhorMes = null;
   [...mesesChave].reverse().forEach((m,idx) => {
     const mesIdx = mesesChave.indexOf(m);
     const d = dadosMensais[m]; if(d.entradas===0&&d.saidas===0) return;
     const resultado = d.entradas - d.saidas;
+    if (!melhorMes || resultado > melhorMes.res) melhorMes = { nome: NOMES_MESES[mesIdx].substring(0,3), res: resultado };
     const tr = document.createElement('tr');
     tr.innerHTML = `<td><b>${NOMES_MESES[mesIdx].substring(0,3)}</b></td>
       <td class="txt-verde">R$ ${d.entradas.toLocaleString('pt-BR',{maximumFractionDigits:0})}</td>
@@ -3955,7 +3889,9 @@ function atualizarDashboard() {
     tbody.appendChild(tr);
   });
   if(tbody.innerHTML==='') tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#c49070;padding:20px;">Sem registros.</td></tr>`;
+  document.getElementById('daMensal').textContent = melhorMes ? `Melhor mês: ${melhorMes.nome} · R$ ${Math.round(melhorMes.res).toLocaleString('pt-BR')}` : 'Sem registros';
   atualizarMargemProdutos(pedidosFiltrados, insumosFiltrados, volumeDoces);
+  fichaRefrescarTipo('dash');
 }
  
 /* ===== RENDER LOGS ===== */
