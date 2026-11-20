@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#6b3f20">
+<title>Entregas · Vanessa Doces Finos</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+:root{--brand:#d94d7d;--brown:#6b3f20;--bg:#f7f8fa;--t1:#111827;--t2:#4b5563;--t3:#9ca3af;--ok:#15803d;--warn:#b45309;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins','Segoe UI',Arial,sans-serif;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--t1);display:flex;flex-direction:column;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;}
+.top{background:var(--brown);color:#fff;min-height:54px;display:flex;align-items:center;padding:0 12px;gap:10px;flex:none;}
+.top h1{font-size:19px;font-weight:700;white-space:nowrap;}
+.dia{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border-radius:10px;padding:0 4px;height:40px;}
+.dia b{font-size:16px;min-width:128px;text-align:center;cursor:pointer;white-space:nowrap;}
+.dia button,.tb{background:transparent;border:0;color:#fff;font-size:24px;width:42px;height:40px;border-radius:8px;cursor:pointer;}
+.tb{background:rgba(255,255,255,.14);font-size:20px;}
+.tb:active,.dia button:active{background:rgba(255,255,255,.3);}
+.resumo{flex:1;text-align:right;line-height:1.15;min-width:0;}
+.resumo small{display:block;font-size:12px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.resumo small.off{color:#fde68a;opacity:1;font-weight:600;}
+.resumo b{font-size:18px;white-space:nowrap;}
+#lista{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:min-content;gap:10px;align-content:start;}
+.sep{grid-column:1/-1;font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;padding:2px 4px 0;}
+.vazio{grid-column:1/-1;text-align:center;color:var(--t2);padding:60px 20px;font-size:20px;}
+.vazio small{display:block;font-size:13px;color:var(--t3);margin-top:6px;}
+
+/* cartão — modo grande (até 6 entregas) */
+.c{background:#fff;border-radius:14px;border:1px solid #e8eaee;padding:10px 12px;display:flex;flex-direction:column;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,.04);min-width:0;}
+.l1{display:flex;justify-content:space-between;align-items:baseline;gap:8px;min-width:0;}
+.nome{font-size:19px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.saldo{font-size:17px;font-weight:700;color:var(--warn);white-space:nowrap;}
+.saldo.pago{color:var(--ok);}
+.end{display:block;background:#fdf2f6;border:1.5px solid #f9d0df;color:var(--brand);border-radius:10px;padding:8px 10px;font-size:15px;font-weight:600;line-height:1.25;text-decoration:none;min-height:48px;}
+.end small{display:block;color:var(--t2);font-weight:400;font-size:12px;margin-top:1px;}
+.end.ret{background:#f3f4f6;border-color:#e5e7eb;color:var(--t2);}
+.acoes{display:grid;grid-template-columns:1fr 1.5fr;gap:8px;}
+.btn{height:46px;border-radius:10px;font-size:16px;font-weight:700;border:1.5px solid #d1d5db;background:#fff;color:var(--t1);display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;cursor:pointer;}
+.btn i{font-style:normal;}
+.btn.ent{background:var(--ok);border-color:var(--ok);color:#fff;}
+.btn.off{opacity:.35;pointer-events:none;}
+.btn:active{filter:brightness(.92);}
+.c.feito{background:#f3f4f6;box-shadow:none;}
+.c.feito .nome{color:var(--t3);text-decoration:line-through;}
+.c.feito .saldo{color:var(--t3);}
+.c.feito .end{background:#f3f4f6;border-color:#e5e7eb;color:var(--t3);}
+.c.feito .acoes{grid-template-columns:1fr;}
+.c.feito .btn{height:38px;font-size:14px;color:var(--t2);}
+
+/* cartão — modo compacto (7 ou mais entregas) */
+#lista.mini{padding:8px;gap:8px;}
+.mini .c{display:grid;grid-template-columns:1fr auto;grid-template-areas:"l1 ac" "end ac";gap:4px 10px;align-items:center;padding:7px 8px 7px 12px;border-radius:12px;}
+.mini .l1{grid-area:l1;} .mini .end{grid-area:end;} .mini .acoes{grid-area:ac;display:flex;gap:6px;}
+.mini .nome{font-size:17px;} .mini .saldo{font-size:15px;}
+.mini .end{padding:5px 8px;font-size:13.5px;border-radius:9px;min-height:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.mini .end small{display:inline;font-size:inherit;font-weight:600;color:inherit;margin:0;}
+.mini .end small::before{content:" · ";}
+.mini .btn{width:74px;height:62px;flex-direction:column;gap:1px;font-size:12px;border-radius:10px;}
+.mini .btn i{font-size:20px;line-height:1;}
+.mini .c.feito{padding:5px 8px 5px 12px;}
+.mini .c.feito .nome{font-size:15px;}
+.mini .c.feito .end{background:transparent;border-color:transparent;padding:0 2px;font-weight:500;}
+.mini .c.feito .btn{width:84px;height:40px;flex-direction:row;font-size:12px;}
+
+/* retrato / telas estreitas: uma coluna */
+@media (max-width:700px){
+  #lista{grid-template-columns:1fr;}
+  .top h1{display:none;}
+  .dia b{min-width:104px;font-size:14px;}
+}
+
+/* login */
+.login{grid-column:1/-1;max-width:420px;margin:30px auto;background:#fff;border-radius:14px;padding:22px;border:1px solid #e8eaee;display:flex;flex-direction:column;gap:12px;user-select:text;-webkit-user-select:text;}
+.login h2{font-size:18px;color:var(--brown);}
+.login input{height:50px;border:1.5px solid #d1d5db;border-radius:10px;padding:0 12px;font-size:17px;}
+.login button{height:50px;border:0;border-radius:10px;background:var(--brand);color:#fff;font-size:17px;font-weight:700;}
+.login p{font-size:13px;color:#b91c1c;min-height:16px;}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>🚚 Entregas</h1>
+  <div class="dia"><button id="bAnt" aria-label="Dia anterior">‹</button><b id="rotDia" title="Voltar para hoje">—</b><button id="bProx" aria-label="Próximo dia">›</button></div>
+  <div class="resumo"><small id="sub">carregando…</small><b id="areceber"></b></div>
+  <button class="tb" id="bTela" aria-label="Tela cheia">⛶</button>
+  <button class="tb" id="bRef" aria-label="Atualizar">↻</button>
+</div>
+<div id="lista"></div>
+
+<script>
+/* ===== configuração (a mesma do app principal) ===== */
+var SUPABASE_URL = 'https://stwqlmxymyixgbwxynxh.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_jBjgD5yEzdHdGT1pEZ6Jkw_kj3lowPV';
+/* Endereços sem cidade ganham este sufixo na busca do mapa. Deixe '' para não acrescentar nada. */
+var CIDADE_PADRAO = ', Campos dos Goytacazes, RJ';
+var LIMITE_GRANDE = 6;            /* até 6 entregas no dia: cartões grandes; 7 ou mais: compacto */
+var ATUALIZA_MS = 3 * 60 * 1000;
+
+var sb = (window.supabase && window.supabase.createClient) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+var dia = hoje(), cards = [], clientes = null, clientesEm = 0, ultimaCarga = 0;
+var offline = false, atualizadoEm = '', carregando = false, precisaLogin = false, carregouDia = '';
+
+/* ===== utilitários ===== */
+function pad(n) { return String(n).padStart(2, '0'); }
+function dataLocal(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function hoje() { return dataLocal(new Date()); }
+function somaDias(iso, n) { var d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return dataLocal(d); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function dig(s) { return String(s || '').replace(/\D/g, ''); }
+function brl(n) { return 'R$ ' + (n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function rotuloDia(iso) {
+  var d = new Date(iso + 'T12:00:00'), s = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'][d.getDay()] + ' ' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1);
+  var dif = Math.round((d - new Date(hoje() + 'T12:00:00')) / 86400000);
+  return s + (dif === 0 ? ' · hoje' : dif === 1 ? ' · amanhã' : dif === -1 ? ' · ontem' : '');
+}
+function hhmm(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+function linkMapa(end) {
+  var q = end.trim();
+  if (CIDADE_PADRAO && !/campos|goytacazes|,\s*rj\b|\brj\b/i.test(q)) q += CIDADE_PADRAO;
+  return 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + encodeURIComponent(q);
+}
+
+/* ===== "entregue": guardado só neste aparelho, por dia ===== */
+function chaveEnt(d) { return 'vdf_entregues_' + d; }
+function lerEnt(d) { try { return JSON.parse(localStorage.getItem(chaveEnt(d)) || '{}') || {}; } catch (e) { return {}; } }
+function gravarEnt(d, o) { try { localStorage.setItem(chaveEnt(d), JSON.stringify(o)); } catch (e) {} }
+function limparAntigos() {
+  try {
+    var corte = somaDias(hoje(), -14);
+    Object.keys(localStorage).forEach(function (k) {
+      var m = /^vdf_(entregues|lista)_(\d{4}-\d{2}-\d{2})$/.exec(k);
+      if (m && m[2] < corte) localStorage.removeItem(k);
+    });
+  } catch (e) {}
+}
+function gravarCache(d) { try { localStorage.setItem('vdf_lista_' + d, JSON.stringify({ t: Date.now(), cards: cards })); } catch (e) {} }
+function lerCache(d) { try { return JSON.parse(localStorage.getItem('vdf_lista_' + d) || 'null'); } catch (e) { return null; } }
+
+/* ===== dados ===== */
+async function listarClientes() {
+  if (clientes && Date.now() - clientesEm < 30 * 60 * 1000) return clientes;
+  var tudo = [];
+  try {
+    for (var ini = 0; ; ini += 1000) {
+      var r = await sb.from('clientes').select('*').order('id', { ascending: true }).range(ini, ini + 999);
+      if (r.error) throw r.error;
+      var lote = r.data || []; tudo = tudo.concat(lote);
+      if (lote.length < 1000) break;
+    }
+    clientes = tudo; clientesEm = Date.now();
+  } catch (e) { console.error('clientes:', e); if (!clientes) clientes = []; }   /* só serve de reserva de endereço: não é fatal */
+  return clientes;
+}
+function acharCliente(p, lista) {
+  var t = dig(p.telefone), n = (p.cliente || '').trim().toLowerCase();
+  var i, c;
+  if (t) for (i = 0; i < lista.length; i++) { c = lista[i]; if (dig(c.id) === t || dig(c.tel) === t) return c; }
+  if (n) for (i = 0; i < lista.length; i++) { c = lista[i]; if ((c.nome || '').trim().toLowerCase() === n) return c; }
+  return null;
+}
+function montarCards(pedidos, lista) {
+  return pedidos.filter(function (p) { return p.status !== 'cancelado'; }).map(function (p) {
+    var cad = acharCliente(p, lista) || {};
+    var saldo = Math.round(((p.total || 0) - (p.entrada || 0)) * 100) / 100;
+    return {
+      id: String(p.id), nome: (p.cliente || '—').trim() || '—',
+      end: ((p.endereco || '').trim() || (cad.end || '').trim()),       /* o endereço do pedido vale; o do cadastro é reserva */
+      tel: dig(p.telefone) || dig(cad.tel),
+      obs: (p.obs || '').trim(), saldo: saldo, pago: saldo <= 0.005
+    };
+  });
+}
+async function carregar() {
+  if (carregando) return;
+  var diaReq = dia;
+  if (!sb) { usarCache(diaReq); return; }
+  carregando = true;
+  try {
+    var s = await sb.auth.getSession();
+    if (!s.data || !s.data.session) { precisaLogin = true; desenhar(); return; }
+    precisaLogin = false;
+    var r = await sb.from('pedidos').select('*').eq('data', diaReq).order('id', { ascending: true });
+    if (r.error) throw r.error;
+    var lista = await listarClientes();
+    if (dia !== diaReq) return;                      /* o usuário já trocou de dia */
+    cards = montarCards(r.data || [], lista);
+    offline = false; carregouDia = diaReq; atualizadoEm = hhmm(new Date()); ultimaCarga = Date.now();
+    gravarCache(diaReq);
+    desenhar();
+  } catch (e) {
+    console.error('carregar:', e);
+    usarCache(diaReq);
+  } finally { carregando = false; }
+}
+function usarCache(d) {
+  if (dia !== d) return;
+  var c = lerCache(d);
+  cards = c ? c.cards : []; offline = true; carregouDia = d; atualizadoEm = c ? hhmm(new Date(c.t)) : '';
+  precisaLogin = false; desenhar();
+}
+
+/* ===== tela ===== */
+function btnLigar(c) { return c.tel ? '<a class="btn" href="tel:' + esc(c.tel) + '"><i>📞</i><span>Ligar</span></a>' : '<span class="btn off"><i>📞</i><span>Ligar</span></span>'; }
+function htmlEnd(c) {
+  if (!c.end) return '<div class="end ret">🏠 Retirada no local — sem endereço</div>';
+  return '<a class="end" href="' + esc(linkMapa(c.end)) + '" target="_blank" rel="noopener">📍 ' + esc(c.end) + (c.obs ? '<small>' + esc(c.obs) + '</small>' : '') + '</a>';
+}
+function htmlSaldo(c, feito) {
+  return (c.pago && !feito) ? '<span class="saldo pago">Pago ✓</span>' : '<span class="saldo">' + (c.pago ? 'Pago ✓' : brl(c.saldo)) + '</span>';
+}
+function htmlCard(c, feito) {
+  var acoes = feito
+    ? '<button class="btn" data-acao="des" data-id="' + esc(c.id) + '"><i>↩</i><span>Desfazer</span></button>'
+    : btnLigar(c) + '<button class="btn ent" data-acao="ent" data-id="' + esc(c.id) + '"><i>✓</i><span>Entregue</span></button>';
+  return '<div class="c' + (feito ? ' feito' : '') + '"><div class="l1"><span class="nome">' + esc(c.nome) + '</span>' + htmlSaldo(c, feito) + '</div>' +
+    htmlEnd(c) + '<div class="acoes">' + acoes + '</div></div>';
+}
+function porNome(a, b) { return a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }); }
+function desenhar() {
+  var L = document.getElementById('lista');
+  document.getElementById('rotDia').textContent = rotuloDia(dia);
+  if (precisaLogin) {
+    document.getElementById('sub').textContent = 'entre para ver as entregas'; document.getElementById('sub').className = '';
+    document.getElementById('areceber').textContent = '';
+    L.className = '';
+    L.innerHTML = '<form class="login" id="fLogin"><h2>🔒 Entrar</h2><input id="lEmail" type="email" placeholder="E-mail" autocomplete="username"><input id="lSenha" type="password" placeholder="Senha" autocomplete="current-password"><p id="lErro"></p><button type="submit">Entrar</button></form>';
+    return;
+  }
+  var ent = lerEnt(dia);
+  var pend = cards.filter(function (c) { return !ent[c.id]; }).sort(porNome);
+  var feitos = cards.filter(function (c) { return ent[c.id]; }).sort(porNome);
+  var aReceber = pend.reduce(function (a, c) { return a + (c.saldo > 0 ? c.saldo : 0); }, 0);
+  var sub = document.getElementById('sub');
+  sub.textContent = pend.length + ' a entregar · ' + feitos.length + ' feita' + (feitos.length === 1 ? '' : 's') + (offline ? ' · ⚠ sem conexão' + (atualizadoEm ? ' (lista das ' + atualizadoEm + ')' : '') : '');
+  sub.className = offline ? 'off' : '';
+  document.getElementById('areceber').textContent = cards.length ? 'A receber: ' + brl(aReceber) : '';
+  L.className = cards.length > LIMITE_GRANDE ? 'mini' : '';
+  if (!cards.length && carregouDia !== dia) { L.innerHTML = '<div class="vazio">Carregando…</div>'; return; }
+  if (!cards.length) {
+    L.innerHTML = offline
+      ? '<div class="vazio">⚠ Sem conexão<small>Não há lista guardada para este dia. Toque em ↻ quando a internet voltar.</small></div>'
+      : '<div class="vazio">Nenhuma entrega para este dia 🎉</div>';
+    return;
+  }
+  var h = pend.map(function (c) { return htmlCard(c, false); }).join('');
+  if (feitos.length) h += '<div class="sep">Entregues (' + feitos.length + ')</div>' + feitos.map(function (c) { return htmlCard(c, true); }).join('');
+  var rol = L.scrollTop;
+  L.innerHTML = h; L.scrollTop = rol;
+}
+
+/* ===== eventos ===== */
+document.getElementById('lista').addEventListener('click', function (e) {
+  var b = e.target.closest ? e.target.closest('[data-acao]') : null; if (!b) return;
+  var ent = lerEnt(dia), id = b.getAttribute('data-id');
+  if (b.getAttribute('data-acao') === 'ent') ent[id] = 1; else delete ent[id];
+  gravarEnt(dia, ent); desenhar();
+});
+document.getElementById('lista').addEventListener('submit', async function (e) {
+  if (!e.target || e.target.id !== 'fLogin') return;
+  e.preventDefault();
+  var erro = document.getElementById('lErro'); erro.textContent = 'Entrando…';
+  if (!sb) { erro.textContent = 'Sem conexão com o servidor.'; return; }
+  var r = await sb.auth.signInWithPassword({ email: document.getElementById('lEmail').value.trim(), password: document.getElementById('lSenha').value });
+  if (r.error) { erro.textContent = 'E-mail ou senha inválidos'; return; }
+  precisaLogin = false; carregar();
+});
+function irDia(d) { dia = d; cards = []; offline = false; desenhar(); carregar(); }
+document.getElementById('bAnt').onclick = function () { irDia(somaDias(dia, -1)); };
+document.getElementById('bProx').onclick = function () { irDia(somaDias(dia, 1)); };
+document.getElementById('rotDia').onclick = function () { irDia(hoje()); };
+document.getElementById('bRef').onclick = function () { carregar(); };
+document.getElementById('bTela').onclick = function () {
+  var el = document.documentElement;
+  try {
+    if (document.fullscreenElement || document.webkitFullscreenElement) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    else (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+  } catch (e) {}
+};
+document.addEventListener('visibilitychange', function () { if (!document.hidden && Date.now() - ultimaCarga > 60000) carregar(); });
+setInterval(function () { if (!document.hidden && !precisaLogin) carregar(); }, ATUALIZA_MS);
+
+limparAntigos();
+desenhar();
+carregar();
+</script>
+</body>
+</html>
