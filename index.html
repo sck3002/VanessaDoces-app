@@ -225,6 +225,9 @@ table tr:hover td{background:var(--bg);}
 .nav-header{position:sticky;top:0;background:var(--brown-dark);padding:12px 16px;display:flex;align-items:center;gap:12px;z-index:2;border-radius:var(--radius-lg) var(--radius-lg) 0 0;}
 .nav-back{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;white-space:nowrap;font-weight:500;transition:background .15s;}
 .nav-back:hover{background:rgba(255,255,255,.25);}
+.nav-back.voltar{background:none;border:0;color:#fff;font-size:36px;font-weight:300;line-height:.75;padding:0 14px 6px 4px;min-width:40px;height:40px;margin:-6px 0 -6px -6px;border-radius:0;display:flex;align-items:center;}
+.nav-back.voltar:hover{background:none;}
+.nav-back.voltar:active{opacity:.55;}
 .nav-titulo{color:white;font-weight:700;font-size:14px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .nav-body{padding:16px;padding-bottom:28px;}
 /* ━━━ FICHAS EMPILHÁVEIS: cabeçalho e rodapé fixos, só a lista do meio rola ━━━ */
@@ -563,7 +566,14 @@ table tr:hover td{background:var(--bg);}
 .pedido-lado small{font-size:10.5px;font-weight:700;text-transform:lowercase;}
 .st-pendente{color:#b45309;}.st-pago{color:#15803d;}.st-cancelado{color:#b91c1c;}
 .barra-acoes{display:flex;gap:10px;position:sticky;bottom:0;background:#fff;padding:10px 0 12px;border-top:1px solid var(--divider);margin-top:8px;z-index:3;}
+@media(prefers-reduced-motion:reduce){.nav-overlay,.nav-overlay.active{transition-duration:.01s !important;}}
 @media(max-width:768px){
+  /* telas empilhadas no estilo iOS: a nova desliza da direita, a de baixo recua um pouco (só transform: roda na GPU) */
+  .nav-overlay{opacity:1;transform:translate3d(100%,0,0);transition:transform .38s cubic-bezier(.32,.72,0,1),visibility 0s linear .38s;will-change:transform;}
+  .nav-overlay.active{opacity:1;transform:none;transition:transform .38s cubic-bezier(.32,.72,0,1),visibility 0s;}
+  .nav-overlay.active.coberta{transform:translate3d(-26%,0,0);}
+  .nav-overlay.arrastando{transition:none !important;}
+  #navBackdrop.active{backdrop-filter:none;}
   body,.conteudo,.nav-overlay{background:#fff;}
   .nav-overlay,.nav-overlay-2,.nav-overlay-3{left:0 !important;right:0 !important;bottom:58px !important;border-radius:0 !important;box-shadow:none !important;}
   .nav-header{border-radius:0 !important;padding:8px 14px;}
@@ -1019,7 +1029,7 @@ table tr:hover td{background:var(--bg);}
 <!-- OVERLAY CLIENTE: FORMULÁRIO -->
 <div id="clienteFormOverlay" class="nav-overlay nav-overlay-3">
   <div class="nav-header">
-    <button class="nav-back" onclick="fecharFormCliente()">← Voltar</button>
+    <button class="nav-back voltar" aria-label="Voltar" onclick="fecharFormCliente()">‹</button>
     <span class="nav-titulo" id="clienteFormTitulo">Novo Cliente</span>
   </div>
   <div class="nav-body">
@@ -1045,7 +1055,7 @@ table tr:hover td{background:var(--bg);}
 <!-- OVERLAY AGENDA: DIAS DO MÊS -->
 <div id="agendaMesOverlay" class="nav-overlay nav-overlay-2">
   <div class="nav-header">
-    <button class="nav-back" onclick="fecharAgendaMes()">← Voltar</button>
+    <button class="nav-back voltar" aria-label="Voltar" onclick="fecharAgendaMes()">‹</button>
     <span class="nav-titulo" id="agendaMesTitulo">Mês</span>
   </div>
   <div class="nav-body" id="agendaMesConteudo"></div>
@@ -1054,14 +1064,14 @@ table tr:hover td{background:var(--bg);}
 <!-- OVERLAY AGENDA: PEDIDOS DO DIA -->
 <div id="agendaDiaOverlay" class="nav-overlay nav-overlay-3">
   <div class="nav-header">
-    <button class="nav-back" onclick="fecharAgendaDia()">← Voltar</button>
+    <button class="nav-back voltar" aria-label="Voltar" onclick="fecharAgendaDia()">‹</button>
     <span class="nav-titulo" id="agendaDiaTitulo">Dia</span>
   </div>
   <div class="nav-body" id="agendaDiaConteudo"></div>
 </div>
 <div id="novoPedidoOverlay" class="nav-overlay">
   <div class="nav-header">
-    <button class="nav-back" onclick="fecharNovoPedido()">← Voltar</button>
+    <button class="nav-back voltar" aria-label="Voltar" onclick="fecharNovoPedido()">‹</button>
     <span class="nav-titulo">Novo Pedido</span>
   </div>
   <div class="nav-body">
@@ -1129,7 +1139,7 @@ table tr:hover td{background:var(--bg);}
 <!-- OVERLAY 3A: EDITAR CLIENTE DO PEDIDO -->
 <div id="editClienteOverlay" class="nav-overlay nav-overlay-3">
   <div class="nav-header">
-    <button class="nav-back" onclick="fecharEditarCliente()">← Voltar</button>
+    <button class="nav-back voltar" aria-label="Voltar" onclick="fecharEditarCliente()">‹</button>
     <span class="nav-titulo">Editar Cliente</span>
   </div>
   <div class="nav-body">
@@ -1154,7 +1164,7 @@ table tr:hover td{background:var(--bg);}
 <!-- TABELA DE PREÇOS -->
 <div id="tabelaPrecoOverlay" class="nav-overlay nav-overlay-3">
   <div class="nav-header">
-    <button class="nav-back" onclick="fecharTabelaPreco()">← Voltar</button>
+    <button class="nav-back voltar" aria-label="Voltar" onclick="fecharTabelaPreco()">‹</button>
     <span class="nav-titulo" id="tabelaPrecoTitulo">Nova tabela</span>
   </div>
   <div class="nav-body" style="padding:14px 16px 90px;">
@@ -1176,7 +1186,7 @@ table tr:hover td{background:var(--bg);}
 <!-- SELETOR DE PRODUTOS -->
 <div id="seletorProdutoOverlay" class="nav-overlay nav-overlay-3">
   <div class="nav-header">
-    <button class="nav-back" onclick="fecharSeletorProdutos()">← Voltar</button>
+    <button class="nav-back voltar" aria-label="Voltar" onclick="fecharSeletorProdutos()">‹</button>
     <span class="nav-titulo">Escolha o doce</span>
   </div>
   <div class="nav-body" id="seletorProdutoBody" style="padding:0;"></div>
@@ -1613,7 +1623,7 @@ function fichaFechar(id) {
   _ovFechar(id);
   _fichas.splice(i, 1);
   delete _fechadores[id];
-  if (el) setTimeout(() => el.remove(), 260);
+  if (el) setTimeout(() => el.remove(), 420);
   _fichaFoco();
 }
 function _fichaFecharTopo() {                  /* fecha a ficha de cima, só se ela for mesmo a tela de cima */
@@ -1682,7 +1692,7 @@ function _fichaPedidoHtml(f) {
       <button class="nav-back nav-salvar" data-k="btnsalvar" onclick="fichaSalvar('${fid}')">💾 Salvar</button>
     </div>` : `
     <div class="nav-header">
-      <button class="nav-back" onclick="fichaFechar('${fid}')">← Voltar</button>
+      <button class="nav-back voltar" aria-label="Voltar" onclick="fichaFechar('${fid}')">‹</button>
       <span class="nav-titulo">Pedido</span>
       <button class="nav-back" onclick="fichaEditar('${fid}')">✏️ Editar</button>
       <button class="nav-back" onclick="excluirPedidoDetalhe(${idp})" aria-label="Excluir pedido">🗑</button>
@@ -1717,7 +1727,7 @@ function _fichaPedidoHtml(f) {
       </div>
       <div class="fs-l2"><span>📅 ${_diaSemana(orig.data)} ${_esc(formatarData(orig.data))} · ${_quando(orig.data)}</span>
         ${orig.telefone ? `<a class="fs-tel" href="${_linkZap(orig.telefone)}" target="_blank" rel="noopener">📱 ${_esc(orig.telefone)}</a>` : ''}</div>
-      ${orig.endereco ? `<a class="fs-end" href="${_linkMapa(orig.endereco)}" target="_blank" rel="noopener">📍 ${_esc(orig.endereco)}</a>` : ''}
+      ${_endPedido(orig) ? `<a class="fs-end" href="${_linkMapa(_endPedido(orig))}" target="_blank" rel="noopener">📍 ${_esc(_endPedido(orig))}</a>` : ''}
       ${orig.obs ? `<div class="fs-obs">📝 ${_esc(orig.obs)}</div>` : ''}
     </div>
     <div class="fg-cab"><span>Doce ${ed ? `<button class="fg-add" onclick="fichaAddItem('${fid}')">＋ Adicionar</button>` : ''}</span><span>Qtd</span><span>Unit.</span><span>Total</span><span></span></div>
@@ -1842,6 +1852,14 @@ function fichaAbrirClienteDoPedido(idPedido) {
   fichaAbrir('cliente', { tel: p.telefone || '', nome: p.cliente || '' });
 }
 
+/* endereço do pedido; se o pedido foi lançado sem endereço, usa o do cadastro do cliente (atualiza sozinho quando o cadastro muda) */
+function _endPedido(p) {
+  if (!p) return '';
+  if (p.endereco) return p.endereco;
+  const r = _clienteRegistro({ tel: p.telefone, nome: p.cliente });
+  return (r && r.end) || '';
+}
+
 /* ---- ficha do cliente ---- */
 function _clienteRegistro(ref) {
   if (ref.id != null) { const r = clientes.find(c => String(c.id) === String(ref.id)); if (r) return r; }
@@ -1878,7 +1896,7 @@ function _fichaClienteHtml(f) {
     </div>`).join('') || '<p style="color:#aaa;font-size:12px;padding:14px;">Nenhum pedido encontrado para este cliente.</p>';
   return `
     <div class="nav-header">
-      <button class="nav-back" onclick="fichaFechar('${f.id}')">← Voltar</button>
+      <button class="nav-back voltar" aria-label="Voltar" onclick="fichaFechar('${f.id}')">‹</button>
       <span class="nav-titulo">Cliente</span>
       ${reg ? `<button class="nav-back" onclick="excluirClienteOverlay('${_esc(reg.id)}')" aria-label="Excluir cliente">🗑</button>` : ''}
     </div>
@@ -1918,7 +1936,7 @@ function _fichaDashHtml(f) {
   const corpo = d.fonte().replace(/\sid="[^"]*"/g, '');       /* o conteúdo original continua no dashboard; aqui vai uma cópia */
   return `
     <div class="nav-header">
-      <button class="nav-back" onclick="fichaFechar('${f.id}')">← Voltar</button>
+      <button class="nav-back voltar" aria-label="Voltar" onclick="fichaFechar('${f.id}')">‹</button>
       <span class="nav-titulo">${d.t}</span>
     </div>
     <div class="ficha-sub fs-periodo">Período: ${ano}${mes}</div>
@@ -1946,6 +1964,7 @@ function _ovAbrir(id) {
   _histAbrir(id);
   /* a ordem de empilhamento é a ordem de abertura: a tela aberta por último fica sempre por cima */
   if (el) el.style.zIndex = String(200 + Math.max(0, _pilhaTelas.indexOf(id)));
+  _atualizaCobertas();
 }
 function _ovFechar(id) {
   const el = document.getElementById(id);
@@ -1954,7 +1973,40 @@ function _ovFechar(id) {
   const nivel1 = ['novoPedidoOverlay','agendaMesOverlay'];
   const algumAberto = nivel1.some(x => document.getElementById(x)?.classList.contains('active')) || !!document.querySelector('.ficha.active');
   if (!algumAberto) document.getElementById('navBackdrop').classList.remove('active');
+  _atualizaCobertas();
 }
+function _atualizaCobertas() {                  /* toda tela que tem outra por cima recua um pouco (efeito de pilha) */
+  _pilhaTelas.forEach((tid, i) => { const e = document.getElementById(tid); if (e) e.classList.toggle('coberta', i < _pilhaTelas.length - 1); });
+}
+/* arrastar da borda esquerda para voltar: a tela de cima acompanha o dedo, a de baixo vem junto */
+(function () {
+  let el = null, abaixo = null, x0 = 0, y0 = 0, dx = 0, t0 = 0, larg = 1, ativo = false, decidido = false;
+  const movel = () => window.innerWidth <= 768;
+  document.addEventListener('touchstart', ev => {
+    ativo = false; if (!movel() || ev.touches.length !== 1 || !_pilhaTelas.length) return;
+    const t = ev.touches[0]; if (t.clientX > 28) return;
+    el = document.getElementById(_pilhaTelas[_pilhaTelas.length - 1]); if (!el || !el.classList.contains('nav-overlay')) return;
+    abaixo = _pilhaTelas.length > 1 ? document.getElementById(_pilhaTelas[_pilhaTelas.length - 2]) : null;
+    x0 = t.clientX; y0 = t.clientY; dx = 0; t0 = Date.now(); larg = window.innerWidth; ativo = true; decidido = false;
+  }, { passive: true });
+  document.addEventListener('touchmove', ev => {
+    if (!ativo) return;
+    const t = ev.touches[0]; dx = t.clientX - x0; const dy = Math.abs(t.clientY - y0);
+    if (!decidido) { if (dx < 8 && dy < 8) return; if (dy > dx) { ativo = false; return; } decidido = true; el.classList.add('arrastando'); if (abaixo) abaixo.classList.add('arrastando'); }
+    dx = Math.max(0, dx);
+    el.style.transform = 'translate3d(' + dx + 'px,0,0)';
+    if (abaixo) abaixo.style.transform = 'translate3d(' + (-26 + 26 * Math.min(1, dx / larg)) + '%,0,0)';
+  }, { passive: true });
+  function soltar(cancelou) {
+    if (!ativo) return; ativo = false;
+    const fechar = decidido && !cancelou && (dx > larg * 0.35 || (dx > 40 && dx / Math.max(1, Date.now() - t0) > 0.6));
+    const e = el, b = abaixo, id = e && e.id;
+    [e, b].forEach(n => { if (n) { n.classList.remove('arrastando'); n.style.transform = ''; } });
+    if (fechar && id && _fechadores[id]) _fechadores[id]();
+  }
+  document.addEventListener('touchend', () => soltar(false), { passive: true });
+  document.addEventListener('touchcancel', () => soltar(true), { passive: true });
+})();
 
 /* — Novo Pedido — */
 function abrirNovoPedido() {
@@ -1981,7 +2033,7 @@ function abrirEditarCliente() {
   document.getElementById('editCliente').value  = p.cliente  ||'';
   document.getElementById('editTelefone').value = p.telefone ||'';
   document.getElementById('editEntrega').value  = p.data     ||'';
-  document.getElementById('editEndereco').value = p.endereco ||'';
+  document.getElementById('editEndereco').value = _endPedido(p);
   document.getElementById('editObs').value      = p.obs      ||'';
   document.getElementById('editStatus').value   = p.status   ||'pendente';
   _ovAbrir('editClienteOverlay');
@@ -2411,7 +2463,7 @@ function gerarContrato() {
 
   <h2>1. DA IDENTIFICAÇÃO DAS PARTES</h2>
   <p>Pelo presente contrato de prestação de serviços, firmado entre <b>${p.cliente}</b>, C.P.F ${cpf},
-  endereço ${p.endereco||'—'}, telefone ${p.telefone||'—'}, doravante denominada <b>CONTRATANTE</b>,
+  endereço ${_endPedido(p)||'—'}, telefone ${p.telefone||'—'}, doravante denominada <b>CONTRATANTE</b>,
   e <b>${meuCadastro.nome}</b>, C.P.F. ${meuCadastro.cpf}, telefone ${meuCadastro.telefone||'—'} doravante denominada
   <b>CONTRATADA</b>, as partes identificadas acima têm entre si justos e acertados os termos que reger-se-ão
   pelas cláusulas seguintes.</p>
@@ -2688,7 +2740,7 @@ function compartilharPedido() {
     ``,
     `👤 Cliente: ${p.cliente}`,
     `📅 Entrega: ${dataFmt}`,
-    `📍 Endereço: ${p.endereco || 'a combinar'}`,
+    `📍 Endereço: ${_endPedido(p) || 'a combinar'}`,
     ``,
     `*Itens do pedido:*`,
     lista,
@@ -2947,7 +2999,7 @@ function mostrarPedidosDoDia(data, lista) {
     return `<div class="pedido-item" style="cursor:pointer;" onclick="abrirDetalhePedidoDeAgenda(${p.id})">
       <div class="pedido-info">
         <strong>${_esc(p.cliente||'')}</strong>
-        <span>${Math.round(doc)} un${bc>0?` + ${Math.round(bc)} BC`:''}${p.endereco?` · ${_esc(p.endereco)}`:''}</span>
+        <span>${Math.round(doc)} un${bc>0?` + ${Math.round(bc)} BC`:''}${_endPedido(p)?` · ${_esc(_endPedido(p))}`:''}</span>
       </div>
       <div class="pedido-lado"><b>${fmtBRL(p.total||0)}</b><small class="st-${st}">${st}</small></div>
     </div>`;
