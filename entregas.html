@@ -385,7 +385,7 @@ function htmlLinha(c, n, feito) {
 function cardSel() { return cards.filter(function (c) { return c.id === selId; })[0] || null; }
 function urlMapa(c) {
   var t = satelite ? 'k' : 'm', dest = enderecoBusca(c.end);
-  return 'https://maps.google.com/maps?q=' + encodeURIComponent(dest) + '&z=16&t=' + t + '&hl=pt-BR&output=embed';
+  return 'https://maps.google.com/maps?q=' + encodeURIComponent(dest) + '&z=14&t=' + t + '&hl=pt-BR&output=embed';
 }
 function atualizarMapa() {
   var c = cardSel(), fr = document.getElementById('mapa'), vazio = document.getElementById('mapaVazio'), barra = document.getElementById('mapaBarra');
