@@ -23,6 +23,8 @@ body{background:var(--bg);color:var(--t1);display:flex;flex-direction:column;ove
 .resumo small{display:block;font-size:12px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .resumo small.off{color:#fde68a;opacity:1;font-weight:600;}
 .resumo b{font-size:18px;white-space:nowrap;}
+#corpo{flex:1;min-height:0;display:flex;}
+#painel{display:none;}
 #lista{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:min-content;gap:10px;align-content:start;}
 .sep{grid-column:1/-1;font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;padding:2px 4px 0;}
 .vazio{grid-column:1/-1;text-align:center;color:var(--t2);padding:60px 20px;font-size:20px;}
@@ -64,6 +66,37 @@ body{background:var(--bg);color:var(--t1);display:flex;flex-direction:column;ove
 .mini .c.feito .nome{font-size:15px;}
 .mini .c.feito .end{background:transparent;border-color:transparent;padding:0 2px;font-weight:500;}
 .mini .c.feito .btn{width:84px;height:40px;flex-direction:row;font-size:12px;}
+
+/* tela larga (multimídia/tablet): lista à esquerda + mapa do Google à direita */
+body.dividida #lista{flex:none;width:372px;display:flex;flex-direction:column;gap:6px;padding:8px;background:#fff;border-right:1px solid #e5e7eb;}
+body.dividida #painel{display:block;flex:1;position:relative;background:#e8eaed;min-width:0;}
+#mapa{position:absolute;inset:0;width:100%;height:100%;border:0;background:#e8eaed;}
+#mapaVazio{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--t2);font-size:17px;padding:30px;line-height:1.4;}
+#mapaVazio small{display:block;color:var(--t3);font-size:12px;margin-top:6px;}
+#mapaBarra{position:absolute;left:8px;right:8px;top:8px;display:none;gap:6px;align-items:center;background:rgba(255,255,255,.96);border-radius:12px;padding:6px 8px;box-shadow:0 2px 10px rgba(0,0,0,.3);z-index:2;}
+#mapaTit{flex:1;min-width:0;font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#mapaTit b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;}
+#mapaBarra .mb{height:42px;padding:0 12px;border-radius:10px;border:1.5px solid #d1d5db;background:#fff;color:var(--t1);font-size:13px;font-weight:700;display:flex;align-items:center;gap:5px;text-decoration:none;white-space:nowrap;cursor:pointer;}
+#mapaBarra .mb.on{background:var(--brand);border-color:var(--brand);color:#fff;}
+#mapaBarra .mb.go{background:var(--ok);border-color:var(--ok);color:#fff;}
+.lh{border:1.5px solid #e8eaee;border-radius:12px;padding:7px 9px;display:flex;flex-direction:column;gap:3px;background:#fff;cursor:pointer;flex:none;}
+.lh .l1{display:flex;align-items:center;gap:8px;justify-content:flex-start;}
+.lh .n{width:26px;height:26px;border-radius:50%;background:#e5e7eb;color:var(--t3);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex:none;}
+.lh .n.on{background:var(--brand);color:#fff;}
+.lh .nome{font-size:15px;flex:1;min-width:0;}
+.lh .saldo{font-size:13px;}
+.lh .le{font-size:12px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:34px;}
+.lh.sel{border-color:var(--brand);background:#fdf2f6;box-shadow:0 0 0 2px #f9d0df;}
+.lh.sel .le{white-space:normal;color:var(--brand);font-weight:600;font-size:13px;}
+.lh .ac{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px;margin-top:5px;padding-left:34px;}
+.lh .ac .btn{height:40px;font-size:12px;border-radius:9px;gap:4px;padding:0 4px;text-align:center;line-height:1.1;}
+.lh .ac .btn.ord{background:var(--brand);border-color:var(--brand);color:#fff;}
+.lh.sp .le{color:var(--warn);}
+.lh.f{background:#f3f4f6;border-color:#eceef1;}
+.lh.f .nome{color:var(--t3);text-decoration:line-through;}
+.lh.f .n{background:#e5e7eb;color:#9ca3af;}
+.lh.f .desf{margin:4px 0 0 34px;height:34px;font-size:12px;color:var(--t2);}
+body.dividida .sep{padding:4px 4px 0;}
 
 /* retrato / telas estreitas: uma coluna */
 @media (max-width:700px){
@@ -108,13 +141,25 @@ body{background:var(--bg);color:var(--t1);display:flex;flex-direction:column;ove
   <button class="tb" id="bTela" aria-label="Tela cheia">⛶</button>
   <button class="tb" id="bRef" aria-label="Atualizar">↻</button>
 </div>
-<div id="lista"></div>
+<div id="corpo">
+  <div id="lista"></div>
+  <div id="painel">
+    <iframe id="mapa" title="Mapa" allow="geolocation" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <div id="mapaVazio">Toque numa entrega para ver no mapa<small>Use o dedo para arrastar e dar zoom no mapa.</small></div>
+    <div id="mapaBarra">
+      <div id="mapaTit"></div>
+      <button class="mb" id="bSat" aria-label="Satélite">🛰 Satélite</button>
+      <a class="mb go" id="bNav" href="#" aria-label="Navegar">▶ Navegar</a>
+    </div>
+  </div>
+</div>
 <div id="aviso" role="status"></div>
-<div id="cfg"><div class="cfg-box"><div class="cfg-top"><b>📞 App de telefone do carro</b><button class="fx" id="cfgFechar">Fechar</button></div>
+<div id="cfg"><div class="cfg-box"><div class="cfg-top"><b>⚙ Configurações</b><button class="fx" id="cfgFechar">Fechar</button></div>
+  <div class="soapk" style="display:none;flex-direction:column;gap:8px;min-height:0;flex:1;"><b style="font-size:15px">📞 App de telefone do carro</b>
   <input id="cfgBusca" type="text" placeholder="Filtrar (ex.: bluetooth, telefone, BT)" autocomplete="off">
   <div id="cfgLista"></div>
   <div class="cfg-man"><input id="cfgPac" type="text" placeholder="ou digite o pacote do app (avançado)" autocomplete="off"><button id="cfgUsar">Usar</button></div>
-  <small id="cfgInfo"></small></div></div>
+  <small id="cfgInfo"></small></div></div></div>
 
 <script>
 /* ===== configuração (a mesma do app principal) ===== */
@@ -130,6 +175,7 @@ var NATIVO = !!(window.Capacitor && window.Capacitor.getPlatform && window.Capac
 var Nativo = (NATIVO && window.Capacitor.registerPlugin) ? window.Capacitor.registerPlugin('Nativo') : null;
 var sb = (window.supabase && window.supabase.createClient) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 var dia = hoje(), cards = [], clientes = null, clientesEm = 0, ultimaCarga = 0;
+var selId = '', satelite = false, _mapaUrl = '', DIVIDIDA = false;
 var offline = false, atualizadoEm = '', carregando = false, precisaLogin = false, carregouDia = '';
 
 /* ===== utilitários ===== */
@@ -152,6 +198,15 @@ function linkMapa(end) {
   return 'https://www.google.com/maps/dir/?api=1&travelmode=driving&dir_action=navigate&destination=' + encodeURIComponent(q);   /* dir_action=navigate: já inicia a navegação */
 }
 
+/* ===== ordem das entregas (decidida por você) e ponto de partida: guardados neste aparelho ===== */
+function lerOrdem(d) { try { var o = JSON.parse(localStorage.getItem('vdf_ordem_' + d) || '[]'); return Array.isArray(o) ? o : []; } catch (e) { return []; } }
+function gravarOrdem(d, o) { try { localStorage.setItem('vdf_ordem_' + d, JSON.stringify(o)); } catch (e) {} }
+function enderecoBusca(end) {
+  var q = (end || '').trim();
+  if (CIDADE_PADRAO && q && !/campos|goytacazes|,\s*rj\b|\brj\b/i.test(q)) q += CIDADE_PADRAO;
+  return q;
+}
+
 /* ===== "entregue": guardado só neste aparelho, por dia ===== */
 function chaveEnt(d) { return 'vdf_entregues_' + d; }
 function lerEnt(d) { try { return JSON.parse(localStorage.getItem(chaveEnt(d)) || '{}') || {}; } catch (e) { return {}; } }
@@ -160,7 +215,7 @@ function limparAntigos() {
   try {
     var corte = somaDias(hoje(), -14);
     Object.keys(localStorage).forEach(function (k) {
-      var m = /^vdf_(entregues|lista)_(\d{4}-\d{2}-\d{2})$/.exec(k);
+      var m = /^vdf_(entregues|lista|ordem)_(\d{4}-\d{2}-\d{2})$/.exec(k);
       if (m && m[2] < corte) localStorage.removeItem(k);
     });
   } catch (e) {}
@@ -285,7 +340,7 @@ function desenhar() {
   sub.textContent = pend.length + ' a entregar · ' + feitos.length + ' feita' + (feitos.length === 1 ? '' : 's') + (offline ? ' · ⚠ sem conexão' + (atualizadoEm ? ' (lista das ' + atualizadoEm + ')' : '') : '');
   sub.className = offline ? 'off' : '';
   document.getElementById('areceber').textContent = cards.length ? 'A receber: ' + brl(aReceber) : '';
-  L.className = cards.length > LIMITE_GRANDE ? 'mini' : '';
+  L.className = (!DIVIDIDA && cards.length > LIMITE_GRANDE) ? 'mini' : '';
   if (!cards.length && carregouDia !== dia) { L.innerHTML = '<div class="vazio">Carregando…</div>'; return; }
   if (!cards.length) {
     L.innerHTML = offline
@@ -293,31 +348,99 @@ function desenhar() {
       : '<div class="vazio">Nenhuma entrega para este dia 🎉</div>';
     return;
   }
-  var h = pend.map(function (c) { return htmlCard(c, false); }).join('');
-  if (feitos.length) h += '<div class="sep">Entregues (' + feitos.length + ')</div>' + feitos.map(function (c) { return htmlCard(c, true); }).join('');
-  var rol = L.scrollTop;
+  var rol = L.scrollTop, h;
+  if (DIVIDIDA) {
+    var ord = ordemPendentes(pend);
+    var comOrdem = ord.map(function (id) { return pend.filter(function (c) { return c.id === id; })[0]; });
+    var semOrdem = pend.filter(function (c) { return ord.indexOf(c.id) < 0; });
+    h = comOrdem.map(function (c, i) { return htmlLinha(c, i + 1, false); }).join('') + semOrdem.map(function (c) { return htmlLinha(c, 0, false); }).join('');
+    if (feitos.length) h += '<div class="sep">Entregues (' + feitos.length + ')</div>' + feitos.map(function (c) { return htmlLinha(c, 0, true); }).join('');
+  } else {
+    h = pend.map(function (c) { return htmlCard(c, false); }).join('');
+    if (feitos.length) h += '<div class="sep">Entregues (' + feitos.length + ')</div>' + feitos.map(function (c) { return htmlCard(c, true); }).join('');
+  }
   L.innerHTML = h; L.scrollTop = rol;
 }
+/* ordem escolhida, só com as entregas ainda pendentes deste dia */
+function ordemPendentes(pend) {
+  var ids = pend.map(function (c) { return c.id; });
+  return lerOrdem(dia).filter(function (id) { return ids.indexOf(id) >= 0; });
+}
+function htmlLinha(c, n, feito) {
+  var sel = (c.id === selId) && !feito;
+  var cls = 'lh' + (sel ? ' sel' : '') + (feito ? ' f' : '') + (!c.end && !feito ? ' sp' : '');
+  var end = c.end ? (c.end + (c.obs ? ' · ' + c.obs : '')) : 'Retirada no local — sem endereço';
+  var h = '<div class="' + cls + '" data-sel="' + esc(c.id) + '"><div class="l1"><span class="n' + (n ? ' on' : '') + '">' + (feito ? '✓' : (n || '–')) + '</span><span class="nome">' + esc(c.nome) + '</span>' + htmlSaldo(c, feito) + '</div>';
+  if (!feito) h += '<div class="le">' + esc(end) + '</div>';
+  if (feito) h += '<button class="btn desf" data-acao="des" data-id="' + esc(c.id) + '"><i>↩</i><span>Desfazer</span></button>';
+  else if (sel) {
+    h += '<div class="ac"><button class="btn ord" data-acao="ord" data-id="' + esc(c.id) + '"><span>' + (n ? '✕ Tirar da ordem' : '📍 Colocar na ordem') + '</span></button>' +
+      (c.tel ? '<button class="btn" data-acao="lig" data-tel="' + esc(c.tel) + '"><i>📞</i><span>Ligar</span></button>' : '<span class="btn off"><i>📞</i><span>Ligar</span></span>') +
+      '<button class="btn ent" data-acao="ent" data-id="' + esc(c.id) + '"><i>✓</i><span>Entregue</span></button></div>';
+  }
+  return h + '</div>';
+}
+
+/* ===== mapa do Google (incorporado, sem chave) ===== */
+function cardSel() { return cards.filter(function (c) { return c.id === selId; })[0] || null; }
+function urlMapa(c) {
+  var t = satelite ? 'k' : 'm', dest = enderecoBusca(c.end);
+  return 'https://maps.google.com/maps?q=' + encodeURIComponent(dest) + '&z=16&t=' + t + '&hl=pt-BR&output=embed';
+}
+function atualizarMapa() {
+  var c = cardSel(), fr = document.getElementById('mapa'), vazio = document.getElementById('mapaVazio'), barra = document.getElementById('mapaBarra');
+  if (!DIVIDIDA) return;
+  if (!c) { vazio.style.display = 'flex'; vazio.firstChild.textContent = 'Toque numa entrega para ver no mapa'; barra.style.display = 'none'; fr.style.visibility = 'hidden'; return; }
+  barra.style.display = 'flex';
+  document.getElementById('mapaTit').innerHTML = '<b>' + esc(c.nome) + '</b>' + esc(c.end || 'Retirada no local');
+  document.getElementById('bSat').className = 'mb' + (satelite ? ' on' : '');
+  var nav = document.getElementById('bNav');
+  if (!c.end) { vazio.style.display = 'flex'; vazio.firstChild.textContent = 'Retirada no local — sem endereço para mostrar'; fr.style.visibility = 'hidden'; nav.style.display = 'none'; _mapaUrl = ''; return; }
+  nav.style.display = ''; nav.href = linkMapa(c.end);
+  if (NATIVO) nav.removeAttribute('target'); else { nav.target = '_blank'; nav.rel = 'noopener'; }
+  vazio.style.display = 'none'; fr.style.visibility = 'visible';
+  var u = urlMapa(c);
+  if (u !== _mapaUrl) { _mapaUrl = u; fr.src = u; }          /* só recarrega o mapa quando algo mudou */
+}
+function ajustarLayout() {
+  var larga = window.innerWidth >= 820;
+  if (larga !== DIVIDIDA) { DIVIDIDA = larga; document.body.className = larga ? 'dividida' : ''; desenhar(); atualizarMapa(); }
+}
+window.addEventListener('resize', ajustarLayout);
 
 /* ===== eventos ===== */
 document.getElementById('lista').addEventListener('click', function (e) {
-  var b = e.target.closest ? e.target.closest('[data-acao]') : null; if (!b) return;
+  var b = e.target.closest ? e.target.closest('[data-acao]') : null;
+  if (!b) {                                              /* toque na linha: seleciona e mostra no mapa */
+    var ln = e.target.closest ? e.target.closest('[data-sel]') : null;
+    if (ln && DIVIDIDA) { selId = ln.getAttribute('data-sel'); desenhar(); atualizarMapa(); }
+    return;
+  }
   var acao = b.getAttribute('data-acao');
   if (acao === 'lig') {
-    var cc = b.closest('.c');
+    var cc = b.closest('.c') || b.closest('.lh');
     avisoTel(cc ? cc.querySelector('.nome').textContent : '', b.getAttribute('data-tel')); return;
   }
-  var ent = lerEnt(dia), id = b.getAttribute('data-id');
-  if (acao === 'ent') ent[id] = 1; else delete ent[id];
-  gravarEnt(dia, ent); desenhar();
+  var id = b.getAttribute('data-id');
+  if (acao === 'ord') {
+    var o = lerOrdem(dia), p = o.indexOf(id);
+    if (p >= 0) o.splice(p, 1); else o.push(id);
+    gravarOrdem(dia, o); desenhar(); atualizarMapa(); return;
+  }
+  var ent = lerEnt(dia);
+  if (acao === 'ent') { ent[id] = 1; if (selId === id) selId = ''; } else delete ent[id];
+  gravarEnt(dia, ent); desenhar(); atualizarMapa();
 });
+document.getElementById('bSat').onclick = function () { satelite = !satelite; atualizarMapa(); };
 document.getElementById('aviso').addEventListener('click', function (e) {
   var b = e.target.closest ? e.target.closest('[data-acao]') : null; if (!b) return;
   var acao = b.getAttribute('data-acao');
   if (acao === 'fechaviso') document.getElementById('aviso').style.display = 'none';
   else if (acao === 'abrirtel') {
-    var d = discadorAtual();
-    if (Nativo && d) Nativo.abrirApp({ pacote: d.pacote }).catch(function () { alert('Não consegui abrir ' + (d.nome || 'o app') + '. Escolha de novo em ⚙.'); });
+    var d = discadorAtual(); if (!d) return;
+    var falha = function (m) { alert('Não consegui abrir ' + (d.nome || 'o app') + (m ? ' (' + m + ')' : '') + '. Escolha de novo em ⚙.'); };
+    if (window.AndroidPonte) { var rr = window.AndroidPonte.abrirApp(d.pacote); if (rr !== 'ok') falha(rr); }
+    else if (Nativo) Nativo.abrirApp({ pacote: d.pacote }).catch(function (e) { falha(e && e.message); });
   }
 });
 document.getElementById('lista').addEventListener('submit', async function (e) {
@@ -334,7 +457,7 @@ document.getElementById('bAnt').onclick = function () { irDia(somaDias(dia, -1))
 document.getElementById('bProx').onclick = function () { irDia(somaDias(dia, 1)); };
 document.getElementById('rotDia').onclick = function () { irDia(hoje()); };
 document.getElementById('bRef').onclick = function () { carregar(); };
-if (NATIVO) { document.getElementById('bCfg').style.display = ''; document.getElementById('bTela').style.display = 'none'; }
+if (NATIVO) { document.getElementById('bCfg').style.display = ''; document.getElementById('bTela').style.display = 'none'; document.querySelector('#cfg .soapk').style.display = 'flex'; }
 var _appsCache = null;
 function desenharCfg() {
   var f = (document.getElementById('cfgBusca').value || '').trim().toLowerCase(), d = discadorAtual(), sel = d && d.pacote;
@@ -344,17 +467,29 @@ function desenharCfg() {
   document.getElementById('cfgLista').innerHTML = h;
 }
 var _cfgErro = '';
+function mostrarMsg(t) { var a = document.getElementById('aviso'); a.innerHTML = '<div class="an">' + esc(t) + '</div>'; a.style.display = 'block'; setTimeout(function () { a.style.display = 'none'; }, 1800); }
 document.getElementById('bCfg').onclick = async function () {
   document.getElementById('cfg').style.display = 'flex';
+  if (!NATIVO) { document.getElementById('cfgInfo').textContent = 'Versão web'; return; }
   var ua = (/Chrome\/[\d.]+/.exec(navigator.userAgent) || ['WebView ?'])[0];
-  document.getElementById('cfgInfo').textContent = 'APK v2 · ' + ua;
+  document.getElementById('cfgInfo').textContent = 'APK v3 · ' + ua;
   document.getElementById('cfgLista').innerHTML = '<button disabled>Carregando apps…</button>';
   _cfgErro = '';
+  var via = window.AndroidPonte ? 'ponte' : (Nativo ? 'plugin' : 'nenhum');
   try {
-    var r = await Nativo.apps();
-    _appsCache = (r.apps || []).sort(function (a, b) { return a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }); });
+    var lista;
+    if (window.AndroidPonte) {
+      var t = window.AndroidPonte.apps();
+      if (typeof t !== 'string' || t.indexOf('ERRO') === 0) throw new Error(String(t));
+      lista = JSON.parse(t);
+    } else if (Nativo) {
+      var r = await Nativo.apps();
+      if (!r || !r.apps) throw new Error('resposta vazia do plugin: ' + JSON.stringify(r));
+      lista = r.apps;
+    } else throw new Error('nenhuma função nativa disponível');
+    _appsCache = lista.sort(function (a, b) { return a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }); });
   } catch (e) { _appsCache = []; _cfgErro = (e && (e.message || e.errorMessage || e.code)) || String(e); }
-  document.getElementById('cfgInfo').textContent = 'APK v2 · ' + ua + ' · ' + _appsCache.length + ' apps' + (_cfgErro ? ' · erro: ' + _cfgErro : '');
+  document.getElementById('cfgInfo').textContent = 'APK v3 · ' + ua + ' · via ' + via + ' · ' + _appsCache.length + ' apps' + (_cfgErro ? ' · erro: ' + _cfgErro : '');
   desenharCfg();
 };
 document.getElementById('cfgUsar').onclick = function () {
@@ -386,6 +521,7 @@ document.addEventListener('visibilitychange', function () { if (!document.hidden
 setInterval(function () { if (!document.hidden && !precisaLogin) carregar(); }, ATUALIZA_MS);
 
 limparAntigos();
+ajustarLayout();
 desenhar();
 carregar();
 </script>
