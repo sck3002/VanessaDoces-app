@@ -146,10 +146,14 @@ $('rRet').onclick=()=>setEnt(false);$('rEnt').onclick=()=>setEnt(true);
 function setEnt(v){entrega=v;totais();$('rRet').classList.toggle('on',!v);$('rEnt').classList.toggle('on',v);$('boxEnd').style.display=v?'block':'none';}
 
 async function carregar(){
-  const{data,error}=await sb.rpc('cardapio_publico');
-  if(error||!Array.isArray(data)){$('cardapio').innerHTML='<div class="vazio">Não foi possível carregar o cardápio agora. Chame a Vanessa no WhatsApp.</div>';return;}
-  doces=data;desenhar();
+  const dt=$('data').value||null;
+  const{data,error}=await sb.rpc('cardapio_publico',{p_data:dt});
+  if(error||!Array.isArray(data)){if(!doces.length)$('cardapio').innerHTML='<div class="vazio">Não foi possível carregar o cardápio agora. Chame a Vanessa no WhatsApp.</div>';return false;}
+  const q0={...qtd};doces=data;desenhar();            /* os preços valem na data de entrega escolhida */
+  Object.keys(q0).forEach(id=>{if(q0[id]&&doces.some(d=>String(d.id)===String(id)))setQ(id,q0[id]);});
+  totais();return true;
 }
+$('data').addEventListener('change',carregar);
 const ORDEM=['Simples','Bombom','Copinho','Especial','Avulso'];
 function desenhar(){
   if(!doces.length){$('cardapio').innerHTML='<div class="vazio">Cardápio indisponível no momento.</div>';return;}
@@ -216,6 +220,8 @@ $('enviar').onclick=async()=>{
   if(tel.length<10)return erro('Informe seu WhatsApp com DDD.');
   if(entrega&&(!rua||!num||!bairro))return erro('Para entrega, informe rua, número e bairro.');
   const end=entrega?`${rua}, ${num} - ${bairro}${ref?' (Ref: '+ref+')':''}`:'';
+  if(!linhas().length)return erro('Escolha ao menos um doce.');
+  if(!(await carregar()))return erro('Não foi possível conferir os preços agora. Tente de novo.');
   const l=linhas();if(!l.length)return erro('Escolha ao menos um doce.');
   const pr=problemas();if(pr.msg)return erro(pr.msg+'.');
   enviando=true;$('enviar').disabled=true;$('enviar').textContent='Enviando…';
