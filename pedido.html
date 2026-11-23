@@ -57,6 +57,11 @@ textarea{resize:none;height:84px;line-height:1.4;}
 .fim .btn{width:100%;margin-top:10px;height:50px;}
 .zoom{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:50;display:none;align-items:center;justify-content:center;padding:18px;}
 .zoom img{max-width:100%;max-height:88vh;border-radius:12px;}
+.regras{padding:10px 16px 12px;font-size:12.5px;color:var(--t2);line-height:1.5;border-bottom:1px solid var(--ln);}
+.regras ul{margin:4px 0 0 18px;}
+.regras b{color:var(--tx);}
+.it .av{display:block;font-size:11.5px;color:#b91c1c;margin-top:3px;line-height:1.3;}
+.barra div.er{color:#b91c1c;}
 .vazio{padding:30px 16px;color:var(--t3);text-align:center;font-size:14px;}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;}
 </style>
@@ -82,11 +87,28 @@ textarea{resize:none;height:84px;line-height:1.4;}
         <input type="tel" id="tel" autocomplete="tel" inputmode="tel" placeholder="(22) 99999-9999">
         <label>Como prefere receber?</label>
         <div class="seg"><button type="button" class="chip on" id="rRet">Retirar</button><button type="button" class="chip" id="rEnt">Entrega</button></div>
-        <div id="boxEnd" style="display:none;"><label for="end">Endereço de entrega</label><input type="text" id="end" autocomplete="street-address" placeholder="Rua, número, bairro"></div>
+        <div id="boxEnd" style="display:none;">
+          <div class="dica" style="padding:8px 0 0;">Entrega: <b>R$ 10,00</b> acrescentados ao pedido.</div>
+          <label for="rua">Rua</label><input type="text" id="rua" autocomplete="address-line1" placeholder="Nome da rua">
+          <div style="display:grid;grid-template-columns:92px 1fr;gap:14px;">
+            <div><label for="num">Número</label><input type="text" id="num" inputmode="numeric" placeholder="Nº"></div>
+            <div><label for="bairro">Bairro</label><input type="text" id="bairro" autocomplete="address-level3" placeholder="Bairro"></div>
+          </div>
+          <label for="ref">Complemento / ponto de referência <span style="color:var(--t3)">(opcional)</span></label><input type="text" id="ref" placeholder="Apto, bloco, portão azul…">
+        </div>
       </div>
     </section>
     <section>
       <h2>Cardápio</h2>
+      <div class="regras">
+        <b>Regras do pedido</b>
+        <ul>
+          <li>Mínimo de <b>50 unidades</b> por pedido</li>
+          <li>Cada sabor: mínimo de <b>20</b>, aumentando de <b>5 em 5</b></li>
+          <li>Bem-casado: de <b>15 em 15</b>, ou 50, 100, 150, 200…</li>
+          <li>Entregamos a partir de <b>100 unidades</b> (doces e bem-casados somam)</li>
+        </ul>
+      </div>
       <div id="cardapio"><div class="vazio">Carregando o cardápio…</div></div>
     </section>
     <section>
@@ -112,6 +134,7 @@ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const brl=n=>'R$ '+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const TAXA=10;
 let doces=[],qtd={},evento='',entrega=false,enviando=false;
 const ls={get(k){try{return localStorage.getItem(k)||''}catch(e){return ''}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 
@@ -120,7 +143,7 @@ $('nome').value=ls.get('vdf_nome');$('tel').value=ls.get('vdf_tel');
 $('eventos').innerHTML=EVENTOS.map(e=>`<button type="button" class="chip" data-e="${esc(e)}">${esc(e)}</button>`).join('');
 $('eventos').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;evento=b.dataset.e;document.querySelectorAll('#eventos .chip').forEach(x=>x.classList.toggle('on',x===b));};
 $('rRet').onclick=()=>setEnt(false);$('rEnt').onclick=()=>setEnt(true);
-function setEnt(v){entrega=v;$('rRet').classList.toggle('on',!v);$('rEnt').classList.toggle('on',v);$('boxEnd').style.display=v?'block':'none';}
+function setEnt(v){entrega=v;totais();$('rRet').classList.toggle('on',!v);$('rEnt').classList.toggle('on',v);$('boxEnd').style.display=v?'block':'none';}
 
 async function carregar(){
   const{data,error}=await sb.rpc('cardapio_publico');
@@ -141,46 +164,71 @@ function desenhar(){
 $('cardapio').addEventListener('click',e=>{
   const z=e.target.closest('[data-z]');if(z){$('zimg').src=z.dataset.z;$('zoom').style.display='flex';return;}
   const m=e.target.closest('[data-m]'),p=e.target.closest('[data-p]');
-  if(m)setQ(m.dataset.m,(qtd[m.dataset.m]||0)-passo(m.dataset.m));
-  if(p)setQ(p.dataset.p,(qtd[p.dataset.p]||0)+passo(p.dataset.p));
+  if(m){const d=doces.find(x=>String(x.id)===m.dataset.m);setQ(m.dataset.m,proximo(d,qtd[m.dataset.m]||0,-1));}
+  if(p){const d=doces.find(x=>String(x.id)===p.dataset.p);setQ(p.dataset.p,proximo(d,qtd[p.dataset.p]||0,1));}
 });
 $('cardapio').addEventListener('change',e=>{const i=e.target.closest('[data-q]');if(i)setQ(i.dataset.q,parseInt(i.value.replace(/\D/g,''),10)||0);});
 $('cardapio').addEventListener('focusin',e=>{if(e.target.matches('[data-q]'))e.target.select();});
 $('zoom').onclick=()=>{$('zoom').style.display='none';};
-function passo(){return 10;}
+const ehBC=d=>d.bc===true||/^\s*bem casado\s*$/i.test(d.nome||'');
+const bcOk=v=>v>0&&(v%15===0||v%50===0);
+function proximo(d,v,dir){            /* próximo valor válido do botão + / − */
+  if(!ehBC(d)){ if(dir>0)return v<20?20:v+5; return v<=20?0:v-5; }
+  let x=v;for(let i=0;i<400;i++){x+=dir;if(x<=0)return 0;if(bcOk(x))return x;}return v;
+}
 function setQ(id,v){
   v=Math.max(0,Math.min(5000,v|0));qtd[id]=v;
   const el=$('it'+id);if(el){el.querySelector('[data-q]').value=v;el.classList.toggle('sel',v>0);}
   totais();
 }
+function problemas(){
+  const l=linhas(),out=[],porItem={};let t=0,b=0,dc=0;
+  l.forEach(x=>{t+=x.q;if(ehBC(x.d)){b+=x.q;}else{dc+=x.q;if(x.q<20||(x.q-20)%5!==0){porItem[x.d.id]='Mínimo de 20, de 5 em 5 (20, 25, 30…)';}}});
+  l.forEach(x=>{if(ehBC(x.d)&&!bcOk(x.q))porItem[x.d.id]='De 15 em 15, ou 50, 100, 150…';});
+  if(!l.length)return{msg:'',porItem};
+  if(Object.keys(porItem).length)out.push(Object.keys(porItem).length>1?'Ajuste as quantidades marcadas em vermelho':'Ajuste a quantidade marcada em vermelho');
+  else if(dc===0&&b>0&&b<50)out.push('Só bem-casado: mínimo de 50');
+  else if(t<50)out.push(`Pedido mínimo: 50 unidades (faltam ${50-t})`);
+  if(!out.length&&entrega&&t<100)out.push(`Entrega a partir de 100 unidades (faltam ${100-t}). Escolha retirada ou aumente o pedido`);
+  return{msg:out[0]||'',porItem,t};
+}
 function linhas(){return doces.filter(d=>(qtd[d.id]||0)>0).map(d=>({d,q:qtd[d.id],t:Math.round(qtd[d.id]*d.preco*100)/100}));}
 function totais(){
-  const l=linhas(),un=l.reduce((a,x)=>a+x.q,0),tot=l.reduce((a,x)=>a+x.t,0);
-  $('resumo').textContent=un?`${un} doce${un===1?'':'s'} · ${l.length} sabor${l.length===1?'':'es'}`:'Nenhum doce escolhido';
-  $('total').textContent=brl(tot);$('enviar').disabled=!un||enviando;
+  const l=linhas(),un=l.reduce((a,x)=>a+x.q,0),tot=l.reduce((a,x)=>a+x.t,0)+(un&&entrega?TAXA:0);
+  $('resumo').textContent=un?`${un} doce${un===1?'':'s'}${entrega?' + entrega R$ 10,00':''}`:'Nenhum doce escolhido';
+  $('total').textContent=brl(tot);
+  const pr=problemas();
+  document.querySelectorAll('.it .av').forEach(e=>e.remove());
+  Object.keys(pr.porItem).forEach(id=>{const tt=document.querySelector('#it'+id+' .tt');if(tt)tt.insertAdjacentHTML('beforeend','<span class="av">'+esc(pr.porItem[id])+'</span>');});
+  if(pr.msg){$('resumo').textContent=pr.msg;}
+  $('resumo').parentNode.classList.toggle('er',!!pr.msg);
+  $('enviar').disabled=!un||enviando||!!pr.msg;
 }
 function dataBr(s){const p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
 function erro(m){const e=$('erro');e.textContent=m;e.style.display=m?'block':'none';if(m)e.scrollIntoView({behavior:'smooth',block:'center'});}
 
 $('enviar').onclick=async()=>{
   if(enviando)return;erro('');
-  const nome=$('nome').value.trim(),tel=$('tel').value.replace(/\D/g,''),data=$('data').value,end=$('end').value.trim(),obs=$('obs').value.trim();
+  const nome=$('nome').value.trim(),tel=$('tel').value.replace(/\D/g,''),data=$('data').value,rua=$('rua').value.trim(),num=$('num').value.trim(),bairro=$('bairro').value.trim(),ref=$('ref').value.trim(),obs=$('obs').value.trim();
   if(!evento)return erro('Escolha o tipo de evento.');
   if(!data)return erro('Informe a data desejada.');
   if(nome.length<2)return erro('Informe seu nome.');
   if(tel.length<10)return erro('Informe seu WhatsApp com DDD.');
-  if(entrega&&!end)return erro('Informe o endereço de entrega.');
+  if(entrega&&(!rua||!num||!bairro))return erro('Para entrega, informe rua, número e bairro.');
+  const end=entrega?`${rua}, ${num} - ${bairro}${ref?' (Ref: '+ref+')':''}`:'';
   const l=linhas();if(!l.length)return erro('Escolha ao menos um doce.');
+  const pr=problemas();if(pr.msg)return erro(pr.msg+'.');
   enviando=true;$('enviar').disabled=true;$('enviar').textContent='Enviando…';
-  const{data:r,error}=await sb.rpc('criar_pre_pedido',{p_nome:nome,p_telefone:tel,p_evento:evento,p_data:data,p_entrega:entrega,p_endereco:entrega?end:'',p_obs:obs,p_itens:l.map(x=>({id:String(x.d.id),qtd:x.q})),p_site:$('site').value});
+  const{data:r,error}=await sb.rpc('criar_pre_pedido',{p_nome:nome,p_telefone:tel,p_evento:evento,p_data:data,p_entrega:entrega,p_endereco:end,p_obs:obs,p_itens:l.map(x=>({id:String(x.d.id),qtd:x.q})),p_site:$('site').value});
   enviando=false;$('enviar').textContent='Enviar no WhatsApp';
   if(error||!r){totais();return erro((error&&error.message)||'Não foi possível enviar agora. Tente de novo ou chame a Vanessa no WhatsApp.');}
   ls.set('vdf_nome',nome);ls.set('vdf_tel',$('tel').value);
-  const total=r.total!=null?Number(r.total):l.reduce((a,x)=>a+x.t,0);
+  const taxa=entrega?(r.taxa!=null?Number(r.taxa):TAXA):0;
+  const total=r.total!=null?Number(r.total):l.reduce((a,x)=>a+x.t,0)+taxa;
   const msg=[`Olá, Vanessa! Fiz um pré-pedido pelo cardápio (${r.codigo}).`,'',
     `*Evento:* ${evento}`,`*Data desejada:* ${dataBr(data)}`,`*Nome:* ${nome}`,
     entrega?`*Entrega:* ${end}`:'*Retirada no local*','','*Itens:*',
-    ...l.map(x=>`• ${x.q} × ${x.d.nome} — ${brl(x.t)}`),'',`*Total estimado:* ${brl(total)}`,
+    ...l.map(x=>`• ${x.q} × ${x.d.nome} — ${brl(x.t)}`),...(entrega?[`• Taxa de entrega — ${brl(taxa)}`]:[]),'',`*Total estimado:* ${brl(total)}`,
     ...(obs?['',`*Observações:* ${obs}`]:[]),'','Aguardo sua confirmação 😊'].join('\n');
   const url=`https://wa.me/${WHATS}?text=${encodeURIComponent(msg)}`;
   $('form').style.display='none';$('barra').style.display='none';$('fim').style.display='block';
