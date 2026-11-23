@@ -1457,6 +1457,7 @@ function salvarLS() {
 }
  
 let pedidos = [], produtos = [], insumos = [], clientes = [], tiposInsumos = [];
+let _ppErro = '';
 let prePedidos = [];     /* pedidos feitos pelo link do cardápio, aguardando a Vanessa confirmar */
 let tabelasPreco = [];   /* [{id, vigencia:'AAAA-MM-DD', precos:{idProduto:preco}}] */
 let tiposMassa = [], massasDiario = [];
@@ -1944,13 +1945,16 @@ function _ppAbertos() { return prePedidos.filter(x => x.status === 'aguardando')
 function _ppAviso() {
   const el = document.getElementById('avisoPre'); if (!el) return;
   const n = _ppAbertos().length;
-  el.innerHTML = `<div class="lr pre-aviso" onclick="fichaAbrir('prepedidos',null)"><span class="lr-n">Pré-pedidos do cardápio<small>${n ? n + ' aguardando confirmação' : 'nenhum aguardando · copiar link'}</small></span>${n ? `<em class="pre-n">${n}</em>` : ''}<i>›</i></div>`;
+  el.innerHTML = `<div class="lr pre-aviso" onclick="fichaAbrir('prepedidos',null)"><span class="lr-n">Pré-pedidos do cardápio<small>${_ppErro ? 'erro ao ler: ' + _esc(_ppErro) : n ? n + ' aguardando confirmação' : 'nenhum aguardando · copiar link'}</small></span>${n ? `<em class="pre-n">${n}</em>` : ''}<i>›</i></div>`;
 }
 async function atualizarPrePedidos() {
+  _ppErro = '';
   try {
-    const l = await sbListar('pre_pedidos');
-    prePedidos = l.sort((a, b) => String(b.criado).localeCompare(String(a.criado)));
-  } catch (e) { console.error(e); }
+    const { data, error } = await sbClient.from('pre_pedidos').select('*').order('id', { ascending: false }).limit(300);
+    if (error) { _ppErro = error.message || 'erro desconhecido'; console.error('pre_pedidos:', error); }
+    else prePedidos = (data || []).sort((a, b) => String(b.criado).localeCompare(String(a.criado)));
+  } catch (e) { _ppErro = String(e && e.message || e); console.error(e); }
+  if (_ppErro) mostrarAviso('Não foi possível ler os pré-pedidos: ' + _ppErro);
   _ppAviso();
   _fichas.filter(f => f.tipo === 'prepedidos').forEach(f => _fichaRender(f.id));
 }
@@ -1968,6 +1972,7 @@ function _fichaPrePedidosHtml(f) {
       <button class="nav-back" onclick="atualizarPrePedidos()">Atualizar</button>
     </div>
     <div class="ficha-lista pf">
+      ${_ppErro ? `<div class="pf-v" style="color:#b91c1c;">Erro ao ler os pré-pedidos: ${_esc(_ppErro)}</div>` : ''}
       <div class="pf-t">Aguardando confirmação <small>${ab.length}</small></div>
       ${ab.map(linha).join('') || '<div class="pf-v">Nenhum pré-pedido aguardando</div>'}
       ${fe.length ? `<div class="pf-t">Encerrados <small>${fe.length}</small></div>` + fe.map(x => linha(x).replace('</b><i>', `</b><em style="font-style:normal;font-size:11px;color:#9ca3af;">${x.status}</em><i>`)).join('') : ''}
