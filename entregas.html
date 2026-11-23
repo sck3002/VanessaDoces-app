@@ -33,6 +33,9 @@ body{background:var(--bg);color:var(--t1);display:flex;flex-direction:column;ove
 /* cartão — modo grande (até 6 entregas) */
 .c{background:#fff;border-radius:14px;border:1px solid #e8eaee;padding:10px 12px;display:flex;flex-direction:column;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,.04);min-width:0;}
 .l1{display:flex;justify-content:space-between;align-items:baseline;gap:8px;min-width:0;}
+.nb{width:28px;height:28px;border-radius:50%;background:#e5e7eb;color:#6b7280;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;}
+.nb.on{background:var(--brand);color:#fff;}
+.c .l1{gap:8px;align-items:center;} .c .l1 .nome{flex:1;min-width:0;}
 .nome{font-size:19px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .saldo{font-size:17px;font-weight:700;color:var(--warn);white-space:nowrap;}
 .saldo.pago{color:var(--ok);}
@@ -192,17 +195,57 @@ function rotuloDia(iso) {
   return s + (dif === 0 ? ' · hoje' : dif === 1 ? ' · amanhã' : dif === -1 ? ' · ontem' : '');
 }
 function hhmm(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+/* o endereço aparece completo na lista, mas para o mapa saem a referência e o complemento
+   ("(Ref: portão azul)", "Ref: ...", "próximo à ...", "apto 304", "bloco B", "fundos"), que atrapalham a localização */
+function enderecoLimpo(end) {
+  var orig = String(end || '').trim(), q = orig;
+  q = q.replace(/\([^)]*\)?/g, ' ').replace(/\[[^\]]*\]?/g, ' ');
+  q = q.replace(/[\s,;\-–—]*\b(?:ref(?:er[eê]ncia)?\s*[.:]|ponto de refer[eê]ncia|pr[oó]x(?:imo|\.)|perto\b|ao lado\b|em frente\b|atr[aá]s d|depois d[oae]\b|fundos\b).*$/i, '');
+  q = q.replace(/[\s,;\-–—]*\b(?:apto?|apt|ap|apartamento|sala|andar|loja|casa|cs)\.?\s*(?:n[º°o]\.?\s*)?\d+[a-z]?\b/gi, '');
+  q = q.replace(/[\s,;\-–—]*\b(?:bloco|bl|torre)\.?\s*[a-z0-9]{1,2}\b/gi, '');
+  q = q.replace(/\s{2,}/g, ' ').replace(/\s+,/g, ',').replace(/,\s*([-–—])/g, ' $1').replace(/[\s,;\-–—]+$/, '').replace(/^[\s,;\-–—]+/, '').trim();
+  return q || orig;
+}
 function linkMapa(end) {
-  var q = end.trim();
+  var q = enderecoLimpo(end);
   if (CIDADE_PADRAO && !/campos|goytacazes|,\s*rj\b|\brj\b/i.test(q)) q += CIDADE_PADRAO;
   return 'https://www.google.com/maps/dir/?api=1&travelmode=driving&dir_action=navigate&destination=' + encodeURIComponent(q);   /* dir_action=navigate: já inicia a navegação */
 }
 
-/* ===== ordem das entregas (decidida por você) e ponto de partida: guardados neste aparelho ===== */
+/* ===== ordem das entregas (decidida por você): fica no banco (tabela entregas_ordem), com uma cópia neste aparelho ===== */
+var _ordemPend = {}, _ordemEnv = {}, ordemErro = false;
 function lerOrdem(d) { try { var o = JSON.parse(localStorage.getItem('vdf_ordem_' + d) || '[]'); return Array.isArray(o) ? o : []; } catch (e) { return []; } }
-function gravarOrdem(d, o) { try { localStorage.setItem('vdf_ordem_' + d, JSON.stringify(o)); } catch (e) {} }
+function _ordemLocal(d, o) { try { localStorage.setItem('vdf_ordem_' + d, JSON.stringify(o)); } catch (e) {} }
+function gravarOrdem(d, o) { _ordemLocal(d, o); _ordemPend[d] = true; enviarOrdem(d); }
+async function enviarOrdem(d) {
+  if (!sb) return;
+  if (_ordemEnv[d]) { _ordemEnv[d] = 2; return; }          /* já enviando: repete ao terminar, com a ordem mais nova */
+  _ordemEnv[d] = 1;
+  try {
+    do {
+      _ordemEnv[d] = 1;
+      var r = await sb.from('entregas_ordem').upsert({ dia: d, ordem: lerOrdem(d), atualizado: new Date().toISOString() }, { onConflict: 'dia' });
+      if (r.error) throw r.error;
+    } while (_ordemEnv[d] === 2);
+    delete _ordemPend[d]; ordemErro = false;
+  } catch (e) { console.error('ordem (enviar):', e); ordemErro = true; }
+  finally { delete _ordemEnv[d]; if (typeof desenhar === 'function') desenhar(); }
+}
+async function baixarOrdem(d) {                              /* traz a ordem do banco; o que foi alterado aqui e ainda não subiu tem prioridade */
+  if (!sb) return;
+  if (_ordemPend[d]) { await enviarOrdem(d); return; }
+  try {
+    var r = await sb.from('entregas_ordem').select('ordem').eq('dia', d);
+    if (r.error) throw r.error;
+    ordemErro = false;
+    var linha = (r.data || [])[0];
+    if (_ordemPend[d]) return;                               /* mudou enquanto buscava */
+    if (linha && Array.isArray(linha.ordem)) _ordemLocal(d, linha.ordem.map(String));
+    else if (lerOrdem(d).length) { _ordemPend[d] = true; await enviarOrdem(d); }   /* ordem feita antes de existir a tabela: sobe */
+  } catch (e) { console.error('ordem (baixar):', e); ordemErro = true; }
+}
 function enderecoBusca(end) {
-  var q = (end || '').trim();
+  var q = enderecoLimpo(end);
   if (CIDADE_PADRAO && q && !/campos|goytacazes|,\s*rj\b|\brj\b/i.test(q)) q += CIDADE_PADRAO;
   return q;
 }
@@ -269,6 +312,7 @@ async function carregar() {
     var r = await sb.from('pedidos').select('*').eq('data', diaReq).order('id', { ascending: true });
     if (r.error) throw r.error;
     var lista = await listarClientes();
+    await baixarOrdem(diaReq);
     if (dia !== diaReq) return;                      /* o usuário já trocou de dia */
     cards = montarCards(r.data || [], lista);
     offline = false; carregouDia = diaReq; atualizadoEm = hhmm(new Date()); ultimaCarga = Date.now();
@@ -314,11 +358,12 @@ function htmlEnd(c) {
 function htmlSaldo(c, feito) {
   return (c.pago && !feito) ? '<span class="saldo pago">Pago ✓</span>' : '<span class="saldo">' + (c.pago ? 'Pago ✓' : brl(c.saldo)) + '</span>';
 }
-function htmlCard(c, feito) {
+function htmlCard(c, feito, n) {
   var acoes = feito
     ? '<button class="btn" data-acao="des" data-id="' + esc(c.id) + '"><i>↩</i><span>Desfazer</span></button>'
     : btnLigar(c) + '<button class="btn ent" data-acao="ent" data-id="' + esc(c.id) + '"><i>✓</i><span>Entregue</span></button>';
-  return '<div class="c' + (feito ? ' feito' : '') + '"><div class="l1"><span class="nome">' + esc(c.nome) + '</span>' + htmlSaldo(c, feito) + '</div>' +
+  var nb = feito ? '' : '<span class="nb' + (n ? ' on' : '') + '" data-acao="ord" data-id="' + esc(c.id) + '">' + (n || '–') + '</span>';
+  return '<div class="c' + (feito ? ' feito' : '') + '"><div class="l1">' + nb + '<span class="nome">' + esc(c.nome) + '</span>' + htmlSaldo(c, feito) + '</div>' +
     htmlEnd(c) + '<div class="acoes">' + acoes + '</div></div>';
 }
 function porNome(a, b) { return a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }); }
@@ -337,8 +382,8 @@ function desenhar() {
   var feitos = cards.filter(function (c) { return ent[c.id]; }).sort(porNome);
   var aReceber = pend.reduce(function (a, c) { return a + (c.saldo > 0 ? c.saldo : 0); }, 0);
   var sub = document.getElementById('sub');
-  sub.textContent = pend.length + ' a entregar · ' + feitos.length + ' feita' + (feitos.length === 1 ? '' : 's') + (offline ? ' · ⚠ sem conexão' + (atualizadoEm ? ' (lista das ' + atualizadoEm + ')' : '') : '');
-  sub.className = offline ? 'off' : '';
+  sub.textContent = pend.length + ' a entregar · ' + feitos.length + ' feita' + (feitos.length === 1 ? '' : 's') + (offline ? ' · ⚠ sem conexão' + (atualizadoEm ? ' (lista das ' + atualizadoEm + ')' : '') : (ordemErro ? ' · ⚠ ordem não salva no banco' : ''));
+  sub.className = (offline || ordemErro) ? 'off' : '';
   document.getElementById('areceber').textContent = cards.length ? 'A receber: ' + brl(aReceber) : '';
   L.className = (!DIVIDIDA && cards.length > LIMITE_GRANDE) ? 'mini' : '';
   if (!cards.length && carregouDia !== dia) { L.innerHTML = '<div class="vazio">Carregando…</div>'; return; }
@@ -356,7 +401,9 @@ function desenhar() {
     h = comOrdem.map(function (c, i) { return htmlLinha(c, i + 1, false); }).join('') + semOrdem.map(function (c) { return htmlLinha(c, 0, false); }).join('');
     if (feitos.length) h += '<div class="sep">Entregues (' + feitos.length + ')</div>' + feitos.map(function (c) { return htmlLinha(c, 0, true); }).join('');
   } else {
-    h = pend.map(function (c) { return htmlCard(c, false); }).join('');
+    var ord2 = ordemPendentes(pend);
+    var seq = ord2.map(function (id) { return pend.filter(function (c) { return c.id === id; })[0]; }).concat(pend.filter(function (c) { return ord2.indexOf(c.id) < 0; }));
+    h = seq.map(function (c, i) { return htmlCard(c, false, ord2.indexOf(c.id) >= 0 ? ord2.indexOf(c.id) + 1 : 0); }).join('');
     if (feitos.length) h += '<div class="sep">Entregues (' + feitos.length + ')</div>' + feitos.map(function (c) { return htmlCard(c, true); }).join('');
   }
   L.innerHTML = h; L.scrollTop = rol;
@@ -519,6 +566,7 @@ document.getElementById('bTela').onclick = function (e) {
 document.addEventListener('click', function () { if (querCheia === false && !window._cheiaIniciada) { window._cheiaIniciada = true; querCheia = true; } if (querCheia && !emCheia()) entrarCheia(); }, true);
 document.addEventListener('visibilitychange', function () { if (!document.hidden && Date.now() - ultimaCarga > 60000) carregar(); });
 setInterval(function () { if (!document.hidden && !precisaLogin) carregar(); }, ATUALIZA_MS);
+document.addEventListener('visibilitychange', function () { if (!document.hidden && !precisaLogin && Date.now() - ultimaCarga > 15000) carregar(); });
 
 limparAntigos();
 ajustarLayout();
