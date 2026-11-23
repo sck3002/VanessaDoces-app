@@ -643,6 +643,9 @@ table tr:hover td{background:var(--bg);}
 .pf-add button,.pf-l{border:0;background:none;color:var(--brand);font-weight:600;font-size:13px;cursor:pointer;padding:6px 8px;text-transform:none;letter-spacing:0;}
 .pf-a{color:var(--brand);text-decoration:none;font-weight:600;}
 .k-ab b{color:var(--brand);}
+.pf-foto{width:52px;height:52px;object-fit:cover;border-radius:10px;display:block;}
+.pre-aviso{border:1px solid #eceef1;border-radius:12px;margin-bottom:10px;}
+.pre-n{font-style:normal !important;background:var(--brand);color:#fff !important;font-weight:700;border-radius:999px;min-width:22px;height:22px;padding:0 7px;display:flex;align-items:center;justify-content:center;font-size:12px;}
 .cf-cod{font-size:12px;color:#9ca3af;margin-top:12px;}
 .cf-cod b{color:#6b7280;margin-left:4px;}
 .fr-acoes .danger{color:#b91c1c;}
@@ -768,6 +771,7 @@ table tr:hover td{background:var(--bg);}
     <h2 style="color:#8a5a34;margin:0;font-size:18px;">Meus Pedidos</h2>
     <button class="btn btn-rosa" style="padding:10px 18px;font-size:14px;" onclick="abrirNovoPedido()">➕ Novo Pedido</button>
   </div>
+  <div id="avisoPre"></div>
   <div class="filtros">
     <div class="filtros-topo">
       <input type="text" id="filtroBusca" placeholder="🔍 Buscar cliente..." oninput="renderPedidos()">
@@ -1453,6 +1457,7 @@ function salvarLS() {
 }
  
 let pedidos = [], produtos = [], insumos = [], clientes = [], tiposInsumos = [];
+let prePedidos = [];     /* pedidos feitos pelo link do cardápio, aguardando a Vanessa confirmar */
 let tabelasPreco = [];   /* [{id, vigencia:'AAAA-MM-DD', precos:{idProduto:preco}}] */
 let tiposMassa = [], massasDiario = [];
 let meuCadastro = null;
@@ -1508,6 +1513,7 @@ async function carregarSistema() {
   pedidos = p; produtos = pr; insumos = ins;
   clientes = cli; tiposInsumos = ti;
   tiposMassa = tm; massasDiario = md;
+  prePedidos = (await sbListar('pre_pedidos')).sort((a, b) => String(b.criado).localeCompare(String(a.criado)));
 }
  
  
@@ -1537,7 +1543,7 @@ function trocarAba(index) {
   document.querySelectorAll('.menu button')[index].classList.add('active');
   fecharAutocompletes();
   if(index === 0) trocarSubAbaAgenda(0);
-  if(index === 1) renderPedidos();
+  if(index === 1) { renderPedidos(); atualizarPrePedidos(); }
   if(index === 2) { renderInsumos(); atualizarFiltroAnoInsumos(); }
   if(index === 3) { renderizarClientes(); renderProdutos(); renderTiposInsumos(); }
   if(index === 4) { definirDashOculto(true); gerenciarFiltrosAnoDashboard(); atualizarDashboard(); }
@@ -1710,7 +1716,7 @@ function fichaRefrescarTipo(tipo) { _fichas.filter(f => f.tipo === tipo).forEach
 function _fichaRender(id) {
   const f = _fichas.find(x => x.id === id), el = document.getElementById(id); if (!f || !el) return;
   const ant = el.querySelector('.ficha-lista'); const rolagem = ant ? ant.scrollTop : 0;
-  const html = f.tipo === 'pedido' ? _fichaPedidoHtml(f) : f.tipo === 'dash' ? _fichaDashHtml(f) : f.tipo === 'produto' ? _fichaProdutoHtml(f) : _fichaClienteHtml(f);
+  const html = f.tipo === 'pedido' ? _fichaPedidoHtml(f) : f.tipo === 'dash' ? _fichaDashHtml(f) : f.tipo === 'produto' ? _fichaProdutoHtml(f) : f.tipo === 'prepedidos' ? _fichaPrePedidosHtml(f) : f.tipo === 'prepedido' ? _fichaPrePedidoHtml(f) : _fichaClienteHtml(f);
   if (html == null) { f.rasc = null; fichaFechar(id); return; }
   el.innerHTML = html;
   const dep = el.querySelector('.ficha-lista'); if (dep) dep.scrollTop = rolagem;
@@ -1733,6 +1739,7 @@ function _resumoPedido(p) {
 function _fichaSujo(f) {                       /* há alterações no rascunho que ainda não foram salvas? */
   if (!f || !f.rasc) return false;
   if (f.tipo === 'produto') { const o = produtos.find(x => x.id === f.ref); return o ? JSON.stringify(f.rasc) !== JSON.stringify(o) : !!String(f.rasc.nome || '').trim(); }
+  if (f.tipo === 'prepedido') { const o = prePedidos.find(x => x.id === f.ref); return !!o && JSON.stringify(f.rasc) !== JSON.stringify(o); }
   if (f.tipo === 'cliente') { const o = _clienteRegistro(f.ref); return o ? JSON.stringify(f.rasc) !== JSON.stringify(o) : !!String(f.rasc.nome || '').trim(); }
   const p = pedidos.find(x => x.id === f.ref);
   return !p || JSON.stringify(f.rasc) !== JSON.stringify(p);
@@ -1796,6 +1803,7 @@ function _fichaPedidoHtml(f) {
       <div class="fs-l2"><span>📅 ${_diaSemana(orig.data)} ${_esc(formatarData(orig.data))} · ${_quando(orig.data)}</span>
         ${orig.telefone ? `<a class="fs-tel" href="${_linkZap(orig.telefone)}" target="_blank" rel="noopener">📱 ${_esc(orig.telefone)}</a>` : ''}</div>
       ${_endPedido(orig) ? `<a class="fs-end" href="${_linkMapa(_endPedido(orig))}" target="_blank" rel="noopener">📍 ${_esc(_endPedido(orig))}</a>` : ''}
+      ${orig.evento ? `<div class="fs-obs" style="font-style:normal;">Evento: ${_esc(orig.evento)}</div>` : ''}
       ${orig.obs ? `<div class="fs-obs">📝 ${_esc(orig.obs)}</div>` : ''}
     </div>
     <div class="fg-cab"><span>Doce ${ed ? `<button class="fg-add" onclick="fichaAddItem('${fid}')">＋ Adicionar</button>` : ''}</span><span>Qtd</span><span>Unit.</span><span>Total</span><span></span></div>
@@ -1929,6 +1937,152 @@ function _endPedido(p) {
 }
 
 
+
+/* ===== PRÉ-PEDIDOS (link do cardápio) ===== */
+const LINK_CARDAPIO = 'https://sck3002.github.io/VanessaDoces-app/pedido.html';
+function _ppAbertos() { return prePedidos.filter(x => x.status === 'aguardando'); }
+function _ppAviso() {
+  const el = document.getElementById('avisoPre'); if (!el) return;
+  const n = _ppAbertos().length;
+  el.innerHTML = `<div class="lr pre-aviso" onclick="fichaAbrir('prepedidos',null)"><span class="lr-n">Pré-pedidos do cardápio<small>${n ? n + ' aguardando confirmação' : 'nenhum aguardando · copiar link'}</small></span>${n ? `<em class="pre-n">${n}</em>` : ''}<i>›</i></div>`;
+}
+async function atualizarPrePedidos() {
+  try {
+    const l = await sbListar('pre_pedidos');
+    prePedidos = l.sort((a, b) => String(b.criado).localeCompare(String(a.criado)));
+  } catch (e) { console.error(e); }
+  _ppAviso();
+  _fichas.filter(f => f.tipo === 'prepedidos').forEach(f => _fichaRender(f.id));
+}
+function _ppQuando(x) { const d = new Date(x.criado); return isNaN(d) ? '' : _dataLocal(d).split('-').reverse().slice(0, 2).join('/') + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+function _fichaPrePedidosHtml(f) {
+  const ab = _ppAbertos(), fe = prePedidos.filter(x => x.status !== 'aguardando').slice(0, 20);
+  const linha = x => `<div class="lr${x.status === 'aguardando' ? '' : ' off'}" onclick="fichaAbrir('prepedido',${x.id})">
+      <span class="lr-c" style="width:54px;">${_esc(x.codigo)}</span>
+      <span class="lr-n">${_esc(x.nome)}<small>${_esc(x.evento || 'Sem evento')}${x.data_desejada ? ' · ' + _esc(formatarData(x.data_desejada).slice(0, 5)) : ''}</small></span>
+      <b>${_n2(x.total)}</b><i>›</i></div>`;
+  return `
+    <div class="nav-header">
+      <button class="nav-back voltar" aria-label="Voltar" onclick="fichaFechar('${f.id}')">‹</button>
+      <span class="nav-titulo">Pré-pedidos</span>
+      <button class="nav-back" onclick="atualizarPrePedidos()">Atualizar</button>
+    </div>
+    <div class="ficha-lista pf">
+      <div class="pf-t">Aguardando confirmação <small>${ab.length}</small></div>
+      ${ab.map(linha).join('') || '<div class="pf-v">Nenhum pré-pedido aguardando</div>'}
+      ${fe.length ? `<div class="pf-t">Encerrados <small>${fe.length}</small></div>` + fe.map(x => linha(x).replace('</b><i>', `</b><em style="font-style:normal;font-size:11px;color:#9ca3af;">${x.status}</em><i>`)).join('') : ''}
+      <div class="pf-t">Link do cardápio</div>
+      <div class="pf-r"><span style="max-width:100%;word-break:break-all;font-size:12px;">${_esc(LINK_CARDAPIO)}</span></div>
+    </div>
+    <div class="ficha-rod"><div class="fr-acoes">
+      <button onclick="window.open(LINK_CARDAPIO,'_blank')">Abrir</button>
+      <button class="prim" onclick="ppCopiarLink()">Copiar link</button>
+      <button onclick="ppCompartilharLink()">Enviar</button>
+    </div></div>`;
+}
+async function ppCopiarLink() {
+  try { await navigator.clipboard.writeText(LINK_CARDAPIO); mostrarAviso('Link copiado'); }
+  catch (e) { prompt('Copie o link:', LINK_CARDAPIO); }
+}
+function ppCompartilharLink() {
+  const t = 'Oi! Aqui está o cardápio da Vanessa Doces Finos. Escolha os doces e envie seu pré-pedido: ' + LINK_CARDAPIO;
+  if (navigator.share) navigator.share({ text: t }).catch(() => {}); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank');
+}
+function _fichaPrePedidoHtml(f) {
+  const orig = prePedidos.find(x => x.id === f.ref); if (!orig) return null;
+  if (!f.rasc && orig.status === 'aguardando') f.rasc = JSON.parse(JSON.stringify(orig));
+  const x = f.rasc || orig, fid = f.id, aberto = orig.status === 'aguardando';
+  const row = (l, v) => `<div class="pf-r"><span>${l}</span><b>${v}</b></div>`;
+  const dia = x.data_desejada ? pedidos.filter(p => p.data === x.data_desejada && p.status !== 'cancelado') : [];
+  const itens = (x.itens || []).map((i, k) => `<div class="fg-row" data-row="${k}">
+      <span class="fg-n">${_esc(i.produto)}</span>
+      ${aberto ? `<input class="fr-in fg-q" type="text" inputmode="numeric" value="${_esc(i.qtd || 0)}" onfocus="this.select()" onchange="ppQtd('${fid}',${k},this)" aria-label="Quantidade">` : `<b class="fg-qv">${_esc(i.qtd || 0)}</b>`}
+      <span class="fg-u">${_n2(i.valor)}</span><b>${_n2(i.total)}</b>
+      ${aberto ? `<button class="fg-x" onclick="ppRemover('${fid}',${k})" aria-label="Remover item">✕</button>` : '<span></span>'}</div>`).join('');
+  const st = { aguardando: 'AGUARDANDO', confirmado: 'CONFIRMADO', recusado: 'RECUSADO' }[orig.status] || orig.status;
+  const zapTxt = encodeURIComponent(`Oi, ${(orig.nome || '').split(' ')[0]}! Recebi seu pré-pedido ${orig.codigo}. `);
+  return `
+    <div class="nav-header">
+      <button class="nav-back voltar" aria-label="Voltar" onclick="fichaFechar('${fid}')">‹</button>
+      <span class="nav-titulo">${_esc(orig.codigo)}</span>
+      <span class="badge ${orig.status === 'confirmado' ? 'badge-pago' : orig.status === 'recusado' ? 'badge-cancelado' : 'badge-pendente'}">${st}</span>
+    </div>
+    <div class="ficha-sub"><div class="fs-l1"><b style="font-size:16px;">${_esc(orig.nome)}</b></div>
+      <div class="fs-obs" style="font-style:normal;">Enviado em ${_esc(_ppQuando(orig))}</div></div>
+    <div class="ficha-lista pf">
+      <div class="pf-t">Pedido</div>
+      ${row('Evento', _esc(x.evento || '—'))}
+      ${aberto ? `<div class="pf-r"><span>Data desejada</span><input class="fr-in pf-in" type="date" value="${_esc(x.data_desejada || '')}" onchange="ppData('${fid}',this)"></div>` : row('Data desejada', x.data_desejada ? _esc(formatarData(x.data_desejada)) : '—')}
+      ${x.data_desejada ? row('Agenda do dia', dia.length ? `${dia.length} pedido${dia.length === 1 ? '' : 's'} já marcado${dia.length === 1 ? '' : 's'}` : 'livre') : ''}
+      <div class="pf-r"><span>WhatsApp</span><b><a class="pf-a" href="https://wa.me/${_esc(String(orig.telefone).startsWith('55') ? orig.telefone : '55' + orig.telefone)}?text=${zapTxt}" target="_blank" rel="noopener">${_esc(orig.telefone)}</a></b></div>
+      ${row('Recebimento', orig.entrega ? 'Entrega' : 'Retirada')}
+      ${orig.entrega && orig.endereco ? `<div class="pf-r"><span>Endereço</span><b><a class="pf-a" href="${_linkMapa(orig.endereco)}" target="_blank" rel="noopener">${_esc(orig.endereco)}</a></b></div>` : ''}
+      ${orig.obs ? row('Observações', _esc(orig.obs)) : ''}
+      <div class="pf-t">Itens <small data-k="ppmini">${_ppResumo(x)}</small></div>
+      ${itens || '<div class="pf-v">Sem itens</div>'}
+      <div class="pf-r"><span>Total</span><b data-k="pptot">R$ ${_n2(x.total)}</b></div>
+      ${orig.status === 'confirmado' && orig.pedido_id ? `<div class="pf-r"><span>Pedido</span><b><a class="pf-a" href="#" onclick="fichaAbrir('pedido',${orig.pedido_id});return false;">Abrir pedido ›</a></b></div>` : ''}
+    </div>
+    ${aberto ? `<div class="ficha-rod"><div class="fr-acoes">
+      <button class="danger" onclick="ppRecusar('${fid}')">Recusar</button>
+      <button class="prim" data-k="ppok" onclick="ppConfirmar('${fid}')">Confirmar pedido</button>
+    </div></div>` : ''}`;
+}
+function _ppResumo(x) { const u = (x.itens || []).reduce((a, i) => a + (i.qtd || 0), 0); return `${u} un · ${(x.itens || []).length} sabores`; }
+function _ppRecalc(x) { (x.itens || []).forEach(i => { i.total = Math.round((i.qtd || 0) * (i.valor || 0) * 100) / 100; }); x.total = Math.round((x.itens || []).reduce((a, i) => a + i.total, 0) * 100) / 100; }
+function ppQtd(fid, k, el) {
+  const f = _fichas.find(x => x.id === fid); if (!f || !f.rasc) return;
+  const v = parseInt(String(el.value).replace(/\D/g, ''), 10);
+  if (!(v >= 0)) { el.value = f.rasc.itens[k].qtd; return; }
+  if (v === 0) { ppRemover(fid, k); return; }
+  f.rasc.itens[k].qtd = v; _ppRecalc(f.rasc); _fichaRender(fid);
+}
+function ppRemover(fid, k) {
+  const f = _fichas.find(x => x.id === fid); if (!f || !f.rasc) return;
+  f.rasc.itens.splice(k, 1); _ppRecalc(f.rasc); _fichaRender(fid);
+}
+function ppData(fid, el) { const f = _fichas.find(x => x.id === fid); if (f && f.rasc) { f.rasc.data_desejada = el.value || null; _fichaRender(fid); } }
+async function ppConfirmar(fid) {
+  const f = _fichas.find(x => x.id === fid); if (!f || !f.rasc || f.salvando) return;
+  const x = f.rasc;
+  if (!x.data_desejada) { alert('Informe a data de entrega antes de confirmar.'); return; }
+  if (!(x.itens || []).length) { alert('O pedido ficou sem itens. Use Recusar para descartar.'); return; }
+  f.salvando = true;
+  const btn = document.querySelector(`#${fid} [data-k="ppok"]`); if (btn) { btn.disabled = true; btn.textContent = 'Confirmando…'; }
+  const tel = String(x.telefone || '').replace(/\D/g, '');
+  const subtotal = x.itens.reduce((a, i) => a + (i.total || 0), 0);
+  const ped = { id: Date.now(), cliente: x.nome, telefone: tel, data: x.data_desejada, endereco: x.entrega ? (x.endereco || '') : '',
+    obs: [x.obs, 'Pré-pedido ' + x.codigo].filter(Boolean).join(' | '), evento: x.evento || null,
+    itens: x.itens.map(i => ({ produto: i.produto, produto_id: i.produto_id, qtd: i.qtd, valor: i.valor, total: i.total })),
+    status: 'pendente', entrada: 0, total: Math.round(subtotal * 100) / 100, taxaEntrega: 0 };
+  let ok = false;
+  try { ok = await sbUpsert('pedidos', [ped]); } catch (e) { console.error(e); }
+  if (ok) {
+    const novo = Object.assign({}, prePedidos.find(p => p.id === x.id), { status: 'confirmado', pedido_id: ped.id, itens: x.itens, total: ped.total, data_desejada: x.data_desejada });
+    if (await sbUpsert('pre_pedidos', [novo])) { const i = prePedidos.findIndex(p => p.id === x.id); prePedidos[i] = novo; }
+    else mostrarAviso('Pedido criado, mas o pré-pedido não foi marcado como confirmado');
+    pedidos.push(ped);
+    if (tel && !clientes.find(c => _mesmoTel(c.tel, tel) || _mesmoTel(c.id, tel))) {
+      const nc = { id: tel, nome: x.nome, tel, end: x.entrega ? _endSemRef(x.endereco || '') : '', ref: '', obs: '', codigo: _proxCodigo(clientes) };
+      if (await sbUpsert('clientes', [nc])) clientes.push(nc);
+    }
+    registrarLog('PEDIDO', `Pré-pedido ${x.codigo} confirmado — ${x.nome} | R$ ${ped.total.toFixed(2)}`);
+  }
+  f.salvando = false;
+  if (!ok) { if (btn) { btn.disabled = false; btn.textContent = 'Confirmar pedido'; } mostrarAviso('Não foi possível confirmar — nada foi alterado'); return; }
+  f.rasc = null;
+  _ppAviso(); _fichaRender(fid); fichaRefrescar(); _atualizarGeralDepois();
+  mostrarAviso('Pedido confirmado e lançado na agenda');
+}
+async function ppRecusar(fid) {
+  const f = _fichas.find(x => x.id === fid); const o = f && prePedidos.find(x => x.id === f.ref); if (!o) return;
+  if (!confirm(`Recusar o pré-pedido ${o.codigo} de ${o.nome}?`)) return;
+  const novo = Object.assign({}, o, { status: 'recusado' });
+  if (!(await sbUpsert('pre_pedidos', [novo]))) return;
+  prePedidos[prePedidos.findIndex(p => p.id === o.id)] = novo; f.rasc = null;
+  _ppAviso(); fichaRefrescar(); mostrarAviso('Pré-pedido recusado');
+}
+
 /* ---- ficha do produto: dados, preço, receita, histórico; Alterar / Incluir / Excluir ou Inativar ---- */
 function _custo100(p) { return (p.ingredientes || []).reduce((a, r) => a + (r.qtd || 0) * _precoUsoInsumo(r.nome), 0); }
 function _precosHist(p) { return tabelasPreco.filter(t => t.precos && t.precos[p.id] != null).sort((a, b) => b.vigencia.localeCompare(a.vigencia)); }
@@ -1962,6 +2116,13 @@ function _fichaProdutoHtml(f) {
       ${row('Descrição', _esc(p.nome))}${row('Categoria', _esc(p.categoria || 'Simples'))}
       ${row('Preço vigente', 'R$ ' + _n2(vig))}${row('Conta como', p.contagem === 'bem_casado' ? 'Bem casado' : 'Doce')}
       ${row('Código', _esc(_codProd(p) || '—'))}`;
+  const cardapio = ed ? `
+      <div class="pf-r"><span>Foto</span><span class="pf-e">${p.foto ? `<img class="pf-foto" src="${_esc(p.foto)}" alt="">` : '<small>sem foto</small>'}
+        <label class="pf-l pf-up">${p.foto ? 'Trocar' : 'Adicionar'}<input type="file" accept="image/*" hidden onchange="pfFoto('${fid}',this)"></label>${p.foto ? `<button class="fg-x" onclick="pfFotoTirar('${fid}')" aria-label="Remover foto">✕</button>` : ''}</span></div>
+      <div class="pf-r"><span>Texto no cardápio</span><input class="fr-in pf-in" type="text" value="${_esc(p.descricao || '')}" placeholder="Ex.: brigadeiro belga com granulado" onchange="pfCampo('${fid}','descricao',this)"></div>
+      <div class="pf-r"><span>Mostrar no link</span><select class="fr-in pf-in" onchange="pfCampo('${fid}','no_cardapio',this)"><option value="1"${p.no_cardapio !== false ? ' selected' : ''}>Sim</option><option value="0"${p.no_cardapio === false ? ' selected' : ''}>Não</option></select></div>` : `
+      <div class="pf-r"><span>Foto</span><b>${p.foto ? `<img class="pf-foto" src="${_esc(p.foto)}" alt="">` : '—'}</b></div>
+      ${row('Texto no cardápio', _esc(p.descricao || '—'))}${row('Mostrar no link', p.no_cardapio === false ? 'Não' : 'Sim')}`;
   const massas = (p.receita || []).map((r, i) => `<div class="pf-r"><span>🍫 ${_esc(r.nome)}</span>${ed
     ? `<span class="pf-e"><input class="fr-in pf-n" type="text" inputmode="decimal" value="${_esc(r.por100)}" onfocus="this.select()" onchange="pfLinha('${fid}','receita',${i},this)"> <small>un/100</small><button class="fg-x" onclick="pfRemover('${fid}','receita',${i})" aria-label="Remover">✕</button></span>`
     : `<b>${_esc(r.por100)} <small>un/100</small></b>`}</div>`).join('') || '<div class="pf-v">Nenhuma massa</div>';
@@ -1989,12 +2150,31 @@ function _fichaProdutoHtml(f) {
   return `${cabecalho}${sub}
     <div class="ficha-lista pf">
       <div class="pf-t">Dados</div>${dados}
+      <div class="pf-t">Cardápio online</div>${cardapio}
       <div class="pf-t">Massas <small>unidades por 100</small></div>${massas}${addMassa}
       <div class="pf-t">Ingredientes <small>por 100 un${c100 ? ' · R$ ' + _n2(c100) : ''}</small></div>${ings}${addIng}
       ${novo ? '' : `<div class="pf-t">Histórico de preço <button class="pf-l" onclick="pfVerTabelas('${fid}')">Ver tabelas ›</button></div>${hist}`}
     </div>
     <div class="ficha-rod">${rod}</div>`;
 }
+async function pfFoto(fid, input) {
+  const f = _fichas.find(x => x.id === fid); const file = input.files && input.files[0]; if (!f || !f.rasc || !file) return;
+  mostrarAviso('Enviando foto…');
+  try {
+    const bmp = await createImageBitmap(file);
+    const k = Math.min(1, 900 / Math.max(bmp.width, bmp.height));
+    const cv = document.createElement('canvas'); cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k);
+    cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+    const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.82));
+    const caminho = `${f.rasc.id}-${Date.now()}.jpg`;
+    const { error } = await sbClient.storage.from('fotos-produtos').upload(caminho, blob, { contentType: 'image/jpeg', upsert: true });
+    if (error) throw error;
+    f.rasc.foto = sbClient.storage.from('fotos-produtos').getPublicUrl(caminho).data.publicUrl;
+    _fichaRender(fid); mostrarAviso('Foto enviada: toque em Salvar');
+  } catch (e) { console.error(e); mostrarAviso('Não foi possível enviar a foto (rodou o SQL do pré-pedido?)'); }
+  input.value = '';
+}
+function pfFotoTirar(fid) { const f = _fichas.find(x => x.id === fid); if (f && f.rasc) { f.rasc.foto = null; _fichaRender(fid); } }
 function pfNovo() {
   fichaAbrir('produto', null, { rasc: { id: Date.now(), nome: '', preco: 0, categoria: 'Simples', receita: [], ingredientes: [], codigo: _proxCodigo(produtos), ativo: true } });
 }
@@ -2012,6 +2192,8 @@ function pfCancelar(fid) {
 function pfCampo(fid, campo, el) {
   const f = _fichas.find(x => x.id === fid); if (!f || !f.rasc) return;
   if (campo === 'preco') { const v = _num(el.value); if (isNaN(v) || v < 0) { el.value = _in2(f.rasc.preco); return; } f.rasc.preco = Math.round(v * 100) / 100; el.value = _in2(f.rasc.preco); return; }
+  if (campo === 'no_cardapio') { f.rasc.no_cardapio = el.value !== '0'; return; }
+  if (campo === 'descricao') { f.rasc.descricao = el.value.trim(); return; }
   if (campo === 'contagem') { f.rasc.contagem = el.value || null; if (!f.rasc.contagem) delete f.rasc.contagem; return; }
   f.rasc[campo] = el.value; if (campo === 'nome') f.rasc.nome = el.value.trim();
 }

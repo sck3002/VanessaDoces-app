@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#6b3f20">
+<title>Vanessa Doces Finos — Cardápio e pré-pedido</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+:root{--ac:#d94d7d;--br:#6b3f20;--tx:#111827;--t2:#6b7280;--t3:#9ca3af;--bg:#f1f2f4;--ln:#eceef1;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',system-ui,sans-serif;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--tx);padding-bottom:calc(86px + env(safe-area-inset-bottom));}
+header{background:var(--br);color:#fff;padding:22px 18px 18px;}
+header h1{font-size:19px;font-weight:700;letter-spacing:.2px;}
+header p{font-size:13px;opacity:.85;margin-top:4px;line-height:1.4;}
+main{max-width:640px;margin:0 auto;}
+section{background:#fff;margin-top:10px;}
+section>h2{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--t2);background:var(--bg);padding:14px 16px 6px;}
+.bloco{padding:6px 16px 14px;}
+label{display:block;font-size:12px;color:var(--t2);margin:12px 0 2px;font-weight:500;}
+input[type=text],input[type=tel],input[type=date],textarea{width:100%;border:0;border-bottom:1.5px solid #cfd4da;border-radius:0;padding:8px 0;font-size:16px;background:transparent;outline:none;color:var(--tx);}
+input:focus,textarea:focus{border-bottom-color:var(--ac);}
+textarea{resize:none;height:84px;line-height:1.4;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding-top:4px;}
+.chip{border:1.5px solid #d9dce1;background:#fff;border-radius:999px;padding:8px 14px;font-size:14px;color:var(--tx);cursor:pointer;}
+.chip.on{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600;}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:6px;}
+.seg .chip{text-align:center;border-radius:12px;}
+.cat{background:var(--bg);color:var(--t2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:7px 16px;}
+.it{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--ln);}
+.ft{flex:none;width:68px;height:68px;border-radius:12px;background:#fbe4ec center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:default;}
+.ft.z{cursor:zoom-in;}
+.tt{flex:1;min-width:0;}
+.tt b{display:block;font-size:15px;font-weight:600;line-height:1.25;}
+.tt small{display:block;font-size:12px;color:var(--t2);margin-top:2px;line-height:1.35;}
+.tt span{display:block;font-size:13px;color:var(--br);font-weight:600;margin-top:3px;}
+.qt{flex:none;display:flex;align-items:center;gap:2px;}
+.qt button{width:34px;height:34px;border-radius:50%;border:1.5px solid #d9dce1;background:#fff;font-size:20px;line-height:1;color:var(--tx);cursor:pointer;}
+.qt button.p{background:var(--ac);border-color:var(--ac);color:#fff;}
+.qt input{width:50px;text-align:center;border:0;font-size:16px;font-weight:600;background:transparent;padding:4px 0;-moz-appearance:textfield;}
+.qt input::-webkit-inner-spin-button{display:none;}
+.it.sel{background:#fff7fa;}
+.dica{font-size:12px;color:var(--t3);padding:8px 16px 0;line-height:1.4;}
+.barra{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #e5e7eb;padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;z-index:10;}
+.barra div{flex:1;font-size:12px;color:var(--t2);line-height:1.3;}
+.barra div b{display:block;font-size:17px;color:var(--tx);}
+.btn{border:0;background:var(--ac);color:#fff;font-weight:600;font-size:15px;height:46px;padding:0 20px;border-radius:12px;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;}
+.btn:disabled{background:#d1d3d6;color:#9ca3af;}
+.btn.vz{background:#fff;color:var(--tx);border:1.5px solid #d9dce1;}
+.erro{background:#fdecec;color:#b91c1c;font-size:13px;padding:10px 16px;display:none;line-height:1.4;}
+.fim{padding:36px 22px;text-align:center;background:#fff;margin-top:10px;}
+.fim .ok{width:56px;height:56px;border-radius:50%;background:#e7f6ec;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px;}
+.fim h2{font-size:19px;margin-bottom:6px;}
+.fim p{font-size:14px;color:var(--t2);line-height:1.5;margin:6px 0;}
+.cod{display:inline-block;background:var(--bg);border-radius:10px;padding:8px 16px;font-weight:700;font-size:20px;letter-spacing:1px;margin:10px 0 14px;}
+.fim .btn{width:100%;margin-top:10px;height:50px;}
+.zoom{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:50;display:none;align-items:center;justify-content:center;padding:18px;}
+.zoom img{max-width:100%;max-height:88vh;border-radius:12px;}
+.vazio{padding:30px 16px;color:var(--t3);text-align:center;font-size:14px;}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Vanessa Doces Finos</h1>
+  <p>Escolha os doces, conte um pouco do seu evento e envie pelo WhatsApp. A Vanessa confirma tudo com você na conversa.</p>
+</header>
+<main id="app">
+  <div id="form">
+    <section>
+      <h2>Seu evento</h2>
+      <div class="bloco">
+        <label>Tipo de evento</label>
+        <div class="chips" id="eventos"></div>
+        <label for="data">Data desejada</label>
+        <input type="date" id="data">
+        <div class="dica" style="padding:6px 0 0;">É uma sugestão: a Vanessa confirma se tem vaga na agenda.</div>
+        <label for="nome">Seu nome</label>
+        <input type="text" id="nome" autocomplete="name" placeholder="Nome e sobrenome">
+        <label for="tel">WhatsApp (com DDD)</label>
+        <input type="tel" id="tel" autocomplete="tel" inputmode="tel" placeholder="(22) 99999-9999">
+        <label>Como prefere receber?</label>
+        <div class="seg"><button type="button" class="chip on" id="rRet">Retirar</button><button type="button" class="chip" id="rEnt">Entrega</button></div>
+        <div id="boxEnd" style="display:none;"><label for="end">Endereço de entrega</label><input type="text" id="end" autocomplete="street-address" placeholder="Rua, número, bairro"></div>
+      </div>
+    </section>
+    <section>
+      <h2>Cardápio</h2>
+      <div id="cardapio"><div class="vazio">Carregando o cardápio…</div></div>
+    </section>
+    <section>
+      <h2>Observações</h2>
+      <div class="bloco"><textarea id="obs" placeholder="Tema, cores, alergias, quantidade de convidados, horário…"></textarea></div>
+    </section>
+    <input class="hp" type="text" id="site" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <div class="erro" id="erro"></div>
+  </div>
+  <div id="fim" style="display:none;"></div>
+</main>
+<div class="barra" id="barra">
+  <div><span id="resumo">Nenhum doce escolhido</span><b id="total">R$ 0,00</b></div>
+  <button class="btn" id="enviar" disabled>Enviar no WhatsApp</button>
+</div>
+<div class="zoom" id="zoom"><img id="zimg" alt=""></div>
+<script>
+const SUPABASE_URL='https://stwqlmxymyixgbwxynxh.supabase.co';
+const SUPABASE_KEY='sb_publishable_jBjgD5yEzdHdGT1pEZ6Jkw_kj3lowPV';
+const WHATS='5522998749536';
+const EVENTOS=['Aniversário','Formatura','Casamento','15 anos','Infantil','Outro'];
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const brl=n=>'R$ '+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+let doces=[],qtd={},evento='',entrega=false,enviando=false;
+const ls={get(k){try{return localStorage.getItem(k)||''}catch(e){return ''}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+const hoje=new Date();$('data').min=hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0')+'-'+String(hoje.getDate()).padStart(2,'0');
+$('nome').value=ls.get('vdf_nome');$('tel').value=ls.get('vdf_tel');
+$('eventos').innerHTML=EVENTOS.map(e=>`<button type="button" class="chip" data-e="${esc(e)}">${esc(e)}</button>`).join('');
+$('eventos').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;evento=b.dataset.e;document.querySelectorAll('#eventos .chip').forEach(x=>x.classList.toggle('on',x===b));};
+$('rRet').onclick=()=>setEnt(false);$('rEnt').onclick=()=>setEnt(true);
+function setEnt(v){entrega=v;$('rRet').classList.toggle('on',!v);$('rEnt').classList.toggle('on',v);$('boxEnd').style.display=v?'block':'none';}
+
+async function carregar(){
+  const{data,error}=await sb.rpc('cardapio_publico');
+  if(error||!Array.isArray(data)){$('cardapio').innerHTML='<div class="vazio">Não foi possível carregar o cardápio agora. Chame a Vanessa no WhatsApp.</div>';return;}
+  doces=data;desenhar();
+}
+const ORDEM=['Simples','Bombom','Copinho','Especial','Avulso'];
+function desenhar(){
+  if(!doces.length){$('cardapio').innerHTML='<div class="vazio">Cardápio indisponível no momento.</div>';return;}
+  const cats=[...new Set(doces.map(d=>d.categoria))].sort((a,b)=>(ORDEM.indexOf(a)+1||99)-(ORDEM.indexOf(b)+1||99));
+  $('cardapio').innerHTML=cats.map(c=>`<div class="cat">${esc(c)}</div>`+doces.filter(d=>d.categoria===c).map(d=>`
+    <div class="it" id="it${d.id}">
+      <div class="ft${d.foto?' z':''}" ${d.foto?`style="background-image:url('${esc(d.foto)}')" data-z="${esc(d.foto)}"`:''}>${d.foto?'':'🍬'}</div>
+      <div class="tt"><b>${esc(d.nome)}</b>${d.descricao?`<small>${esc(d.descricao)}</small>`:''}<span>${brl(d.preco)} <small style="display:inline;color:var(--t3);font-weight:400;">a unidade</small></span></div>
+      <div class="qt"><button type="button" data-m="${d.id}" aria-label="Diminuir">−</button><input type="text" inputmode="numeric" value="0" data-q="${d.id}" aria-label="Quantidade"><button type="button" class="p" data-p="${d.id}" aria-label="Aumentar">+</button></div>
+    </div>`).join('')).join('');
+}
+$('cardapio').addEventListener('click',e=>{
+  const z=e.target.closest('[data-z]');if(z){$('zimg').src=z.dataset.z;$('zoom').style.display='flex';return;}
+  const m=e.target.closest('[data-m]'),p=e.target.closest('[data-p]');
+  if(m)setQ(m.dataset.m,(qtd[m.dataset.m]||0)-passo(m.dataset.m));
+  if(p)setQ(p.dataset.p,(qtd[p.dataset.p]||0)+passo(p.dataset.p));
+});
+$('cardapio').addEventListener('change',e=>{const i=e.target.closest('[data-q]');if(i)setQ(i.dataset.q,parseInt(i.value.replace(/\D/g,''),10)||0);});
+$('cardapio').addEventListener('focusin',e=>{if(e.target.matches('[data-q]'))e.target.select();});
+$('zoom').onclick=()=>{$('zoom').style.display='none';};
+function passo(){return 10;}
+function setQ(id,v){
+  v=Math.max(0,Math.min(5000,v|0));qtd[id]=v;
+  const el=$('it'+id);if(el){el.querySelector('[data-q]').value=v;el.classList.toggle('sel',v>0);}
+  totais();
+}
+function linhas(){return doces.filter(d=>(qtd[d.id]||0)>0).map(d=>({d,q:qtd[d.id],t:Math.round(qtd[d.id]*d.preco*100)/100}));}
+function totais(){
+  const l=linhas(),un=l.reduce((a,x)=>a+x.q,0),tot=l.reduce((a,x)=>a+x.t,0);
+  $('resumo').textContent=un?`${un} doce${un===1?'':'s'} · ${l.length} sabor${l.length===1?'':'es'}`:'Nenhum doce escolhido';
+  $('total').textContent=brl(tot);$('enviar').disabled=!un||enviando;
+}
+function dataBr(s){const p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+function erro(m){const e=$('erro');e.textContent=m;e.style.display=m?'block':'none';if(m)e.scrollIntoView({behavior:'smooth',block:'center'});}
+
+$('enviar').onclick=async()=>{
+  if(enviando)return;erro('');
+  const nome=$('nome').value.trim(),tel=$('tel').value.replace(/\D/g,''),data=$('data').value,end=$('end').value.trim(),obs=$('obs').value.trim();
+  if(!evento)return erro('Escolha o tipo de evento.');
+  if(!data)return erro('Informe a data desejada.');
+  if(nome.length<2)return erro('Informe seu nome.');
+  if(tel.length<10)return erro('Informe seu WhatsApp com DDD.');
+  if(entrega&&!end)return erro('Informe o endereço de entrega.');
+  const l=linhas();if(!l.length)return erro('Escolha ao menos um doce.');
+  enviando=true;$('enviar').disabled=true;$('enviar').textContent='Enviando…';
+  const{data:r,error}=await sb.rpc('criar_pre_pedido',{p_nome:nome,p_telefone:tel,p_evento:evento,p_data:data,p_entrega:entrega,p_endereco:entrega?end:'',p_obs:obs,p_itens:l.map(x=>({id:String(x.d.id),qtd:x.q})),p_site:$('site').value});
+  enviando=false;$('enviar').textContent='Enviar no WhatsApp';
+  if(error||!r){totais();return erro((error&&error.message)||'Não foi possível enviar agora. Tente de novo ou chame a Vanessa no WhatsApp.');}
+  ls.set('vdf_nome',nome);ls.set('vdf_tel',$('tel').value);
+  const total=r.total!=null?Number(r.total):l.reduce((a,x)=>a+x.t,0);
+  const msg=[`Olá, Vanessa! Fiz um pré-pedido pelo cardápio (${r.codigo}).`,'',
+    `*Evento:* ${evento}`,`*Data desejada:* ${dataBr(data)}`,`*Nome:* ${nome}`,
+    entrega?`*Entrega:* ${end}`:'*Retirada no local*','','*Itens:*',
+    ...l.map(x=>`• ${x.q} × ${x.d.nome} — ${brl(x.t)}`),'',`*Total estimado:* ${brl(total)}`,
+    ...(obs?['',`*Observações:* ${obs}`]:[]),'','Aguardo sua confirmação 😊'].join('\n');
+  const url=`https://wa.me/${WHATS}?text=${encodeURIComponent(msg)}`;
+  $('form').style.display='none';$('barra').style.display='none';$('fim').style.display='block';
+  $('fim').innerHTML=`<div class="fim"><div class="ok">✓</div><h2>Pré-pedido criado</h2>
+    <div class="cod">${esc(r.codigo)}</div>
+    <p><b>Falta só um passo:</b> toque no botão abaixo e envie a mensagem no WhatsApp. O pedido só é confirmado depois que a Vanessa responder.</p>
+    <a class="btn" href="${esc(url)}" id="zap">Abrir WhatsApp e enviar</a>
+    <p style="font-size:12px;color:var(--t3);margin-top:14px;">Se o WhatsApp não abrir, chame no número (22) 99874-9536 e informe o código.</p></div>`;
+  window.scrollTo(0,0);
+  setTimeout(()=>{location.href=url;},700);
+};
+carregar();totais();
+</script>
+</body>
+</html>
