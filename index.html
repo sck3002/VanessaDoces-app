@@ -3110,7 +3110,7 @@ async function _contratoPdf(html, p) {
   const brl = v => 'R$ ' + (Number(v) || 0).toFixed(2).replace('.', ',');
   const imgs = [...raiz.querySelectorAll('img')].map(i => i.getAttribute('src'));
   const conteudo = [];
-  if (imgs[0]) conteudo.push({ image: imgs[0], height: 62, alignment: 'center', margin: [0, 0, 0, 14] });
+  if (imgs[0]) conteudo.push({ image: imgs[0], fit: [170, 85], alignment: 'center', margin: [0, 0, 0, 14] });
   raiz.querySelectorAll(':scope > h1, :scope > h2, :scope > p').forEach(el => {
     if (el.tagName === 'H1') conteudo.push({ text: el.textContent.trim(), alignment: 'center', bold: true, fontSize: 14, margin: [0, 0, 0, 16] });
     else if (el.tagName === 'H2') conteudo.push({ text: el.textContent.trim(), bold: true, margin: [0, 12, 0, 5], keepWithNext: true });
