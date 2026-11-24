@@ -213,7 +213,7 @@ function erro(m){const e=$('erro');e.textContent=m;e.style.display=m?'block':'no
 
 $('enviar').onclick=async()=>{
   if(enviando)return;erro('');
-  const nome=$('nome').value.trim(),tel=$('tel').value.replace(/\D/g,''),data=$('data').value,rua=$('rua').value.trim(),num=$('num').value.trim(),bairro=$('bairro').value.trim(),ref=$('ref').value.trim(),obs=$('obs').value.trim();
+  const nome=$('nome').value.trim(),tel=(d=>{d=d.replace(/^0+/,'');return(d.length===8||(d.length===9&&d[0]==='9'))?'22'+d:d})($('tel').value.replace(/\D/g,'')),data=$('data').value,rua=$('rua').value.trim(),num=$('num').value.trim(),bairro=$('bairro').value.trim(),ref=$('ref').value.trim(),obs=$('obs').value.trim();
   if(!evento)return erro('Escolha o tipo de evento.');
   if(!data)return erro('Informe a data desejada.');
   if(nome.length<2)return erro('Informe seu nome.');

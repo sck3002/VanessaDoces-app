@@ -692,8 +692,31 @@ table tr:hover td{background:var(--bg);}
   .lista-flat{border:1px solid #eceef1;border-radius:12px;overflow:hidden;}
   .lr,.pf-r{max-width:100%;}
 }
-#avisoApp{position:fixed;left:50%;bottom:76px;transform:translate(-50%,20px);background:#3b2a20;color:#fff;font-size:13px;padding:10px 16px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:400;max-width:90vw;text-align:center;}
-#avisoApp.on{opacity:1;transform:translate(-50%,0);}
+#avisoApp{position:fixed;left:50%;bottom:76px;transform:translate(-50%,16px) scale(.96);background:rgba(28,28,30,.94);color:#fff;font-size:14px;padding:10px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease;z-index:9000;max-width:90vw;display:flex;align-items:center;gap:8px;box-shadow:0 6px 20px rgba(0,0,0,.25);}
+#avisoApp.on{opacity:1;transform:translate(-50%,0) scale(1);}
+#avisoApp i{flex:none;width:18px;height:18px;border-radius:50%;background:#34c759;display:flex;align-items:center;justify-content:center;font-size:11px;font-style:normal;font-weight:700;}
+#avisoApp.err i{background:#ff453a;}
+.dlg-ov{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;padding:24px;transition:background .18s ease,backdrop-filter .18s ease;}
+.dlg-ov.on{background:rgba(0,0,0,.38);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
+.dlg{width:100%;max-width:280px;background:rgba(250,250,251,.98);border-radius:16px;overflow:hidden;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.25);opacity:0;transform:scale(.92);transition:opacity .18s ease,transform .18s ease;}
+.dlg-ov.on .dlg{opacity:1;transform:scale(1);}
+.dlg-c{padding:20px 16px 16px;}
+.dlg-c h4{font-size:16px;font-weight:600;color:#111827;margin-bottom:5px;}
+.dlg-c p{font-size:13.5px;color:#4b5563;line-height:1.45;}
+.dlg-in{margin-top:12px;width:100%;height:36px;border:1px solid #cfd4da;border-radius:8px;text-align:center;font-size:16px;background:#fff;outline:none;}
+.dlg-in:focus{border-color:var(--brand);}
+.dlg-bt{display:flex;border-top:1px solid #d9dce1;}
+.dlg-bt button{flex:1;border:0;background:none;height:46px;font-size:16px;color:var(--brand);cursor:pointer;border-left:1px solid #d9dce1;}
+.dlg-bt button:first-child{border-left:0;}
+.dlg-bt button:active{background:rgba(0,0,0,.05);}
+.dlg-bt .b{font-weight:600;}.dlg-bt .r{color:#d92d20;}
+.dlg-bt.v{flex-direction:column;}
+.dlg-bt.v button{flex:none;border-left:0;border-top:1px solid #d9dce1;}
+.dlg-bt.v button:first-child{border-top:0;}
+#bannerTopo{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top));z-index:9400;background:rgba(255,255,255,.97);border-radius:16px;padding:12px 14px;box-shadow:0 8px 28px rgba(0,0,0,.2);display:flex;gap:10px;align-items:center;transform:translateY(-130%);transition:transform .3s ease;cursor:pointer;max-width:520px;margin:0 auto;}
+#bannerTopo.on{transform:translateY(0);}
+#bannerTopo .ic{flex:none;width:34px;height:34px;border-radius:9px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;}
+#bannerTopo b{display:block;font-size:13.5px;color:#111827;}#bannerTopo span{font-size:12px;color:#6b7280;}
 .insumo-novo .insumo-info{background:var(--brand-light);border-radius:8px;padding:6px 8px;}
 .tag-novo{font-size:10px;font-weight:600;color:var(--brand);margin-left:6px;}
 /* ━━━ SELETOR DE PRODUTOS ━━━ */
@@ -1515,6 +1538,7 @@ async function carregarSistema() {
   clientes = cli; tiposInsumos = ti;
   tiposMassa = tm; massasDiario = md;
   prePedidos = (await sbListar('pre_pedidos')).sort((a, b) => String(b.criado).localeCompare(String(a.criado)));
+  _ppConhecidos = new Set(prePedidos.filter(x => x.status === 'aguardando').map(x => x.id));
 }
  
  
@@ -1651,11 +1675,38 @@ function _mesmoTel(a, b) {
   const n = Math.min(9, x.length, y.length);
   return n < 8 ? x === y : x.slice(-n) === y.slice(-n);
 }
-function _linkZap(tel) {
-  let d = _dig(tel); if (!d) return '';
-  if (d.length <= 11) d = '55' + d;
-  return 'https://wa.me/' + d;
+/* telefone para WhatsApp: tira 0 inicial, completa DDD 22 quando faltar, ignora números "de mentira" (999999…) */
+function _telLimpo(tel) {
+  let d = _dig(tel).replace(/^0+/, '');
+  if (d.length > 11 && d.startsWith('55')) d = d.slice(2);
+  return d;
 }
+function _telFalso(tel) {
+  const d = _telLimpo(tel);
+  return !d || /^9{6,}/.test(d.slice(-9)) || (d.length <= 8 && /^99999/.test(d)) || /^(\d)\1{7,}$/.test(d);
+}
+function _telComDDD(tel) {
+  let d = _telLimpo(tel);
+  if (d.length === 9 && d[0] === '9' || d.length === 8) d = '22' + d;
+  return d;
+}
+function _linkZap(tel) {
+  if (_telFalso(tel)) return '';
+  const d = _telComDDD(tel); if (d.length < 10) return '';
+  return 'https://wa.me/55' + d;
+}
+function _telHtml(tel) {                           /* número clicável ou, se for provisório, texto simples */
+  const l = _linkZap(tel);
+  return l ? `<a class="fs-tel" href="${l}" target="_blank" rel="noopener">📱 ${_esc(tel)}</a>` : `<span class="fs-tel" style="opacity:.55">${tel && !_telFalso(tel) ? _esc(tel) : 'sem telefone'}</span>`;
+}
+document.addEventListener('change', e => {         /* ao sair do campo, completa o DDD 22 */
+  const el = e.target;
+  if (!el || !['clienteFormTel', 'telefone', 'editTelefone'].includes(el.id)) return;
+  if (_telFalso(el.value)) return;
+  const d = _telLimpo(el.value);
+  if (d.length === 8 || (d.length === 9 && d[0] === '9')) { el.value = '22' + d; if (el.id === 'telefone' && typeof buscarClientePorTelefone === 'function') buscarClientePorTelefone(); }
+  else if (_dig(el.value).startsWith('0')) el.value = d;
+});
 function enderecoLimpo(end) {
   var orig = String(end || '').trim(), q = orig;
   q = q.replace(/\([^)]*\)?/g, ' ').replace(/\[[^\]]*\]?/g, ' ');
@@ -1690,9 +1741,13 @@ function fichaAbrir(tipo, ref, extra) {
   _fichaFoco();
 }
 let _naoFechar = false;                         /* o usuário recusou descartar: a tela fica aberta */
-function fichaFechar(id) {
+async function fichaFechar(id, forcar) {
   const i = _fichas.findIndex(f => f.id === id); if (i < 0) return;
-  if (_fichaSujo(_fichas[i]) && !confirm('Há alterações não salvas. Descartar e sair?')) { if (_fechandoPorGesto) _naoFechar = true; return; }
+  if (!forcar && _fichaSujo(_fichas[i])) {
+    if (_fechandoPorGesto) _naoFechar = true;       /* o gesto repõe o passo no histórico; se descartar, fecha pelo caminho normal */
+    if (!(await uiConfirm('As alterações feitas nesta tela serão perdidas.', { titulo: 'Descartar alterações?', ok: 'Descartar', perigo: true }))) return;
+    return fichaFechar(id, true);
+  }
   const el = document.getElementById(id);
   _ovFechar(id);
   _fichas.splice(i, 1);
@@ -1802,7 +1857,7 @@ function _fichaPedidoHtml(f) {
         <span class="badge ${stCls}" data-k="badge">${(p.status || 'pendente').toUpperCase()}</span>
       </div>
       <div class="fs-l2"><span>📅 ${_diaSemana(orig.data)} ${_esc(formatarData(orig.data))} · ${_quando(orig.data)}</span>
-        ${orig.telefone ? `<a class="fs-tel" href="${_linkZap(orig.telefone)}" target="_blank" rel="noopener">📱 ${_esc(orig.telefone)}</a>` : ''}</div>
+        ${orig.telefone ? _telHtml(orig.telefone) : ''}</div>
       ${_endPedido(orig) ? `<a class="fs-end" href="${_linkMapa(_endPedido(orig))}" target="_blank" rel="noopener">📍 ${_esc(_endPedido(orig))}</a>` : ''}
       ${orig.evento ? `<div class="fs-obs" style="font-style:normal;">Evento: ${_esc(orig.evento)}</div>` : ''}
       ${orig.obs ? `<div class="fs-obs">📝 ${_esc(orig.obs)}</div>` : ''}
@@ -1837,9 +1892,9 @@ function fichaEditar(fid) {
   f.rasc = JSON.parse(JSON.stringify(p));
   _fichaRender(fid);
 }
-function fichaCancelar(fid) {
+async function fichaCancelar(fid) {
   const f = _fichas.find(x => x.id === fid); if (!f || !f.rasc) return;
-  if (_fichaSujo(f) && !confirm('Descartar as alterações deste pedido?')) return;
+  if (_fichaSujo(f) && !(await uiConfirm('As alterações feitas neste pedido serão perdidas.', { titulo: 'Descartar alterações?', ok: 'Descartar', perigo: true }))) return;
   f.rasc = null;
   _fichaRender(fid);
 }
@@ -1947,7 +2002,8 @@ function _ppAviso() {
   const n = _ppAbertos().length;
   el.innerHTML = `<div class="lr pre-aviso" onclick="fichaAbrir('prepedidos',null)"><span class="lr-n">Pré-pedidos do cardápio<small>${_ppErro ? 'erro ao ler: ' + _esc(_ppErro) : n ? n + ' aguardando confirmação' : 'nenhum aguardando · copiar link'}</small></span>${n ? `<em class="pre-n">${n}</em>` : ''}<i>›</i></div>`;
 }
-async function atualizarPrePedidos() {
+let _ppConhecidos = null;
+async function atualizarPrePedidos(avisar) {
   _ppErro = '';
   try {
     const { data, error } = await sbClient.from('pre_pedidos').select('*').order('id', { ascending: false }).limit(300);
@@ -1955,6 +2011,14 @@ async function atualizarPrePedidos() {
     else prePedidos = (data || []).sort((a, b) => String(b.criado).localeCompare(String(a.criado)));
   } catch (e) { _ppErro = String(e && e.message || e); console.error(e); }
   if (_ppErro) mostrarAviso('Não foi possível ler os pré-pedidos: ' + _ppErro);
+  if (!_ppErro) {
+    const ab = _ppAbertos();
+    if (avisar === true && _ppConhecidos) {
+      const novos = ab.filter(x => !_ppConhecidos.has(x.id));
+      if (novos.length) { const x = novos[0]; avisoTopo(novos.length > 1 ? `${novos.length} novos pré-pedidos` : `Novo pré-pedido ${x.codigo}`, novos.length > 1 ? 'Toque para ver' : `${x.nome} · ${x.evento || 'sem evento'}${x.data_desejada ? ' · ' + formatarData(x.data_desejada).slice(0, 5) : ''}`, () => { if (novos.length === 1) fichaAbrir('prepedido', x.id); else { trocarAba(1); fichaAbrir('prepedidos', null); } }); }
+    }
+    _ppConhecidos = new Set(ab.map(x => x.id));
+  }
   _ppAviso();
   _fichas.filter(f => f.tipo === 'prepedidos').forEach(f => _fichaRender(f.id));
 }
@@ -1987,8 +2051,10 @@ function _fichaPrePedidosHtml(f) {
 }
 async function ppCopiarLink() {
   try { await navigator.clipboard.writeText(LINK_CARDAPIO); mostrarAviso('Link copiado'); }
-  catch (e) { prompt('Copie o link:', LINK_CARDAPIO); }
+  catch (e) { await uiPrompt('Copie o link:', { titulo: 'Link do cardápio', valor: LINK_CARDAPIO, ok: 'Fechar' }); }
 }
+setInterval(() => { if (document.visibilityState === 'visible' && _ppConhecidos) atualizarPrePedidos(true); }, 60000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && _ppConhecidos) atualizarPrePedidos(true); });
 function ppCompartilharLink() {
   const t = 'Oi! Aqui está o cardápio da Vanessa Doces Finos. Escolha os doces e envie seu pré-pedido: ' + LINK_CARDAPIO;
   if (navigator.share) navigator.share({ text: t }).catch(() => {}); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank');
@@ -2019,12 +2085,13 @@ function _fichaPrePedidoHtml(f) {
       ${row('Evento', _esc(x.evento || '—'))}
       ${aberto ? `<div class="pf-r"><span>Data desejada</span><input class="fr-in pf-in" type="date" value="${_esc(x.data_desejada || '')}" onchange="ppData('${fid}',this)"></div>` : row('Data desejada', x.data_desejada ? _esc(formatarData(x.data_desejada)) : '—')}
       ${x.data_desejada ? row('Agenda do dia', dia.length ? `${dia.length} pedido${dia.length === 1 ? '' : 's'} já marcado${dia.length === 1 ? '' : 's'}` : 'livre') : ''}
-      <div class="pf-r"><span>WhatsApp</span><b><a class="pf-a" href="https://wa.me/${_esc(String(orig.telefone).startsWith('55') ? orig.telefone : '55' + orig.telefone)}?text=${zapTxt}" target="_blank" rel="noopener">${_esc(orig.telefone)}</a></b></div>
+      <div class="pf-r"><span>WhatsApp</span><b><a class="pf-a"  href="${_esc(_linkZap(orig.telefone) || 'https://wa.me/')}?text=${zapTxt}" target="_blank" rel="noopener">${_esc(orig.telefone)}</a></b></div>
       ${row('Recebimento', orig.entrega ? 'Entrega' : 'Retirada')}
       ${orig.entrega && orig.endereco ? `<div class="pf-r"><span>Endereço</span><b><a class="pf-a" href="${_linkMapa(orig.endereco)}" target="_blank" rel="noopener">${_esc(orig.endereco)}</a></b></div>` : ''}
       ${orig.obs ? row('Observações', _esc(orig.obs)) : ''}
       <div class="pf-t">Itens <small data-k="ppmini">${_ppResumo(x)}</small></div>
       ${itens || '<div class="pf-v">Sem itens</div>'}
+      ${x.taxa_entrega ? row('Taxa de entrega', 'R$ ' + _n2(x.taxa_entrega)) : ''}
       <div class="pf-r"><span>Total</span><b data-k="pptot">R$ ${_n2(x.total)}</b></div>
       ${orig.status === 'confirmado' && orig.pedido_id ? `<div class="pf-r"><span>Pedido</span><b><a class="pf-a" href="#" onclick="fichaAbrir('pedido',${orig.pedido_id});return false;">Abrir pedido ›</a></b></div>` : ''}
     </div>
@@ -2034,7 +2101,7 @@ function _fichaPrePedidoHtml(f) {
     </div></div>` : ''}`;
 }
 function _ppResumo(x) { const u = (x.itens || []).reduce((a, i) => a + (i.qtd || 0), 0); return `${u} un · ${(x.itens || []).length} sabores`; }
-function _ppRecalc(x) { (x.itens || []).forEach(i => { i.total = Math.round((i.qtd || 0) * (i.valor || 0) * 100) / 100; }); x.total = Math.round((x.itens || []).reduce((a, i) => a + i.total, 0) * 100) / 100; }
+function _ppRecalc(x) { (x.itens || []).forEach(i => { i.total = Math.round((i.qtd || 0) * (i.valor || 0) * 100) / 100; }); x.total = Math.round(((x.itens || []).reduce((a, i) => a + i.total, 0) + (x.taxa_entrega || 0)) * 100) / 100; }
 function ppQtd(fid, k, el) {
   const f = _fichas.find(x => x.id === fid); if (!f || !f.rasc) return;
   const v = parseInt(String(el.value).replace(/\D/g, ''), 10);
@@ -2059,7 +2126,7 @@ async function ppConfirmar(fid) {
   const ped = { id: Date.now(), cliente: x.nome, telefone: tel, data: x.data_desejada, endereco: x.entrega ? (x.endereco || '') : '',
     obs: [x.obs, 'Pré-pedido ' + x.codigo].filter(Boolean).join(' | '), evento: x.evento || null,
     itens: x.itens.map(i => ({ produto: i.produto, produto_id: i.produto_id, qtd: i.qtd, valor: i.valor, total: i.total })),
-    status: 'pendente', entrada: 0, total: Math.round(subtotal * 100) / 100, taxaEntrega: 0 };
+    status: 'pendente', entrada: 0, total: Math.round((subtotal + (x.taxa_entrega || 0)) * 100) / 100, taxaEntrega: x.taxa_entrega || 0 };
   let ok = false;
   try { ok = await sbUpsert('pedidos', [ped]); } catch (e) { console.error(e); }
   if (ok) {
@@ -2068,7 +2135,7 @@ async function ppConfirmar(fid) {
     else mostrarAviso('Pedido criado, mas o pré-pedido não foi marcado como confirmado');
     pedidos.push(ped);
     if (tel && !clientes.find(c => _mesmoTel(c.tel, tel) || _mesmoTel(c.id, tel))) {
-      const nc = { id: tel, nome: x.nome, tel, end: x.entrega ? _endSemRef(x.endereco || '') : '', ref: '', obs: '', codigo: _proxCodigo(clientes) };
+      const nc = { id: tel, nome: x.nome, tel, end: x.entrega ? _endSemRef(x.endereco || '') : '', ref: x.entrega ? _refDoEnd(x.endereco || '') : '', obs: '', codigo: _proxCodigo(clientes) };
       if (await sbUpsert('clientes', [nc])) clientes.push(nc);
     }
     registrarLog('PEDIDO', `Pré-pedido ${x.codigo} confirmado — ${x.nome} | R$ ${ped.total.toFixed(2)}`);
@@ -2081,7 +2148,7 @@ async function ppConfirmar(fid) {
 }
 async function ppRecusar(fid) {
   const f = _fichas.find(x => x.id === fid); const o = f && prePedidos.find(x => x.id === f.ref); if (!o) return;
-  if (!confirm(`Recusar o pré-pedido ${o.codigo} de ${o.nome}?`)) return;
+  if (!(await uiConfirm(`${o.nome} · ${o.codigo}`, { titulo: 'Recusar pré-pedido?', ok: 'Recusar', perigo: true }))) return;
   const novo = Object.assign({}, o, { status: 'recusado' });
   if (!(await sbUpsert('pre_pedidos', [novo]))) return;
   prePedidos[prePedidos.findIndex(p => p.id === o.id)] = novo; f.rasc = null;
@@ -2188,9 +2255,9 @@ function pfEditar(fid) {
   const o = produtos.find(x => x.id === f.ref); if (!o) return;
   f.rasc = JSON.parse(JSON.stringify(o)); _fichaRender(fid);
 }
-function pfCancelar(fid) {
+async function pfCancelar(fid) {
   const f = _fichas.find(x => x.id === fid); if (!f || !f.rasc) return;
-  if (_fichaSujo(f) && !confirm('Descartar as alterações?')) return;
+  if (_fichaSujo(f) && !(await uiConfirm('As alterações feitas neste produto serão perdidas.', { titulo: 'Descartar alterações?', ok: 'Descartar', perigo: true }))) return;
   if (!produtos.find(x => x.id === f.ref)) { f.rasc = null; fichaFechar(fid); return; }
   f.rasc = null; _fichaRender(fid);
 }
@@ -2268,10 +2335,11 @@ async function pfExcluir(fid) {
   const f = _fichas.find(x => x.id === fid); const p = f && produtos.find(x => x.id === f.ref); if (!p) return;
   const usos = _usosProduto(p);
   if (usos) {
-    if (confirm(`"${p.nome}" aparece em ${usos} pedido${usos === 1 ? '' : 's'} e não pode ser excluído sem perder o histórico.\n\nInativar? Ele sai das opções de novo pedido e os pedidos antigos continuam intactos.`)) { if (p.ativo !== false) await pfAtivo(fid); }
+    const r = await uiEscolha('Para não perder o histórico, ele não pode ser excluído. Quer inativar? Ele sai das opções de novo pedido e os pedidos antigos continuam intactos.', { titulo: `${p.nome} está em ${usos} pedido${usos === 1 ? '' : 's'}`, botoes: [{ t: 'Inativar', v: 'i', k: 'b' }, { t: 'Cancelar', v: null, cancel: true }] });
+    if (r === 'i' && p.ativo !== false) await pfAtivo(fid);
     return;
   }
-  if (!confirm(`Excluir "${p.nome}" permanentemente?`)) return;
+  if (!(await uiConfirm('Ele será excluído de vez. Essa ação não pode ser desfeita.', { titulo: `Excluir “${p.nome}”?`, ok: 'Excluir', perigo: true }))) return;
   if (!(await sbDeletar('produtos', p.id))) return;
   produtos = produtos.filter(x => x.id !== p.id);
   registrarLog('PRODUTO', `Produto excluído — ${p.nome}`);
@@ -2343,7 +2411,7 @@ function _fichaClienteHtml(f) {
     <div class="ficha-lista pf">
       <div class="pf-t">Dados</div>
       ${row('Código', _esc(_codCli(reg) || '—'))}
-      ${tel ? `<div class="pf-r"><span>Telefone</span><b><a class="pf-a" href="${_linkZap(tel)}" target="_blank" rel="noopener">${_esc(tel)}</a></b></div>` : ''}
+      ${tel ? `<div class="pf-r"><span>Telefone</span><b>${_linkZap(tel) ? `<a class="pf-a" href="${_linkZap(tel)}" target="_blank" rel="noopener">${_esc(tel)}</a>` : `<span style="opacity:.55">${_telFalso(tel) ? 'sem telefone' : _esc(tel)}</span>`}</b></div>` : ''}
       ${end ? `<div class="pf-r"><span>Endereço</span><b><a class="pf-a" href="${_linkMapa(end)}" target="_blank" rel="noopener">${_esc(end)}</a></b></div>` : ''}
       ${ref ? row('Referência', _esc(ref)) : ''}
       ${obs ? row('Observações', _esc(obs)) : ''}
@@ -2501,7 +2569,7 @@ async function salvarClientePedido() {
 
 /* — Excluir do detalhe — */
 async function excluirPedidoDetalhe(id) {
-  if(!confirm('Excluir este pedido permanentemente?')) return;
+  if (!(await uiConfirm('O pedido será excluído de vez. Essa ação não pode ser desfeita.', { titulo: 'Excluir pedido?', ok: 'Excluir', perigo: true }))) return;
   const p = pedidos.find(x=>x.id===id);
   if (!(await sbDeletar('pedidos',id))) return;
   pedidos = pedidos.filter(x=>x.id!==id);
@@ -2852,12 +2920,22 @@ function abrirContrato(id) {
   document.getElementById('cpfContratante').value = '';
   document.getElementById('modalCpfContrato').classList.add('active');
   _histAbrir('modalCpfContrato');
+  _carregarPdfMake().catch(() => {});            /* já deixa a biblioteca do PDF pronta */
+}
+let _pdfMakeP = null;
+function _carregarPdfMake() {
+  if (window.pdfMake) return Promise.resolve();
+  const carregar = src => new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = src; sc.onload = ok; sc.onerror = () => no(new Error('offline')); document.head.appendChild(sc); });
+  if (!_pdfMakeP) _pdfMakeP = carregar('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.20/pdfmake.min.js')
+    .then(() => carregar('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.20/vfs_fonts.js'))
+    .catch(e => { _pdfMakeP = null; throw e; });
+  return _pdfMakeP;
 }
 function fecharModalCpf() {
   document.getElementById('modalCpfContrato').classList.remove('active');
   _histFechar('modalCpfContrato');
 }
-function gerarContrato() {
+async function gerarContrato(modo) {
   const cpf = document.getElementById('cpfContratante').value.trim();
   if(!cpf){ alert('Informe o CPF do cliente.'); return; }
   const id = parseInt(document.getElementById('cpfContratoPedidoId').value);
@@ -2895,7 +2973,6 @@ function gerarContrato() {
 
   const html = `<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8">
   <title>Contrato - ${p.cliente}</title>
-  <scr` + `ipt src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/scr` + `ipt>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Times New Roman',serif;font-size:12pt;color:#000;padding:30px 50px;}
@@ -2911,6 +2988,7 @@ function gerarContrato() {
     td{font-size:11pt;}
     .total-row td{font-weight:bold;background:#f9f9f9;padding:7px 10px;border:1px solid #ccc;}
     .pagamentos th,  .pagamentos td{padding:10px;}
+    p,.assinaturas,tr{break-inside:avoid;} h2{break-after:avoid;}
     @media print{body{padding:15px 30px;} .no-print{display:none!important;}}
   </style></head><body>
   <div id="contrato-conteudo">
@@ -3000,49 +3078,85 @@ function gerarContrato() {
   </div>
 
   <div style="text-align:center;margin-top:20px;padding-bottom:20px;" class="no-print">
-    <button onclick="window.print()" style="padding:10px 28px;background:#d94d7d;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;margin-right:10px;">🖨️ Imprimir</button>
-    <button onclick="compartilharPDF()" style="padding:10px 28px;background:#25d366;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;">📤 Compartilhar PDF</button>
+    <button onclick="window.print()" style="padding:10px 28px;background:#d94d7d;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;">🖨️ Imprimir</button>
   </div>
-
-  <scr` + `ipt>
-  async function compartilharPDF() {
-    const btn = document.querySelector('button:last-child');
-    btn.textContent = '⏳ Gerando...';
-    btn.disabled = true;
-    try {
-      const el = document.getElementById('contrato-conteudo');
-      const opt = {
-        margin:       [10, 10, 10, 10],
-        filename:     'Contrato_${p.cliente.replace(/\s+/g,'_')}.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-      const pdfBlob = await html2pdf().set(opt).from(el).outputPdf('blob');
-      const file = new File([pdfBlob], opt.filename, { type: 'application/pdf' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Contrato ${p.cliente}' });
-      } else {
-        /* Fallback: download direto */
-        const url = URL.createObjectURL(pdfBlob);
-        const a = document.createElement('a');
-        a.href = url; a.download = opt.filename; a.click();
-        URL.revokeObjectURL(url);
-      }
-    } catch(e) {
-      console.error('Erro ao gerar PDF:', e);
-      alert('Erro ao gerar PDF. Tente usar o botão Imprimir e salvar como PDF.');
-    } finally {
-      btn.textContent = '📤 Compartilhar PDF';
-      btn.disabled = false;
-    }
-  }
-  <\/scr` + `ipt>
 </body></html>`;
 
-  const win = window.open('','_blank','width=900,height=700');
-  win.document.write(html);
-  win.document.close();
+  if (modo === 'imprimir') {
+    const win = window.open('','_blank','width=900,height=700');
+    if (!win) { mostrarAviso('Não foi possível abrir a janela de impressão. Libere pop-ups.', 'erro'); return; }
+    win.document.write(html); win.document.close();
+    return;
+  }
+  await _contratoPdf(html, p);
+}
+async function _contratoPdf(html, p) {
+  mostrarAviso('Gerando contrato…');
+  try { await _carregarPdfMake(); } catch (e) { mostrarAviso('Não foi possível gerar o PDF sem internet. Use Imprimir.', 'erro'); return; }
+  const d = new DOMParser().parseFromString(html, 'text/html');
+  const raiz = d.getElementById('contrato-conteudo');
+  const runs = el => {                                   /* texto com negrito/quebras -> trechos do pdfmake */
+    const out = [];
+    (function walk(n, b) {
+      n.childNodes.forEach(c => {
+        if (c.nodeType === 3) { const t = c.textContent.replace(/\s+/g, ' '); if (t) out.push(b ? { text: t, bold: true } : t); }
+        else if (c.nodeName === 'BR') out.push('\n');
+        else walk(c, b || c.nodeName === 'B');
+      });
+    })(el, false);
+    if (out.length) { if (typeof out[0] === 'string') out[0] = out[0].replace(/^\s+/, ''); else out[0].text = out[0].text.replace(/^\s+/, ''); }
+    return out;
+  };
+  const brl = v => 'R$ ' + (Number(v) || 0).toFixed(2).replace('.', ',');
+  const imgs = [...raiz.querySelectorAll('img')].map(i => i.getAttribute('src'));
+  const conteudo = [];
+  if (imgs[0]) conteudo.push({ image: imgs[0], height: 62, alignment: 'center', margin: [0, 0, 0, 14] });
+  raiz.querySelectorAll(':scope > h1, :scope > h2, :scope > p').forEach(el => {
+    if (el.tagName === 'H1') conteudo.push({ text: el.textContent.trim(), alignment: 'center', bold: true, fontSize: 14, margin: [0, 0, 0, 16] });
+    else if (el.tagName === 'H2') conteudo.push({ text: el.textContent.trim(), bold: true, margin: [0, 12, 0, 5], keepWithNext: true });
+    else if ((el.getAttribute('style') || '').includes('center')) conteudo.push({ text: runs(el), alignment: 'center', margin: [0, 18, 0, 0], keepWithNext: true });
+    else conteudo.push({ text: runs(el), alignment: 'justify', lineHeight: 1.35, margin: [0, 0, 0, 6] });
+  });
+  const linhaAss = () => ({ canvas: [{ type: 'line', x1: 0, y1: 0, x2: 190, y2: 0, lineWidth: .8 }] });
+  conteudo.push({ unbreakable: true, margin: [0, 34, 0, 0], columns: [
+    { width: '*', stack: [{ canvas: [{ type: 'rect', x: 0, y: 0, w: 1, h: 26, color: '#ffffff' }] }, linhaAss(), { text: 'Contratante', margin: [0, 4, 0, 0] }] },
+    { width: '*', stack: [imgs[1] ? { image: imgs[1], width: 170, margin: [0, 0, 0, 2] } : { canvas: [{ type: 'rect', x: 0, y: 0, w: 1, h: 26, color: '#ffffff' }] }, linhaAss(), { text: 'Contratada', margin: [0, 4, 0, 0] }] }
+  ], columnGap: 40 });
+  /* Anexo I em página própria */
+  const cab = t => ({ text: t.text, bold: true, fillColor: '#eeeeee', alignment: t.al || 'left', fontSize: 10.5 });
+  const itens = (p.itens || []).map(i => [{ text: String(i.produto || '') }, { text: String(i.qtd), alignment: 'center' }, { text: brl(i.valor), alignment: 'right' }, { text: brl(i.total), alignment: 'right' }]);
+  if ((p.taxaEntrega || 0) > 0) itens.push([{ text: 'Taxa de entrega' }, { text: '1', alignment: 'center' }, { text: brl(p.taxaEntrega), alignment: 'right' }, { text: brl(p.taxaEntrega), alignment: 'right' }]);
+  conteudo.push({ text: 'Anexo I — Discriminação do Pedido', bold: true, alignment: 'center', pageBreak: 'before', margin: [0, 0, 0, 12] });
+  conteudo.push({ table: { headerRows: 1, widths: ['*', 70, 70, 80], body: [
+    [cab({ text: 'Modelo/Sabor' }), cab({ text: 'Quantidade', al: 'center' }), cab({ text: 'Valor Unit', al: 'right' }), cab({ text: 'Valor Total', al: 'right' })],
+    ...itens,
+    [{ text: 'Valor Total do Pedido', colSpan: 3, alignment: 'right', bold: true, fillColor: '#f6f6f6' }, {}, {}, { text: brl(p.total), alignment: 'right', bold: true, fillColor: '#f6f6f6' }]
+  ] }, layout: { hLineColor: () => '#bbb', vLineColor: () => '#bbb', paddingTop: () => 5, paddingBottom: () => 5 } });
+  conteudo.push({ text: 'Discriminação dos Pagamentos', bold: true, alignment: 'center', margin: [0, 24, 0, 10], keepWithNext: true });
+  const vazio = () => [{ text: ' ' }, '', '', '', ''];
+  conteudo.push({ table: { headerRows: 1, widths: [60, 60, 60, '*', '*'], body: [
+    ['Data', 'Valor', 'Saldo', 'Ass Vanessa', 'Ass Cliente'].map(t => ({ text: t, bold: true, fillColor: '#eeeeee', fontSize: 10.5 })),
+    vazio(), vazio(), vazio()
+  ] }, layout: { hLineColor: () => '#bbb', vLineColor: () => '#bbb', paddingTop: () => 8, paddingBottom: () => 8 } });
+  const arq = 'Contrato_' + String(p.cliente || 'cliente').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w]+/g, '_') + '.pdf';
+  const def = { pageSize: 'A4', pageMargins: [56, 50, 56, 56], defaultStyle: { fontSize: 11 }, info: { title: 'Contrato - ' + (p.cliente || '') },
+    footer: (pg, tot) => ({ text: pg + ' / ' + tot, alignment: 'center', fontSize: 9, color: '#777', margin: [0, 18, 0, 0] }), content: conteudo };
+  const blob = await Promise.race([new Promise(res => window.pdfMake.createPdf(def).getBlob(res)), new Promise((_, no) => setTimeout(() => no(new Error('tempo')), 20000))]).catch(() => null);
+  if (!blob) { mostrarAviso('Não foi possível gerar o PDF. Use Imprimir.', 'erro'); return; }
+  const file = new File([blob], arq, { type: 'application/pdf' });
+  const compartilhar = () => navigator.share({ files: [file], title: 'Contrato ' + (p.cliente || '') });
+  const baixar = () => { const u = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = u; a.download = arq; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000); };
+  window._ultimoContrato = { arq, blob };
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await compartilhar(); return; }
+    catch (e) {
+      if (e && e.name === 'AbortError') return;
+      /* o navegador pode exigir um novo toque para abrir o compartilhamento */
+      if (await uiConfirm('O arquivo está pronto para enviar.', { titulo: 'Contrato gerado', ok: 'Compartilhar' })) { try { await compartilhar(); } catch (e2) { baixar(); } }
+      return;
+    }
+  }
+  baixar(); mostrarAviso('PDF baixado');
 }
 
  
@@ -3136,7 +3250,7 @@ async function salvarClienteForm() {
 }
 
 async function excluirClienteOverlay(id) {
-  if (!confirm('Excluir este cliente permanentemente?')) return;
+  if (!(await uiConfirm('O cadastro será excluído de vez. Os pedidos dele continuam no histórico.', { titulo: 'Excluir cliente?', ok: 'Excluir', perigo: true }))) return;
   if (!(await sbDeletar('clientes', id))) return;
   clientes = clientes.filter(c=>String(c.id)!==String(id));
   fecharDetalheCliente();
@@ -3681,7 +3795,7 @@ function renderTiposInsumos() {
     </div>`).join('');
 }
 async function excluirTipoInsumo(id) {
-  if (confirm('Excluir este tipo de insumo?')) {
+  if (await uiConfirm('O insumo será removido da lista.', { titulo: 'Excluir insumo?', ok: 'Excluir', perigo: true })) {
     if (!(await sbDeletar('tipos_insumos', id))) return;
     tiposInsumos = tiposInsumos.filter(t => t.id !== id);
     renderTiposInsumos();
@@ -3779,11 +3893,60 @@ function renderResumoCartao() {
     <span class="ver" onclick="alternarSoCartao()">${_soCartaoMes ? '✕ todos' : 'ver lançamentos'}</span>
   </div>${_soCartaoMes ? `<div class="cartao-periodo">Compras de ${dm(ini)} a ${dm(fim)} (fechamento da fatura)</div>` : ''}`;
 }
-function mostrarAviso(msg) {
+/* ===== caixas de mensagem próprias (no lugar das do navegador) ===== */
+function mostrarAviso(msg, tipo) {              /* pílula que some sozinha; erro = vermelha */
   let el = document.getElementById('avisoApp');
   if (!el) { el = document.createElement('div'); el.id = 'avisoApp'; document.body.appendChild(el); }
-  el.textContent = msg; el.classList.add('on');
-  clearTimeout(mostrarAviso._t); mostrarAviso._t = setTimeout(() => el.classList.remove('on'), 2600);
+  const erro = tipo ? tipo === 'erro' : /^(n[ãa]o foi poss|erro|falha|falta rodar)/i.test(String(msg));
+  el.classList.toggle('err', erro);
+  el.innerHTML = `<i>${erro ? '!' : '✓'}</i><span></span>`; el.lastChild.textContent = msg; el.classList.add('on');
+  clearTimeout(mostrarAviso._t); mostrarAviso._t = setTimeout(() => el.classList.remove('on'), erro ? 3600 : 2400);
+}
+let _dlgFila = Promise.resolve();
+function uiDialog(o) {                           /* {titulo, msg, botoes:[{t,v,k}], vertical, campo:{valor,teclado}} -> valor do botão */
+  const exec = () => new Promise(res => {
+    const ov = document.createElement('div'); ov.className = 'dlg-ov';
+    const h = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])).replace(/\n/g, '<br>');
+    ov.innerHTML = `<div class="dlg" role="alertdialog" aria-modal="true"><div class="dlg-c">${o.titulo ? `<h4>${h(o.titulo)}</h4>` : ''}${o.msg ? `<p>${h(o.msg)}</p>` : ''}${o.campo ? `<input class="dlg-in" type="text" inputmode="${o.campo.teclado || 'text'}" value="${h(o.campo.valor)}">` : ''}</div><div class="dlg-bt${o.vertical ? ' v' : ''}">${o.botoes.map((b, i) => `<button data-i="${i}" class="${b.k || ''}">${h(b.t)}</button>`).join('')}</div></div>`;
+    document.body.appendChild(ov);
+    const inp = ov.querySelector('.dlg-in');
+    let feito = false;
+    const fechar = v => { if (feito) return; feito = true; document.removeEventListener('keydown', tecla, true); ov.classList.remove('on'); setTimeout(() => ov.remove(), 200); res(v); };
+    const valor = b => (o.campo && b.v === true) ? inp.value : b.v;
+    const tecla = e => {
+      if (e.key === 'Escape') { e.stopPropagation(); const c = o.botoes.find(b => b.cancel) || o.botoes[0]; fechar(valor(c)); }
+      else if (e.key === 'Enter') { e.stopPropagation(); e.preventDefault(); const p = o.botoes.find(b => b.k && b.k.includes('b')) || o.botoes[o.botoes.length - 1]; fechar(valor(p)); }
+    };
+    document.addEventListener('keydown', tecla, true);
+    ov.querySelectorAll('button').forEach(b => { b.onclick = () => fechar(valor(o.botoes[+b.dataset.i])); });
+    ov.addEventListener('click', e => { if (e.target === ov && o.fechaFora) fechar(valor(o.botoes.find(b => b.cancel) || o.botoes[0])); });
+    void ov.offsetWidth; ov.classList.add('on');
+    if (inp) { inp.focus(); inp.select(); }
+  });
+  const p = _dlgFila.then(exec); _dlgFila = p.catch(() => {}); return p;
+}
+function uiAlert(msg, titulo) { return uiDialog({ titulo, msg, botoes: [{ t: 'OK', v: true, k: 'b', cancel: true }] }); }
+function uiConfirm(msg, o) {
+  o = o || {};
+  return uiDialog({ titulo: o.titulo, msg, fechaFora: !o.perigo, botoes: [{ t: o.cancel || 'Cancelar', v: false, cancel: true }, { t: o.ok || 'OK', v: true, k: o.perigo ? 'b r' : 'b' }] });
+}
+function uiEscolha(msg, o) {                    /* botões empilhados; devolve o valor do escolhido (o último é o cancelar) */
+  return uiDialog({ titulo: o.titulo, msg, vertical: true, botoes: o.botoes });
+}
+function uiPrompt(msg, o) {
+  o = o || {};
+  return uiDialog({ titulo: o.titulo, msg, campo: { valor: o.valor == null ? '' : o.valor, teclado: o.teclado }, botoes: [{ t: 'Cancelar', v: null, cancel: true }, { t: o.ok || 'OK', v: true, k: 'b' }] });
+}
+window.alert = m => { uiAlert(String(m)); };
+let _bannerT = 0;
+function avisoTopo(titulo, sub, aoToque) {
+  let el = document.getElementById('bannerTopo');
+  if (!el) { el = document.createElement('div'); el.id = 'bannerTopo'; document.body.appendChild(el); }
+  el.innerHTML = '<div class="ic">PP</div><div><b></b><span></span></div>';
+  el.querySelector('b').textContent = titulo; el.querySelector('span').textContent = sub || '';
+  el.onclick = () => { el.classList.remove('on'); if (aoToque) aoToque(); };
+  void el.offsetWidth; el.classList.add('on');
+  clearTimeout(_bannerT); _bannerT = setTimeout(() => el.classList.remove('on'), 7000);
 }
 /* ----- várias compras de uma vez (mesmo local, mesma data, mesma forma de pagamento) ----- */
 let _loteCompra = [];
@@ -3962,16 +4125,16 @@ function _precoUsoInsumo(nome, fim){
   const ate = ord.filter(i => i.data <= fim);
   return ((ate.length ? ate : ord)[0].preco||0)/fator;
 }
-function editarTipoInsumo(id) {
+async function editarTipoInsumo(id) {
   const t = tiposInsumos.find(x => x.id === id); if (!t) return;
-  const f = prompt(`"${t.nome}"\n\nQuantas unidades de uso rende cada compra?\n(ex: pacote de 5 kg usado em g = 5000)`, t.fator || 1);
+  const f = await uiPrompt('Quantas unidades de uso rende cada compra?\n(ex.: pacote de 5 kg usado em g = 5000)', { titulo: t.nome, valor: t.fator || 1, teclado: 'decimal' });
   if (f === null) return;
   const fator = parseFloat(String(f).replace(',', '.'));
   if (isNaN(fator) || fator <= 0) { alert('Informe um número maior que zero.'); return; }
-  const u = prompt('Unidade de uso (ex: g, un):', t.unidade_uso || t.unidade || '');
+  const u = await uiPrompt('Unidade de uso (ex.: g, un)', { titulo: t.nome, valor: t.unidade_uso || t.unidade || '' });
   if (u === null) return;
-  const mo = confirm(`"${t.nome}" é mão de obra?\n\nOK = sim, Cancelar = não`);
-  t.fator = fator; t.unidade_uso = u.trim(); t.mao_de_obra = mo;
+  const mo = await uiEscolha('Esse item é mão de obra?', { titulo: t.nome, botoes: [{ t: 'Sim, é mão de obra', v: true, k: 'b' }, { t: 'Não', v: false }] });
+  t.fator = fator; t.unidade_uso = u.trim(); t.mao_de_obra = mo === true;
   sbUpsert('tipos_insumos', [t]); renderTiposInsumos(); atualizarDashboard();
 }
 function popularSelectIngredientes() {
@@ -4088,43 +4251,6 @@ function salvarProduto() {
 }
 
 
-/* ===== ALTERAR VALOR ===== */
-
-function alterarValorProduto(id) {
-
-  const produto =
-    produtos.find(p => p.id === id);
-
-  if (!produto) return;
-
-  const novoPreco = prompt(
-    `Alterar valor de "${produto.nome}"\n\nValor atual: R$ ${produto.preco.toFixed(2)}\n\nDigite o novo valor:`,
-    produto.preco
-  );
-
-  if (novoPreco === null) return;
-
-  const precoFormatado =
-    parseFloat(
-      novoPreco.toString().replace(',', '.')
-    );
-
-  if (isNaN(precoFormatado) || precoFormatado < 0) {
-    alert('Valor inválido');
-    return;
-  }
-
-  produto.preco = precoFormatado;
-
-  sbUpsert('produtos', [produto]);
-
-  renderProdutos();
-
-  alert('Valor atualizado com sucesso!');
-
-}
-
-
 /* ===== LISTAR PRODUTOS ===== */
 const COR_CAT = {
   'Simples' : 'background:#d4edda;color:#155724',
@@ -4191,7 +4317,7 @@ async function salvarTabelaPreco() {
   fecharTabelaPreco(); renderTabelasPreco(); mostrarAviso('✓ Tabela de preços salva');
 }
 async function excluirTabelaPreco() {
-  if (!_tpEditandoId || !confirm('Excluir esta tabela de preços? Pedidos já lançados não mudam.')) return;
+  if (!_tpEditandoId || !(await uiConfirm('Pedidos já lançados não mudam.', { titulo: 'Excluir tabela de preços?', ok: 'Excluir', perigo: true }))) return;
   const { error } = await sbClient.from('tabelas_preco').delete().eq('id', _tpEditandoId);
   if (error) { alert('Erro ao excluir: ' + error.message); return; }
   tabelasPreco = tabelasPreco.filter(t => t.id !== _tpEditandoId);
@@ -4218,23 +4344,6 @@ function renderProdutos() {
   if (inat.length) html += `<div class="lg">Inativos<span>${inat.length}</span></div>` + inat.map(p => linha(p).replace('class="lr"', 'class="lr off"')).join('');
   el.innerHTML = html || '<p class="vazio">Nenhum produto encontrado.</p>';
 }
-
-function mudarCategoriaProduto(id) {
-  const p = produtos.find(x => x.id === id); if (!p) return;
-  const nova = prompt(
-    `Categoria de "${p.nome}"\nOpções: ${ORDEM_CAT.join(', ')}\nAtual: ${p.categoria||'Simples'}\n\nDigite a nova categoria:`,
-    p.categoria || 'Simples'
-  );
-  if (!nova) return;
-  const norm = ORDEM_CAT.find(c => c.toLowerCase() === nova.trim().toLowerCase());
-  if (!norm) { alert('Categoria inválida. Use: ' + ORDEM_CAT.join(', ')); return; }
-  p.categoria = norm;
-  sbUpsert('produtos', [p]);
-  renderProdutos();
-  popularSelectProduto();
-  alert(`✅ Categoria de "${p.nome}" alterada para ${norm}!`);
-}
-
 
 /* ===== EXCLUIR PRODUTO ===== */
 
@@ -4513,7 +4622,7 @@ async function salvarTipoMassa() {
   alert(`✅ Tipo "${nome}" cadastrado com sucesso!`);
 }
 async function excluirTipoMassa(id) {
-  if (!confirm('Excluir este tipo de massa?')) return;
+  if (!(await uiConfirm('A massa será removida da lista.', { titulo: 'Excluir massa?', ok: 'Excluir', perigo: true }))) return;
   if (!(await sbDeletar('tipos_massa', id))) return;
   tiposMassa = tiposMassa.filter(t=>t.id!==id);
   renderTiposMassa();
@@ -4832,9 +4941,10 @@ function atualizarTodasAsTelas() {
     <label>CPF do Cliente</label>
     <input type="text" id="cpfContratante" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCpf(this)">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">
-      <button class="btn btn-cinza" onclick="fecharModalCpf()">Cancelar</button>
-      <button class="btn btn-marrom" onclick="gerarContrato()">Gerar</button>
+      <button class="btn btn-marrom" onclick="gerarContrato('pdf')">Compartilhar PDF</button>
+      <button class="btn btn-cinza" onclick="gerarContrato('imprimir')">Imprimir</button>
     </div>
+    <button class="btn btn-cinza" style="width:100%;margin-top:10px;background:none;" onclick="fecharModalCpf()">Cancelar</button>
   </div>
 </div>
 <script>
