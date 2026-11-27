@@ -270,17 +270,17 @@ function lerCache(d) { try { return JSON.parse(localStorage.getItem('vdf_lista_'
 
 /* ===== dados ===== */
 async function listarClientes(forcar) {
-  if (!forcar && clientes && Date.now() - clientesEm < 90 * 1000) return clientes;
+  if (!forcar && clientes && Date.now() - clientesEm < 30 * 60 * 1000) return clientes;
   var tudo = [];
   try {
     for (var ini = 0; ; ini += 1000) {
-      var r = await sb.from('clientes').select('*').order('id', { ascending: true }).range(ini, ini + 999);
+      var r = await sb.from('clientes').select('id,nome,tel,end').order('id', { ascending: true }).range(ini, ini + 999);
       if (r.error) throw r.error;
       var lote = r.data || []; tudo = tudo.concat(lote);
       if (lote.length < 1000) break;
     }
-    clientes = tudo; clientesEm = Date.now();
-  } catch (e) { console.error('clientes:', e); if (!clientes) clientes = []; }   /* só serve de reserva de endereço: não é fatal */
+    clientes = tudo; clientesEm = Date.now(); clientesErro = '';
+  } catch (e) { console.error('clientes:', e); clientesErro = (e && e.message) || 'erro'; clientesEm = 0; if (!clientes) clientes = []; }   /* só serve de reserva de endereço: não é fatal */
   return clientes;
 }
 function acharCliente(p, lista) {
@@ -305,7 +305,7 @@ function montarCards(pedidos, lista) {
     };
   });
 }
-var forcarClientes = false;
+var forcarClientes = false, clientesErro = '', VERSAO = '26/11-23h';
 async function carregar() {
   if (carregando) return;
   var diaReq = dia;
@@ -389,7 +389,8 @@ function desenhar() {
   var aReceber = pend.reduce(function (a, c) { return a + (c.saldo > 0 ? c.saldo : 0); }, 0);
   var sub = document.getElementById('sub');
   sub.textContent = pend.length + ' a entregar · ' + feitos.length + ' feita' + (feitos.length === 1 ? '' : 's') + (offline ? ' · ⚠ sem conexão' + (atualizadoEm ? ' (lista das ' + atualizadoEm + ')' : '') : (ordemErro ? ' · ⚠ ordem não salva no banco' : ''));
-  sub.className = (offline || ordemErro) ? 'off' : '';
+  sub.textContent += (clientesErro ? ' · ⚠ cadastro não carregou: ' + clientesErro : '') + ' · v' + VERSAO;
+  sub.className = (offline || ordemErro || clientesErro) ? 'off' : '';
   document.getElementById('areceber').textContent = cards.length ? 'A receber: ' + brl(aReceber) : '';
   L.className = (!DIVIDIDA && cards.length > LIMITE_GRANDE) ? 'mini' : '';
   if (!cards.length && carregouDia !== dia) { L.innerHTML = '<div class="vazio">Carregando…</div>'; return; }
