@@ -267,8 +267,8 @@ function gravarCache(d) { try { localStorage.setItem('vdf_lista_' + d, JSON.stri
 function lerCache(d) { try { return JSON.parse(localStorage.getItem('vdf_lista_' + d) || 'null'); } catch (e) { return null; } }
 
 /* ===== dados ===== */
-async function listarClientes() {
-  if (clientes && Date.now() - clientesEm < 30 * 60 * 1000) return clientes;
+async function listarClientes(forcar) {
+  if (!forcar && clientes && Date.now() - clientesEm < 90 * 1000) return clientes;
   var tudo = [];
   try {
     for (var ini = 0; ; ini += 1000) {
@@ -284,7 +284,10 @@ async function listarClientes() {
 function acharCliente(p, lista) {
   var t = dig(p.telefone), n = (p.cliente || '').trim().toLowerCase();
   var i, c;
+  var fim = function (x) { x = dig(x).replace(/^0+/, ''); return x.length > 11 && x.indexOf('55') === 0 ? x.slice(2) : x; };
+  var t9 = fim(t).slice(-9);
   if (t) for (i = 0; i < lista.length; i++) { c = lista[i]; if (dig(c.id) === t || dig(c.tel) === t) return c; }
+  if (t9.length >= 8) for (i = 0; i < lista.length; i++) { c = lista[i]; if (fim(c.tel).slice(-9) === t9 || fim(c.id).slice(-9) === t9) return c; }
   if (n) for (i = 0; i < lista.length; i++) { c = lista[i]; if ((c.nome || '').trim().toLowerCase() === n) return c; }
   return null;
 }
@@ -300,6 +303,7 @@ function montarCards(pedidos, lista) {
     };
   });
 }
+var forcarClientes = false;
 async function carregar() {
   if (carregando) return;
   var diaReq = dia;
@@ -311,7 +315,7 @@ async function carregar() {
     precisaLogin = false;
     var r = await sb.from('pedidos').select('*').eq('data', diaReq).order('id', { ascending: true });
     if (r.error) throw r.error;
-    var lista = await listarClientes();
+    var lista = await listarClientes(forcarClientes); forcarClientes = false;
     await baixarOrdem(diaReq);
     if (dia !== diaReq) return;                      /* o usuário já trocou de dia */
     cards = montarCards(r.data || [], lista);
@@ -503,7 +507,7 @@ function irDia(d) { dia = d; cards = []; offline = false; desenhar(); carregar()
 document.getElementById('bAnt').onclick = function () { irDia(somaDias(dia, -1)); };
 document.getElementById('bProx').onclick = function () { irDia(somaDias(dia, 1)); };
 document.getElementById('rotDia').onclick = function () { irDia(hoje()); };
-document.getElementById('bRef').onclick = function () { carregar(); };
+document.getElementById('bRef').onclick = function () { forcarClientes = true; carregar(); };
 if (NATIVO) { document.getElementById('bCfg').style.display = ''; document.getElementById('bTela').style.display = 'none'; document.querySelector('#cfg .soapk').style.display = 'flex'; }
 var _appsCache = null;
 function desenharCfg() {
